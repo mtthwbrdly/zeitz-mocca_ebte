@@ -1,0 +1,226 @@
+---
+import searchOutlineSvg from "../../assets/icons/search-outline.svg?raw";
+import { getArticleCategory, getArticleCategoryClass } from "../../sanity/lib/articleCategory";
+import { cleanString } from "../../sanity/lib/clean";
+import type { ArticleIndexHomeSection, ArticleIndexItem } from "../../sanity/lib/types";
+
+const { articles = [], section } = Astro.props as {
+  articles: ArticleIndexItem[];
+  section: ArticleIndexHomeSection;
+};
+
+const formatDate = (value: string | undefined) => {
+  const cleanValue = cleanString(value);
+
+  if (!cleanValue) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  }).format(new Date(cleanValue)).toUpperCase();
+};
+
+const formatCategory = (article: ArticleIndexItem) =>
+  cleanString(article.format || article.tags?.[0]?.title).toUpperCase();
+
+const title = cleanString(section.title) || "Latest";
+const intro = cleanString(section.intro);
+const categoryFilter = cleanString(section.categoryFilter) || "all";
+const sectionId =
+  categoryFilter && categoryFilter !== "all" ? `articles-${categoryFilter}` : `article-index-${section._key || "latest"}`;
+const filteredArticles = articles
+  .filter((article) => categoryFilter === "all" || getArticleCategory(article) === categoryFilter)
+  .slice(0, section.maxItems || undefined);
+const minimumRowCount = Math.max(section.maxItems || 18, filteredArticles.length);
+const fillerRows = Array.from({
+  length: Math.max(0, minimumRowCount - filteredArticles.length)
+});
+---
+
+<section class="article-index" id={sectionId} aria-labelledby={`article-index-title-${section._key || "latest"}`}>
+  <header class="article-index__header">
+    <h2 class="section-title-row article-index__title-row" id={`article-index-title-${section._key || "latest"}`}>
+      <span>{title}</span>
+     
+    </h2>
+    {intro && <p>{intro}</p>}
+     <span class="section-header-icon article-index__header-icon" set:html={searchOutlineSvg}></span>
+  </header>
+
+  <div class="article-index__list" role="list">
+    {filteredArticles.map((article) => {
+      const slug = cleanString(article.slug);
+      const href = slug ? `/articles/${slug}` : "#";
+
+      return (
+        <a
+          class={`article-index__row ${getArticleCategoryClass(article)}`}
+          href={href}
+          aria-disabled={slug ? undefined : "true"}
+          role="listitem"
+        >
+          <span class="article-index__title">{article.title}</span>
+          <span class="article-index__author">{cleanString(article.author?.name)}</span>
+          <time class="article-index__date" datetime={cleanString(article.publishedAt)}>
+            {formatDate(article.publishedAt)}
+          </time>
+          <span class="article-index__category">{formatCategory(article)}</span>
+        </a>
+      );
+    })}
+
+    {filteredArticles.length === 0 && (
+      <p class="article-index__empty" role="listitem">No articles published yet.</p>
+    )}
+
+    {fillerRows.map(() => (
+      <div class="article-index__row article-index__row--filler" role="listitem" aria-hidden="true">
+        <span class="article-index__title">Coming Soon</span>
+        <span class="article-index__author">Coming Soon</span>
+        <span class="article-index__date">Coming Soon</span>
+        <span class="article-index__category">Coming Soon</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .article-index {
+    width: 100%;
+    margin: 0 auto;
+    border: 1px solid black;
+  }
+
+  .article-index__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4rem;
+    background: var(--surface);
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-right: 1rem;
+  }
+
+  .article-index__header h2 {
+    margin: 0;
+    padding: 1rem clamp(1rem, 5vw, 4rem);
+    border-right: 1px solid var(--ink);
+    font: 700 clamp(1.1rem, 1.6vw, 1.55rem) / 1 var(--font-display);
+    letter-spacing: 0;
+    text-transform: uppercase;
+    width: auto;
+    hieght: 100%;
+  }
+
+  .article-index__header-icon {
+    width: clamp(2rem, 3.4vw, 3.25rem);
+  }
+
+  .article-index__header p {
+    align-self: center;
+    margin: 0;
+    padding: 1rem clamp(1rem, 2vw, 2rem);
+    font: 400 clamp(1rem, 1.25vw, 1.25rem) / 1.3 var(--font-body);
+  }
+
+  .article-index__list {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+
+  .article-index__row {
+    display: grid;
+    grid-template-columns: minmax(18rem, 1.6fr) minmax(10rem, 0.8fr) minmax(9rem, 0.8fr) minmax(5rem, 0.45fr);
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.15rem 0.5rem 0.15rem;
+    background: var(--article-category-bg);
+    color: var(--ink);
+    text-decoration: none;
+    transition: var(--transition-text-shadow), background 0.3s ease;
+  }
+
+  .article-index__row--filler {
+    background: #eeeeee;
+    color: #e1e0e0;
+    text-shadow: -0.5px -0.5px 1px #e1e0e0, 0.5px -0.5px 1px #e1e0e0, -0.5px 0.5px 1px #e1e0e0, 0.5px 0.5px 1px #e1e0e0;;
+    pointer-events: none;
+  }
+
+  .article-index__row:hover,
+  .article-index__row:focus-visible {
+    background: var(--article-category-bg);
+    text-shadow: var(--text-shadow-hover-small-black);
+    outline: 0;
+  }
+
+  .article-index:has(.article-index__row:hover)
+  .article-index__row:not(:hover) {
+    background: var(--surface);
+  }
+  .article-index:has(.article-index__row:hover) 
+  .article-index__row--filler {
+    background: #eeeeee;
+    text-shadow: -0.5px -0.5px 1px #e1e0e0, 0.5px -0.5px 1px #e1e0e0, -0.5px 0.5px 1px #e1e0e0, 0.5px 0.5px 1px #e1e0e0;
+  }
+
+  .article-index__title {
+    min-width: 0;
+    overflow: hidden;
+    font: 400 clamp(1rem, 1.5vw, 1.5rem) / 1.25 var(--font-display);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .article-index__author,
+  .article-index__date,
+  .article-index__category {
+    min-width: 0;
+    overflow: hidden;
+    font: 700 clamp(0.8rem, 1vw, 1rem) / 1 var(--font-display);
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .article-index__category {
+    text-align: right;
+  }
+
+  .article-index__empty {
+    margin: 0;
+    padding: 0.75rem 0.5rem;
+    font: 400 1.1rem / 1.5 var(--font-body);
+  }
+
+  @media (max-width: 980px) {
+    .article-index__header {
+      grid-template-columns: 1fr;
+    }
+
+    .article-index__header h2 {
+      border-right: 0;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .article-index__row {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+      padding: 0.85rem 0.65rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .article-index__title {
+      white-space: normal;
+    }
+
+    .article-index__category {
+      text-align: left;
+    }
+  }
+</style>

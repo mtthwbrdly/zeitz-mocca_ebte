@@ -1,0 +1,420 @@
+---
+import { calculateReadTime } from "../sanity/lib/calculateReadTime";
+import { cleanString } from "../sanity/lib/clean";
+import { extractPullQuoteRuns } from "../sanity/lib/pullQuotes";
+import { renderPortableText } from "../sanity/lib/renderPortableText";
+import type { Article } from "../sanity/lib/types";
+
+const { article } = Astro.props as { article: Article };
+
+const title = cleanString(article.title);
+const subtitle = cleanString(article.subtitle);
+const authorName = cleanString(article.author?.name);
+const publishedAtValue = cleanString(article.publishedAt);
+const publishedAt = publishedAtValue
+  ? new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    }).format(new Date(publishedAtValue))
+  : "";
+const readTime = calculateReadTime(article);
+const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
+  .filter(Boolean)
+  .join("   /   ");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title || "Article"}</title>
+  </head>
+  <body>
+    <div class="print-body">
+      <header class="masthead">
+        <h1 class="masthead__title">{title}</h1>
+        {subtitle && <p class="masthead__subtitle">{subtitle}</p>}
+        {byline && <p class="masthead__byline">{byline}</p>}
+      </header>
+
+      {article.contentSections.map((section) => {
+        if (section._type === "richTextSection") {
+          const html = renderPortableText(section.body);
+          const placement = cleanString(section.pullQuotePlacement) || "top";
+          const extractedQuotes = extractPullQuoteRuns(section.body);
+          const quoteBlocks = extractedQuotes.map((pullQuote) => (
+            <figure class="print-pull-quote print-pull-quote--inline">
+              <blockquote>{pullQuote.quote}</blockquote>
+            </figure>
+          ));
+
+          return (
+            <>
+              {placement === "top" && quoteBlocks}
+              <div class="print-prose" set:html={html} />
+              {placement === "bottom" && quoteBlocks}
+            </>
+          );
+        }
+
+        if (section._type === "pullQuoteSection") {
+          const quote = cleanString(section.quote);
+          const attribution = cleanString(section.attribution);
+          return (
+            <figure class={`print-pull-quote print-pull-quote--${section.size || "normal"}`}>
+              <blockquote>{quote}</blockquote>
+              {attribution && <figcaption>— {attribution}</figcaption>}
+            </figure>
+          );
+        }
+
+        if (section._type === "shareClippingSection") {
+          const label = cleanString(section.label) || "Shareable clipping";
+          const quote = cleanString(section.quote);
+          return (
+            <figure class="print-share-clipping">
+              <p class="print-share-clipping__label">{label}</p>
+              <blockquote>{quote}</blockquote>
+            </figure>
+          );
+        }
+
+        if (section._type === "featureCardSection") {
+          const eyebrow = cleanString(section.eyebrow);
+          const cardTitle = cleanString(section.title);
+          const description = cleanString(section.description);
+          return (
+            <aside class="print-card">
+              {eyebrow && <p class="print-card__eyebrow">{eyebrow}</p>}
+              {cardTitle && <p class="print-card__title">{cardTitle}</p>}
+              {description && <p class="print-card__description">{description}</p>}
+            </aside>
+          );
+        }
+
+        if (section._type === "imageSection") {
+          const url = cleanString(section.image?.url);
+          const caption = cleanString(section.image?.caption);
+          const alt = cleanString(section.image?.alt) || caption;
+
+          if (!url) {
+            return null;
+          }
+
+          return (
+            <figure class="print-image">
+              <img src={url} alt={alt} />
+              {caption && <figcaption>{caption}</figcaption>}
+            </figure>
+          );
+        }
+
+        if (section._type === "dividerSection") {
+          if (cleanString(section.style) === "space") {
+            return <div class="print-spacer" />;
+          }
+          return <hr class="print-divider" />;
+        }
+
+        return null;
+      })}
+    </div>
+
+  </body>
+</html>
+
+<style is:global>
+  @page {
+    size: A4;
+    margin: 30pt 28pt;
+  }
+
+  :root {
+    --font-display: "TeX Gyre Termes", "Times New Roman", Times, serif;
+    --font-body: "TeX Gyre Schola", "Century Schoolbook", Georgia, serif;
+    --font-meta: "TeX Gyre Cursor", "Courier New", Courier, monospace;
+    --meta-letter-spacing: 0.04em;
+    --ink: #171717;
+    --muted: rgba(23, 23, 23, 0.7);
+    --line: rgba(23, 23, 23, 0.25);
+  }
+
+  @font-face {
+    font-family: "TeX Gyre Termes";
+    src: url("/fonts/webfonts/texgyretermes-regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "TeX Gyre Termes";
+    src: url("/fonts/webfonts/texgyretermes-bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "TeX Gyre Termes";
+    src: url("/fonts/webfonts/texgyretermes-italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+  }
+  @font-face {
+    font-family: "TeX Gyre Termes";
+    src: url("/fonts/webfonts/texgyretermes-bolditalic.woff2") format("woff2");
+    font-weight: 700;
+    font-style: italic;
+  }
+  @font-face {
+    font-family: "TeX Gyre Schola";
+    src: url("/fonts/webfonts/texgyreschola-regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "TeX Gyre Schola";
+    src: url("/fonts/webfonts/texgyreschola-bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "TeX Gyre Schola";
+    src: url("/fonts/webfonts/texgyreschola-italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+  }
+  @font-face {
+    font-family: "TeX Gyre Schola";
+    src: url("/fonts/webfonts/texgyreschola-bolditalic.woff2") format("woff2");
+    font-weight: 700;
+    font-style: italic;
+  }
+  @font-face {
+    font-family: "TeX Gyre Cursor";
+    src: url("/fonts/webfonts/texgyrecursor-regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "TeX Gyre Cursor";
+    src: url("/fonts/webfonts/texgyrecursor-bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 10.5pt;
+    line-height: 1.35;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  .masthead {
+    margin: 32pt 16pt 64pt 16pt;
+    text-align: center;
+  }
+
+  .masthead__title {
+    margin: 0 0 6pt;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 21pt;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    
+  }
+
+  .masthead__subtitle {
+    margin: 0 0 6pt;
+    font-family: var(--font-display);
+    font-size: 12pt;
+    color: var(--muted);
+  }
+
+  .masthead__byline {
+    margin: 0;
+    font-family: var(--font-meta);
+    font-size: 7pt;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .print-body {
+    column-count: 2;
+    column-gap: 24pt;
+    column-fill: auto;
+  }
+
+  .print-prose {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .print-prose p,
+  .print-prose li {
+    margin: 0 0 8pt;
+    font-size: 10.5pt;
+    line-height: 1.4;
+  }
+
+  .print-prose h2,
+  .print-prose h3 {
+    column-span: all;
+    font-family: var(--font-display);
+    font-weight: 700;
+    margin: 14pt 0 8pt;
+  }
+
+  .print-prose h2 {
+    font-size: 15pt;
+  }
+
+  .print-prose h3 {
+    font-size: 12pt;
+  }
+
+  .print-prose blockquote {
+    margin: 8pt 0 8pt 14pt;
+    padding-left: 10pt;
+    border-left: 2pt solid var(--ink);
+    color: var(--muted);
+  }
+
+  .print-prose ul,
+  .print-prose ol {
+    margin: 0 0 8pt;
+    padding-left: 16pt;
+  }
+
+  .print-prose code {
+    font-family: var(--font-meta);
+    font-size: 0.92em;
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .print-prose .u-pull-quote-target {
+  }
+
+  .print-pull-quote--inline {
+    margin: 10pt 0;
+  }
+
+  .print-share-clipping,
+  .print-card,
+  .print-divider,
+  .print-spacer {
+    column-span: all;
+  }
+
+  .print-pull-quote {
+    margin: 12pt 0;
+    padding: 10pt 10pt;
+    text-align: center;
+  }
+
+  .print-pull-quote blockquote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 15pt;
+    line-height: 1;
+  }
+
+  .print-pull-quote--large blockquote {
+    font-size: 18pt;
+  }
+
+  .print-pull-quote figcaption {
+    margin-top: 6pt;
+    font-family: var(--font-meta);
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .print-share-clipping {
+    margin: 10pt 0;
+    padding: 8pt 10pt;
+    border: 0.75pt solid var(--ink);
+  }
+
+  .print-share-clipping__label {
+    margin: 0 0 4pt;
+    font-family: var(--font-meta);
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .print-share-clipping blockquote {
+    margin: 0;
+  }
+
+  .print-card {
+    margin: 10pt 0;
+    padding: 8pt 10pt;
+    border: 0.75pt solid var(--ink);
+  }
+
+  .print-card__eyebrow {
+    margin: 0 0 4pt;
+    font-family: var(--font-meta);
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .print-card__title {
+    margin: 0 0 4pt;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 12pt;
+  }
+
+  .print-card__description {
+    margin: 0;
+    font-size: 10pt;
+  }
+
+  .print-image {
+    margin: 16pt 0;
+    text-align: center;
+  }
+
+  .print-image img {
+    max-height: 300pt;
+    margin: 0 auto;
+  }
+
+  .print-image figcaption {
+    margin-top: 6pt;
+    font-family: var(--font-meta);
+    font-size: 7pt;
+    color: var(--muted);
+    letter-spacing: var(--meta-letter-spacing);
+    font-weight: 600;
+    padding: 0 16pt;
+  }
+
+  .print-divider {
+    margin: 12pt 0;
+    border: none;
+    border-top: 0.75pt solid var(--line);
+  }
+
+  .print-spacer {
+    height: 12pt;
+  }
+
+</style>

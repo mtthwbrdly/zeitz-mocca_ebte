@@ -1,0 +1,752 @@
+---
+import AuthorInfo from "./AuthorInfo.astro";
+import { calculateReadTime } from "../sanity/lib/calculateReadTime";
+import { cleanString } from "../sanity/lib/clean";
+
+const { article, citations = [] } = Astro.props;
+const publishedAtValue = cleanString(article?.publishedAt);
+
+const publishedAt = publishedAtValue
+  ? new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date(publishedAtValue))
+  : null;
+
+const readTime = calculateReadTime(article);
+const articleSlug = cleanString(article?.slug?.current);
+---
+
+<details class="article-meta" open data-sidebar-panel="information">
+  <summary class="meta-kicker">
+    <span class="meta-kicker__state" aria-hidden="true"></span>
+    <span>Article Information</span>
+  </summary>
+
+  <div class="meta-stack" data-lenis-prevent>
+    <p class="meta-title">{article.title}</p>
+    <AuthorInfo author={article.author} />
+    {publishedAt && <p class="meta-item">{publishedAt}</p>}
+
+    {
+      article.tags?.length > 0 && (
+        <p class="meta-item">
+          <span>Tags:</span>{" "}
+          {article.tags.map((tag, index) => (
+            <>
+              <a href={`/tags/${cleanString(tag.slug?.current)}`}>
+                {tag.title}
+              </a>
+              {index < article.tags.length - 1 ? ", " : ""}
+            </>
+          ))}
+        </p>
+      )
+    }
+
+    <p class="meta-item">Read Time: {readTime}</p>
+
+    <div class="meta-actions">
+      <button type="button" class="meta-link" data-share-link>
+        (+) Share
+      </button>
+      <button
+        type="button"
+        class="meta-link"
+        data-download-pdf
+        data-slug={articleSlug}
+      >
+        (↓) Download PDF
+      </button>
+    </div>
+  </div>
+</details>
+
+{
+  citations.length > 0 && (
+    <details class="article-meta citations-panel " data-sidebar-panel="citations">
+      <summary class="meta-kicker">
+        <span class="meta-kicker__state" aria-hidden="true" />
+        <span>Citations</span>
+      </summary>
+
+      <ol data-lenis-prevent>
+        {citations.map((citation) => (
+          <li id={citation.id}>
+            <button
+              class="citations-panel__back"
+              type="button"
+              aria-label={`Back to citation ${citation.number}`}
+              data-citation-number={citation.number}
+              data-citation-scroll
+            >
+              [{citation.number}]
+            </button>
+            <span>
+              <span>{citation.source}</span>
+              {citation.url && (
+                <>
+                  {" "}
+                  <a
+                    class="citations-panel__visit"
+                    href={citation.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    (Visit ↗)
+                  </a>
+                </>
+              )}
+              {citation.note && <small>{citation.note}</small>}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )
+}
+
+<aside class="pdf-status" data-pdf-status hidden aria-live="polite">
+  <p class="pdf-status__title" data-pdf-status-title>Preparing PDF...</p>
+  <p class="pdf-status__body" data-pdf-status-body>
+    Formatting this article into a print-ready layout.
+  </p>
+  <button type="button" class="pdf-status__close" data-pdf-status-close hidden>
+    Dismiss
+  </button>
+</aside>
+
+<script is:inline data-astro-rerun>
+  (() => {
+    const getPanelContent = (panel) =>
+      panel.querySelector(":scope > .meta-stack, :scope > ol");
+
+    const finishPanelContent = (content) => {
+      content.style.height = "";
+      content.style.opacity = "";
+      content.style.overflow = "";
+      content.style.transform = "";
+    };
+
+    if (!window.__initArticleMeta) {
+      window.__initArticleMeta = () => {
+        window.__articleMetaController?.abort?.();
+        window.__articleMetaController = new AbortController();
+        const articleMetaSignal = window.__articleMetaController.signal;
+
+        const shareButton = document.querySelector("[data-share-link]");
+        const downloadButton = document.querySelector("[data-download-pdf]");
+        const statusPanel = document.querySelector("[data-pdf-status]");
+        const statusTitle = document.querySelector("[data-pdf-status-title]");
+        const statusBody = document.querySelector("[data-pdf-status-body]");
+        const statusCloseButton = document.querySelector(
+          "[data-pdf-status-close]",
+        );
+        const informationPanel = document.querySelector(
+          '[data-sidebar-panel="information"]',
+        );
+        const citationsPanel = document.querySelector(
+          '[data-sidebar-panel="citations"]',
+        );
+        const animatedPanels = [informationPanel, citationsPanel].filter(
+          (panel) => panel instanceof HTMLDetailsElement,
+        );
+        const prefersReducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        const setPdfStatus = (title, body, dismissible = false) => {
+          if (
+            !(statusPanel instanceof HTMLElement) ||
+            !(statusTitle instanceof HTMLElement) ||
+            !(statusBody instanceof HTMLElement) ||
+            !(statusCloseButton instanceof HTMLButtonElement)
+          ) {
+            return;
+          }
+
+          statusTitle.textContent = title;
+          statusBody.textContent = body;
+          statusPanel.hidden = false;
+          statusCloseButton.hidden = !dismissible;
+        };
+
+        const hidePdfStatus = () => {
+          if (statusPanel instanceof HTMLElement) {
+            statusPanel.hidden = true;
+          }
+        };
+
+        const animatePanelOpen = async (panel) => {
+          const content = getPanelContent(panel);
+
+          if (!(content instanceof HTMLElement)) {
+            panel.open = true;
+            return;
+          }
+
+          content.getAnimations().forEach((animation) => animation.cancel());
+          panel.open = true;
+
+          if (prefersReducedMotion) {
+            finishPanelContent(content);
+            return;
+          }
+
+          content.style.height = "0px";
+          content.style.opacity = "0";
+          content.style.overflow = "hidden";
+          content.style.transform = "translateY(-0.25rem)";
+
+          await new Promise((resolve) => window.requestAnimationFrame(resolve));
+
+          const animation = content.animate(
+            [
+              { height: "0px", opacity: 0, transform: "translateY(-0.25rem)" },
+              {
+                height: `${content.scrollHeight}px`,
+                opacity: 1,
+                transform: "translateY(0)",
+              },
+            ],
+            { duration: 260, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+          );
+
+          try {
+            await animation.finished;
+          } catch {
+            return;
+          }
+
+          finishPanelContent(content);
+        };
+
+        const animatePanelClose = async (panel) => {
+          const content = getPanelContent(panel);
+
+          if (!(content instanceof HTMLElement)) {
+            panel.open = false;
+            return;
+          }
+
+          content.getAnimations().forEach((animation) => animation.cancel());
+
+          if (prefersReducedMotion) {
+            panel.open = false;
+            finishPanelContent(content);
+            return;
+          }
+
+          content.style.height = `${content.offsetHeight}px`;
+          content.style.opacity = "1";
+          content.style.overflow = "hidden";
+          content.style.transform = "translateY(0)";
+
+          await new Promise((resolve) => window.requestAnimationFrame(resolve));
+
+          const animation = content.animate(
+            [
+              {
+                height: `${content.offsetHeight}px`,
+                opacity: 1,
+                transform: "translateY(0)",
+              },
+              { height: "0px", opacity: 0, transform: "translateY(-0.25rem)" },
+            ],
+            { duration: 220, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+          );
+
+          try {
+            await animation.finished;
+          } catch {
+            return;
+          }
+
+          panel.open = false;
+          finishPanelContent(content);
+        };
+
+        const setPanelOpen = (panel, open) => {
+          if (open) {
+            animatedPanels.forEach((item) => {
+              if (item !== panel && item.open) {
+                animatePanelClose(item);
+              }
+            });
+
+            if (!panel.open) {
+              animatePanelOpen(panel);
+            }
+            return;
+          }
+
+          if (panel.open) {
+            animatePanelClose(panel);
+          }
+        };
+
+        if (shareButton instanceof HTMLButtonElement) {
+          shareButton.addEventListener(
+            "click",
+            async () => {
+              const url = window.location.href;
+
+              if (navigator.share) {
+                try {
+                  await navigator.share({ title: document.title, url });
+                  return;
+                } catch {
+                  // Fall through to clipboard copy.
+                }
+              }
+
+              if (navigator.clipboard) {
+                await navigator.clipboard.writeText(url);
+                shareButton.textContent = "(+) Link copied";
+                window.setTimeout(() => {
+                  shareButton.textContent = "(+) Share";
+                }, 1800);
+              }
+            },
+            { signal: articleMetaSignal },
+          );
+        }
+
+        if (downloadButton instanceof HTMLButtonElement) {
+          downloadButton.addEventListener(
+            "click",
+            async () => {
+              const slug = downloadButton.dataset.slug;
+
+              if (!slug) {
+                setPdfStatus(
+                  "PDF unavailable",
+                  "We could not find the article to export. Refresh and try again.",
+                  true,
+                );
+                return;
+              }
+
+              const originalLabel = downloadButton.textContent;
+              downloadButton.disabled = true;
+              downloadButton.textContent = "(↓) Preparing PDF...";
+              setPdfStatus(
+                "Generating PDF...",
+                "This can take a few seconds for long articles with images.",
+              );
+
+              try {
+                const response = await fetch(`/api/articles/${slug}/pdf`);
+
+                if (!response.ok) {
+                  throw new Error(`Server responded with ${response.status}`);
+                }
+
+                const disposition =
+                  response.headers.get("Content-Disposition") || "";
+                const filenameMatch = disposition.match(/filename="([^"]+)"/);
+                const filename = filenameMatch
+                  ? filenameMatch[1]
+                  : `${slug}.pdf`;
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = downloadUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(downloadUrl);
+
+                setPdfStatus(
+                  "Download started",
+                  "Next steps: open the file from your Downloads folder to review layout, then share or print.",
+                  true,
+                );
+              } catch (error) {
+                const detail =
+                  error instanceof Error && error.message
+                    ? ` Details: ${error.message}`
+                    : "";
+
+                setPdfStatus(
+                  "PDF failed",
+                  `The export did not complete. Try again, or use your browser's Print to PDF fallback.${detail}`,
+                  true,
+                );
+              } finally {
+                downloadButton.disabled = false;
+                downloadButton.textContent = originalLabel;
+              }
+            },
+            { signal: articleMetaSignal },
+          );
+        }
+
+        statusCloseButton?.addEventListener("click", hidePdfStatus, {
+          signal: articleMetaSignal,
+        });
+
+        animatedPanels.forEach((panel) => {
+          const summary = panel.querySelector(":scope > summary");
+
+          summary?.addEventListener(
+            "click",
+            (event) => {
+              event.preventDefault();
+              setPanelOpen(panel, !panel.open);
+            },
+            { signal: articleMetaSignal },
+          );
+        });
+
+        document.addEventListener(
+          "click",
+          (event) => {
+            const link =
+              event.target instanceof Element
+                ? event.target.closest("[data-citation-scroll]")
+                : null;
+
+            if (!(link instanceof HTMLElement)) {
+              return;
+            }
+
+            const citationNumber = link.dataset.citationNumber;
+            const target = citationNumber
+              ? document.querySelector(
+                  `[data-citation-inline][data-citation-number="${citationNumber}"]`,
+                )
+              : null;
+
+            if (!(target instanceof HTMLElement)) {
+              return;
+            }
+
+            event.preventDefault();
+
+            const containingDetails = target.closest("details");
+            if (containingDetails instanceof HTMLDetailsElement) {
+              setPanelOpen(containingDetails, true);
+            }
+
+            window.requestAnimationFrame(() => {
+              target.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+                inline: "nearest",
+              });
+
+              window.history.pushState(null, "", `#${target.id}`);
+            });
+          },
+          { signal: articleMetaSignal },
+        );
+
+        document.addEventListener(
+          "click",
+          (event) => {
+            const link =
+              event.target instanceof Element
+                ? event.target.closest("[data-citation-panel-link]")
+                : null;
+
+            if (!(link instanceof HTMLElement)) {
+              return;
+            }
+
+            event.preventDefault();
+
+            if (citationsPanel instanceof HTMLDetailsElement) {
+              setPanelOpen(citationsPanel, true);
+            }
+          },
+          { signal: articleMetaSignal },
+        );
+
+        const articlePage = document.querySelector(".article-page");
+        const closeInformationThreshold = 1080;
+        let hasAutoClosedInformation = false;
+        let scrollFrame = 0;
+
+        const closeInformationOnScroll = () => {
+          scrollFrame = 0;
+
+          if (
+            hasAutoClosedInformation ||
+            !(articlePage instanceof HTMLElement) ||
+            !(informationPanel instanceof HTMLDetailsElement) ||
+            !informationPanel.open
+          ) {
+            return;
+          }
+
+          const scrolledIntoArticle = Math.max(
+            0,
+            window.scrollY - articlePage.offsetTop,
+          );
+
+          if (scrolledIntoArticle >= closeInformationThreshold) {
+            hasAutoClosedInformation = true;
+            setPanelOpen(informationPanel, false);
+          }
+        };
+
+        window.addEventListener(
+          "scroll",
+          () => {
+            if (scrollFrame) {
+              return;
+            }
+
+            scrollFrame = window.requestAnimationFrame(
+              closeInformationOnScroll,
+            );
+          },
+          { passive: true, signal: articleMetaSignal },
+        );
+
+        closeInformationOnScroll();
+      };
+
+      document.addEventListener("astro:page-load", window.__initArticleMeta);
+    }
+
+    window.__initArticleMeta();
+  })();
+</script>
+
+<style>
+  .article-meta {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    overflow: hidden;
+    padding: 1rem 1.5rem 1rem;
+    background: var(--article-category-bg);
+    font: 600 0.75rem / 1.35 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    transition: padding 220ms ease;
+  }
+
+  .meta-kicker,
+  .meta-title,
+  .meta-item {
+    margin: 0;
+  }
+
+  .meta-kicker {
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+    cursor: pointer;
+    letter-spacing: var(--meta-letter-spacing);
+    list-style: none;
+    font-weight: 600;
+    transition: opacity 180ms ease, var(--transition-text-shadow);
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  .meta-kicker:hover {
+    text-shadow: var(--text-shadow-hover-small-black);
+  }
+
+  .meta-kicker::-webkit-details-marker {
+    display: none;
+  }
+
+  .meta-kicker__state::before {
+    content: "[+]";
+  }
+
+  .article-meta[open] .meta-kicker__state::before,
+  .citations-panel[open] .meta-kicker__state::before {
+    content: "[\2212]";
+  }
+
+  .meta-stack {
+    display: grid;
+    gap: 1.25rem;
+    min-height: 0;
+    margin: 1rem 0 0.5rem;
+    transform-origin: top;
+  }
+
+  .article-meta[open] .meta-stack {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .meta-title {
+  }
+
+  .meta-item {
+  }
+
+  .meta-item a,
+  .meta-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    transition: var(--transition-text-shadow);
+  }
+
+  .meta-item a:hover,
+  .meta-link:hover {
+    text-shadow: var(--text-shadow-hover-small-black);
+  }
+
+  .citations-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    overflow: hidden;
+    background: var(--article-category-bg);
+    font: 600 0.72rem / 1.4 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    transition: padding 220ms ease;
+  }
+
+  .citations-panel[open] {
+    padding-bottom: 2rem;
+  }
+
+  .citations-panel ol,
+  .citations-panel li {
+    align-items: start;
+    margin: 0;
+  }
+
+  .citations-panel ol {
+    display: grid;
+    gap: 0.85rem;
+    min-height: 0;
+    margin-top: 1rem;
+    padding: 0;
+    list-style: none;
+    transform-origin: top;
+  }
+
+  .citations-panel[open] ol {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .citations-panel li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.45rem;
+  }
+
+  .citations-panel a {
+    color: inherit;
+  }
+
+  .citations-panel__visit {
+    white-space: nowrap;
+  }
+
+  .citations-panel__back {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-decoration: none;
+    transition: var(--transition-text-shadow);
+  }
+
+  .citations-panel__back:hover {
+    text-shadow: var(--text-shadow-hover-small-black);
+  }
+
+  .citations-panel__back:focus-visible {
+    outline: 1px solid var(--ink);
+    outline-offset: 0.12rem;
+  }
+
+  .citations-panel small {
+    display: block;
+    margin-top: 0.35rem;
+    color: rgba(23, 23, 23, 0.68);
+    font: inherit;
+    font-weight: 400;
+  }
+
+  .meta-actions {
+    display: grid;
+    gap: 0.45rem;
+    justify-items: start;
+  }
+
+  .meta-link {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    font: 600 0.75rem / 1.35 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-decoration: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .article-meta,
+    .citations-panel,
+    .meta-kicker {
+      transition: none;
+    }
+  }
+
+  .pdf-status {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 20;
+    display: grid;
+    gap: 0.6rem;
+    width: min(26rem, calc(100vw - 2rem));
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    font: 400 0.74rem / 1.35 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .pdf-status[hidden] {
+    display: none;
+  }
+
+  .pdf-status__title,
+  .pdf-status__body {
+    margin: 0;
+    max-width: 90%;
+  }
+
+  .pdf-status__title {
+    font-weight: 700;
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .pdf-status__close {
+    justify-self: start;
+    border: 1px solid var(--line);
+    background: transparent;
+    padding: 0.35rem 0.5rem;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  @media (max-width: 900px) {
+    .pdf-status {
+      right: 0.75rem;
+      bottom: 0.75rem;
+      width: calc(100vw - 1.5rem);
+    }
+  }
+</style>

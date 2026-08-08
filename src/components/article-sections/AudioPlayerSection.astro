@@ -1,0 +1,837 @@
+---
+import { cleanString } from "../../sanity/lib/clean";
+import listenOutlineSvg from "../../assets/icons/listen-ouline.svg?raw";
+
+const { section } = Astro.props;
+const title = cleanString(section.title).trim();
+const audioUrl = cleanString(section.audioFile?.url);
+const transcription = cleanString(section.transcription).trim();
+---
+
+{audioUrl && (
+  <section class="audio-section">
+    <div class="audio-section__player">
+      {title && (
+        <div class="section-title-row audio-section__title-row">
+          <h2>{title}</h2>
+          <div class="section-header-icon audio-player__decorative-icon" set:html={listenOutlineSvg}></div>
+        </div>
+      )}
+      <div class="audio-player" data-audio-player>
+        <audio preload="metadata" src={audioUrl} aria-label={title || "Audio player"} data-audio-element>
+          <a href={audioUrl}>Download audio</a>
+        </audio>
+
+        <div class="audio-player__controls">
+          <button class="audio-player__button audio-player__toggle" type="button" aria-label="Play audio" data-audio-toggle>
+            <svg class="audio-player__icon audio-player__icon--play" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M5 3.5v9l7-4.5-7-4.5Z" />
+            </svg>
+            <svg class="audio-player__icon audio-player__icon--pause" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M4.5 3.25h2.25v9.5H4.5v-9.5Zm4.75 0h2.25v9.5H9.25v-9.5Z" />
+            </svg>
+            <span class="audio-player__loader" aria-hidden="true"></span>
+          </button>
+
+          <span class="audio-player__time" data-audio-current>0:00</span>
+
+          <div class="audio-player__timeline">
+            <div class="audio-player__waveform" aria-hidden="true" data-audio-waveform>
+              <canvas class="audio-player__waveform-canvas" data-audio-waveform-track></canvas>
+              <canvas class="audio-player__waveform-canvas audio-player__waveform-canvas--played" data-audio-waveform-played></canvas>
+            </div>
+            <input
+              class="audio-player__range audio-player__progress"
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              step="0.1"
+              aria-label="Audio progress"
+              data-audio-progress
+            />
+          </div>
+
+          <span class="audio-player__time" data-audio-duration>--:--</span>
+
+          <button class="audio-player__button audio-player__mute" type="button" aria-label="Mute audio" data-audio-mute>
+            <svg class="audio-player__icon audio-player__icon--volume" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2 6.25h2.6L8.25 3v10L4.6 9.75H2v-3.5Z" />
+              <path d="M10 5.25c.75.68 1.2 1.64 1.2 2.75s-.45 2.07-1.2 2.75" />
+              <path d="M11.65 3.75A5.8 5.8 0 0 1 13.5 8a5.8 5.8 0 0 1-1.85 4.25" />
+            </svg>
+            <svg class="audio-player__icon audio-player__icon--muted" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2 6.25h2.6L8.25 3v10L4.6 9.75H2v-3.5Z" />
+              <path d="m10.25 6.25 3 3m0-3-3 3" />
+            </svg>
+          </button>
+
+          <input
+            class="audio-player__range audio-player__volume"
+            type="range"
+            min="0"
+            max="1"
+            value="1"
+            step="0.01"
+            aria-label="Audio volume"
+            data-audio-volume
+          />
+        </div>
+      </div>
+    </div>
+
+    {transcription && (
+      <details class="audio-section__transcription">
+        <summary class="audio-section__transcription-heading">
+          <span class="audio-section__transcription-arrow" aria-hidden="true"></span>
+          <span>Transcription</span>
+        </summary>
+        <div class="audio-section__transcription-body">{transcription}</div>
+      </details>
+    )}
+  </section>
+)}
+
+<script is:inline data-astro-rerun>
+  (() => {
+    if (!window.__initAudioPlayers) {
+      const formatAudioTime = (seconds) => {
+        if (!Number.isFinite(seconds) || seconds < 0) {
+          return "0:00";
+        }
+
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60).toString().padStart(2, "0");
+
+        return `${minutes}:${remainingSeconds}`;
+      };
+
+      window.__initAudioPlayers = () => {
+        document.querySelectorAll("[data-audio-player]").forEach((player) => {
+    if (!(player instanceof HTMLElement) || player.dataset.audioBound === "true") {
+      return;
+    }
+
+    const audio = player.querySelector("[data-audio-element]");
+    const toggle = player.querySelector("[data-audio-toggle]");
+    const progress = player.querySelector("[data-audio-progress]");
+    const mute = player.querySelector("[data-audio-mute]");
+    const volume = player.querySelector("[data-audio-volume]");
+    const waveform = player.querySelector("[data-audio-waveform]");
+    const waveformTrack = player.querySelector("[data-audio-waveform-track]");
+    const waveformPlayed = player.querySelector("[data-audio-waveform-played]");
+    const currentTime = player.querySelector("[data-audio-current]");
+    const duration = player.querySelector("[data-audio-duration]");
+
+    if (!(audio instanceof HTMLAudioElement) || !(toggle instanceof HTMLButtonElement) || !(progress instanceof HTMLInputElement)) {
+      return;
+    }
+
+    player.dataset.audioBound = "true";
+
+    let previousVolume = audio.volume || 1;
+    let progressFrame = 0;
+    let waveformPeaks = [];
+
+    const setRangeFill = (range, value) => {
+      range.style.setProperty("--range-fill", `${value}%`);
+      range.parentElement?.style.setProperty("--range-fill", `${value}%`);
+      waveform?.style.setProperty("--range-fill", `${value}%`);
+    };
+
+    const updateProgressFill = () => {
+      setRangeFill(progress, Number(progress.value));
+    };
+
+    const updateVolumeFill = () => {
+      if (volume instanceof HTMLInputElement) {
+        setRangeFill(volume, Number(volume.value) * 100);
+      }
+    };
+
+    const updateToggle = () => {
+      const isPlaying = !audio.paused;
+      toggle.classList.toggle("is-playing", isPlaying);
+      toggle.setAttribute("aria-label", isPlaying ? "Pause audio" : "Play audio");
+    };
+
+    const updateBuffering = (isBuffering) => {
+      player.classList.toggle("is-buffering", isBuffering);
+    };
+
+    const updateMute = () => {
+      const isMuted = audio.muted || audio.volume === 0;
+      player.classList.toggle("is-muted", isMuted);
+
+      if (mute instanceof HTMLButtonElement) {
+        mute.setAttribute("aria-label", isMuted ? "Unmute audio" : "Mute audio");
+      }
+    };
+
+    const updateDuration = () => {
+      if (duration) {
+        duration.textContent = Number.isFinite(audio.duration) ? formatAudioTime(audio.duration) : "--:--";
+      }
+    };
+
+    const updateProgress = () => {
+      const percentage = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      progress.value = String(percentage);
+      updateProgressFill();
+
+      if (currentTime) {
+        currentTime.textContent = formatAudioTime(audio.currentTime);
+      }
+    };
+
+    const getCssColor = (name, fallback) => {
+      const color = window.getComputedStyle(player).getPropertyValue(name).trim();
+      return color || fallback;
+    };
+
+    const resizeCanvas = (canvas, width, height) => {
+      const pixelRatio = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(width * pixelRatio));
+      canvas.height = Math.max(1, Math.floor(height * pixelRatio));
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      const context = canvas.getContext("2d");
+      context?.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+      return context;
+    };
+
+    const drawWaveform = () => {
+      if (
+        !(waveform instanceof HTMLElement) ||
+        !(waveformTrack instanceof HTMLCanvasElement) ||
+        !(waveformPlayed instanceof HTMLCanvasElement)
+      ) {
+        return;
+      }
+
+      const bounds = waveform.getBoundingClientRect();
+      const width = Math.max(1, Math.floor(bounds.width));
+      const height = Math.max(1, Math.floor(bounds.height));
+      const trackContext = resizeCanvas(waveformTrack, width, height);
+      const playedContext = resizeCanvas(waveformPlayed, width, height);
+
+      if (!trackContext || !playedContext) {
+        return;
+      }
+
+      const trackColor = getCssColor("--audio-waveform-track", "rgba(23, 23, 23, 0.22)");
+      const playedColor = getCssColor("--audio-waveform-played", "rgb(23, 23, 23)");
+      const centerY = height / 2;
+      const barWidth = 1;
+      const gap = 2;
+      const step = barWidth + gap;
+      const barCount = Math.max(1, Math.floor(width / step));
+      const peaks = waveformPeaks.length > 0
+        ? waveformPeaks
+        : Array.from({ length: barCount }, (_, index) => {
+            const randomSeed = Math.sin((index + 1) * 12.9898) * 43758.5453;
+            const random = randomSeed - Math.floor(randomSeed);
+            const neighbourSeed = Math.sin((index + 7) * 78.233) * 19341.17;
+            const neighbourRandom = neighbourSeed - Math.floor(neighbourSeed);
+            const softEnvelope = Math.sin(index * 0.09) * 0.5 + 0.5;
+
+            return 0.12 + random * 0.58 + neighbourRandom * 0.18 + softEnvelope * 0.12;
+          });
+      const drawBars = (context, color) => {
+        context.clearRect(0, 0, width, height);
+        context.fillStyle = color;
+
+        for (let index = 0; index < barCount; index += 1) {
+          const peakIndex = Math.min(peaks.length - 1, Math.floor((index / barCount) * peaks.length));
+          const peak = Math.max(0.12, peaks[peakIndex] || 0);
+          const barHeight = Math.max(2, peak * height * 0.92);
+          const x = index * step;
+          const y = centerY - barHeight / 2;
+
+          context.fillRect(x, y, barWidth, barHeight);
+        }
+      };
+
+      drawBars(trackContext, trackColor);
+      drawBars(playedContext, playedColor);
+    };
+
+    const extractPeaks = (audioBuffer) => {
+      const channelCount = Math.min(2, audioBuffer.numberOfChannels);
+      const sampleCount = 900;
+      const blockSize = Math.max(1, Math.floor(audioBuffer.length / sampleCount));
+      const peaks = [];
+
+      for (let blockIndex = 0; blockIndex < sampleCount; blockIndex += 1) {
+        const blockStart = blockIndex * blockSize;
+        let peak = 0;
+
+        for (let channelIndex = 0; channelIndex < channelCount; channelIndex += 1) {
+          const channelData = audioBuffer.getChannelData(channelIndex);
+          const blockEnd = Math.min(channelData.length, blockStart + blockSize);
+
+          for (let sampleIndex = blockStart; sampleIndex < blockEnd; sampleIndex += 1) {
+            peak = Math.max(peak, Math.abs(channelData[sampleIndex]));
+          }
+        }
+
+        peaks.push(peak);
+      }
+
+      const maxPeak = Math.max(...peaks, 0.01);
+      return peaks.map((peak) => Math.pow(peak / maxPeak, 0.72));
+    };
+
+    const loadWaveform = async () => {
+      drawWaveform();
+
+      const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+
+      if (!AudioContextConstructor) {
+        return;
+      }
+
+      try {
+        const response = await fetch(audio.currentSrc || audio.src);
+        const audioData = await response.arrayBuffer();
+        const audioContext = new AudioContextConstructor();
+        const audioBuffer = await audioContext.decodeAudioData(audioData.slice(0));
+        waveformPeaks = extractPeaks(audioBuffer);
+        await audioContext.close();
+        drawWaveform();
+      } catch {
+        drawWaveform();
+      }
+    };
+
+    const startProgressLoop = () => {
+      window.cancelAnimationFrame(progressFrame);
+
+      const tick = () => {
+        updateProgress();
+
+        if (!audio.paused && !audio.ended) {
+          progressFrame = window.requestAnimationFrame(tick);
+        }
+      };
+
+      progressFrame = window.requestAnimationFrame(tick);
+    };
+
+    const stopProgressLoop = () => {
+      window.cancelAnimationFrame(progressFrame);
+      progressFrame = 0;
+      updateProgress();
+    };
+
+    const primeAudioMetadata = () => {
+      if (audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        updateDuration();
+        updateProgress();
+        return;
+      }
+
+      try {
+        audio.load();
+      } catch (error) {
+        console.error("Audio metadata load failed.", error);
+      }
+    };
+
+    toggle.addEventListener("click", async () => {
+      if (audio.paused) {
+        updateBuffering(true);
+
+        if (audio.readyState === HTMLMediaElement.HAVE_NOTHING) {
+          primeAudioMetadata();
+        }
+
+        try {
+          await audio.play();
+        } catch (error) {
+          updateBuffering(false);
+          console.error("Audio playback failed.", error);
+        }
+      } else {
+        audio.pause();
+      }
+    });
+
+    progress.addEventListener("input", () => {
+      if (!audio.duration) {
+        return;
+      }
+
+      audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+      updateProgressFill();
+    });
+
+    if (mute instanceof HTMLButtonElement) {
+      mute.addEventListener("click", () => {
+        if (audio.muted || audio.volume === 0) {
+          audio.muted = false;
+          audio.volume = previousVolume || 1;
+
+          if (volume instanceof HTMLInputElement) {
+            volume.value = String(audio.volume);
+          }
+        } else {
+          previousVolume = audio.volume;
+          audio.muted = true;
+        }
+
+        updateMute();
+        updateVolumeFill();
+      });
+    }
+
+    if (volume instanceof HTMLInputElement) {
+      volume.addEventListener("input", () => {
+        const nextVolume = Number(volume.value);
+        audio.volume = nextVolume;
+        audio.muted = nextVolume === 0;
+
+        if (nextVolume > 0) {
+          previousVolume = nextVolume;
+        }
+
+        updateMute();
+        updateVolumeFill();
+      });
+    }
+
+    audio.addEventListener("loadedmetadata", () => {
+      updateDuration();
+      updateProgress();
+      loadWaveform();
+    });
+
+    audio.addEventListener("durationchange", updateDuration);
+    audio.addEventListener("timeupdate", updateProgress);
+    audio.addEventListener("play", () => {
+      updateToggle();
+      startProgressLoop();
+    });
+    audio.addEventListener("pause", () => {
+      updateToggle();
+      stopProgressLoop();
+    });
+    audio.addEventListener("waiting", () => updateBuffering(true));
+    audio.addEventListener("canplay", () => updateBuffering(false));
+    audio.addEventListener("playing", () => updateBuffering(false));
+    audio.addEventListener("volumechange", () => {
+      if (volume instanceof HTMLInputElement) {
+        volume.value = String(audio.muted ? 0 : audio.volume);
+      }
+
+      updateMute();
+      updateVolumeFill();
+    });
+    audio.addEventListener("ended", () => {
+      updateToggle();
+      stopProgressLoop();
+    });
+
+    updateDuration();
+    updateProgress();
+    updateVolumeFill();
+    updateMute();
+    updateToggle();
+    primeAudioMetadata();
+    loadWaveform();
+
+    window.requestAnimationFrame(drawWaveform);
+    window.requestAnimationFrame(primeAudioMetadata);
+
+    if (window.ResizeObserver && waveform instanceof HTMLElement) {
+      const resizeObserver = new ResizeObserver(drawWaveform);
+      resizeObserver.observe(waveform);
+    } else {
+      window.addEventListener("resize", drawWaveform);
+    }
+  });
+      };
+
+      document.addEventListener("astro:page-load", window.__initAudioPlayers);
+    }
+
+    window.__initAudioPlayers();
+  })();
+</script>
+
+<style>
+  @property --range-fill {
+    syntax: "<percentage>";
+    inherits: true;
+    initial-value: 0%;
+  }
+
+  .audio-section {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 58rem;
+    min-width: 0;
+    margin-left: auto;
+  }
+
+  .audio-section__player {
+    min-width: 0;
+    padding: 1rem;
+    background: var(--color-voice-notes);
+  }
+
+  .audio-section__title-row {
+    margin: 0 0 1.85rem;
+  }
+
+  .audio-section h2 {
+    margin: 0;
+    font: 400 clamp(1.7rem, 3.4vw, 2.5rem) / 1 var(--font-display);
+    text-wrap: balance;
+    letter-spacing: -.03em;
+  }
+
+  .audio-player {
+    --audio-track: rgba(23, 23, 23, 0.2);
+    --audio-progress: var(--ink);
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+    padding:1rem 2rem 1rem 1rem;
+    border: 1px solid #17171747;
+  }
+
+  .audio-player audio {
+    display: none;
+  }
+
+  .audio-player__controls {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto auto;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .audio-player__button {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 8rem;
+    height: 8rem;
+    padding: 0;
+    border: 1px solid rgba(23, 23, 23, 0.28);
+    border-radius: 99rem;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+      background-color 160ms ease,
+      opacity 160ms ease;
+  }
+
+  .audio-player__mute {
+    width: 2rem;
+    height: 2rem;
+    border-color: transparent;
+  }
+
+  .audio-player__button:hover {
+    background: rgba(23, 23, 23, 0.06);
+  }
+
+  .audio-player__icon {
+    width: 0.92rem;
+    height: 0.92rem;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+  }
+
+  .audio-player__icon--play, 
+  .audio-player__icon--pause {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .audio-player__icon--volume path:not(:first-child),
+  .audio-player__icon--muted path:last-child {
+    fill: none;
+  }
+
+  .audio-player__icon--pause,
+  .audio-player__icon--muted,
+  .audio-player__loader,
+  .audio-player__toggle.is-playing .audio-player__icon--play,
+  .audio-player.is-muted .audio-player__icon--volume,
+  .audio-player.is-buffering .audio-player__icon--play,
+  .audio-player.is-buffering .audio-player__icon--pause {
+    display: none;
+  }
+
+  .audio-player__toggle.is-playing .audio-player__icon--pause,
+  .audio-player.is-muted .audio-player__icon--muted,
+  .audio-player.is-buffering .audio-player__loader {
+    display: block;
+  }
+
+  .audio-player__loader {
+    width: 0.95rem;
+    height: 0.95rem;
+    border: 1px solid rgba(23, 23, 23, 0.26);
+    border-top-color: var(--ink);
+    border-radius: 999px;
+    animation: audio-loader-spin 900ms linear infinite;
+  }
+
+  .audio-player button:focus-visible,
+  .audio-player input:focus-visible {
+    outline: 1px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  .audio-player__time {
+    font: 700 0.7rem / 1 var(--font-meta);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--meta-letter-spacing);
+    color: rgba(23, 23, 23, 0.72);
+    white-space: nowrap;
+  }
+
+  .audio-player__range {
+    --range-fill: 0%;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 1rem;
+    margin: 0;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    transition: --range-fill 180ms linear;
+  }
+
+  .audio-player__timeline {
+    --range-fill: 0%;
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    height: 5rem;
+    transition: --range-fill 180ms linear;
+  }
+
+  .audio-player__waveform {
+    --audio-waveform-track: rgba(23, 23, 23, 0.18);
+    --audio-waveform-played: var(--ink);
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .audio-player__waveform-canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .audio-player__waveform-canvas--played {
+    clip-path: inset(0 calc(100% - var(--range-fill)) 0 0);
+  }
+
+  .audio-player__progress {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .audio-player__progress:focus-visible {
+    outline: none;
+  }
+
+  .audio-player__volume {
+    width: 4rem;
+  }
+
+  .audio-player__progress::-webkit-slider-runnable-track {
+    height: 2px;
+    background:
+      linear-gradient(90deg, var(--audio-progress) var(--range-fill), var(--audio-track) var(--range-fill)),
+      var(--audio-track);
+  }
+
+  .audio-player__progress::-moz-range-track {
+    height: 2px;
+    background: var(--audio-track);
+  }
+
+  .audio-player__progress::-moz-range-progress {
+    height: 2px;
+    background: var(--audio-progress);
+  }
+
+  .audio-player__volume::-webkit-slider-runnable-track {
+    height: 2px;
+    background:
+      linear-gradient(90deg, var(--audio-progress) var(--range-fill), var(--audio-track) var(--range-fill)),
+      var(--audio-track);
+  }
+
+  .audio-player__volume::-moz-range-track {
+    height: 2px;
+    background: var(--audio-track);
+  }
+
+  .audio-player__volume::-moz-range-progress {
+    height: 2px;
+    background: var(--audio-progress);
+  }
+
+  .audio-player__range::-webkit-slider-thumb {
+    width: 0.65rem;
+    height: 0.65rem;
+    margin-top: calc((2px - 0.65rem) / 2);
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ink);
+    transition: transform 160ms ease;
+  }
+
+  .audio-player__range::-moz-range-thumb {
+    width: 0.65rem;
+    height: 0.65rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ink);
+    transition: transform 160ms ease;
+  }
+
+  .audio-player__range:hover::-webkit-slider-thumb {
+    transform: scale(1.12);
+  }
+
+  .audio-player__range:hover::-moz-range-thumb {
+    transform: scale(1.12);
+  }
+
+  .audio-player__timeline:focus-within {
+    outline: 1px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  .audio-section__transcription {
+    min-width: 0;
+  }
+
+  .audio-section__transcription-heading {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    cursor: pointer;
+    list-style: none;
+    padding: 1rem;
+    background: var(--article-category-bg);
+    font: 700 0.76rem / 1.2 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+    transtion: var(--transition-text-shadow);
+  }
+
+    .audio-section__transcription-heading:hover {
+      text-shadow: var(--text-shadow-hover-small-black);
+    }
+
+  .audio-section__transcription-heading::-webkit-details-marker {
+    display: none;
+  }
+
+  .audio-section__transcription-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.7rem;
+    flex: 0 0 0.7rem;
+    transition: transform 160ms ease;
+  }
+
+  .audio-section__transcription-arrow::before {
+    content: "\25b6";
+    font-size: 0.7em;
+  }
+
+  .audio-section__transcription[open] .audio-section__transcription-arrow {
+    transform: rotate(90deg);
+  }
+
+  .audio-section__transcription-body {
+    padding: 2rem;
+    background: var(--surface);
+    white-space: pre-wrap;
+    font: 400 clamp(1rem, 0.8vw + 0.82rem, 1.2rem) / 1.6 var(--font-body);
+    color: var(--ink);
+  }
+
+  @media (max-width: 720px) {
+    .audio-section__player,
+    .audio-section__transcription-heading,
+    .audio-section__transcription-body {
+      padding: 0.75rem;
+    }
+
+    .audio-player__controls {
+      grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+      gap: 0.45rem;
+    }
+
+    .audio-player__button {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+
+    .audio-player__mute {
+      width: 1.9rem;
+      height: 1.9rem;
+    }
+
+    .audio-player__volume {
+      display: none;
+    }
+  }
+
+  @keyframes audio-loader-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .audio-player__range {
+      transition: none;
+    }
+
+    .audio-player__range::-webkit-slider-thumb,
+    .audio-player__range::-moz-range-thumb {
+      transition: none;
+    }
+
+    .audio-player__loader {
+      animation: none;
+    }
+  }
+</style>

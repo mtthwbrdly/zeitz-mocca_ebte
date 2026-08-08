@@ -1,0 +1,30 @@
+---
+import { ClientRouter } from "astro:transitions";
+import ScrollProgress from "../components/ScrollProgress.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SmoothScroll from "../components/SmoothScroll.astro";
+import "../styles/theme.css";
+
+const {
+  bodyClass = "",
+  description = "Everything but the Exhibition.",
+  title = "Everything but the Exhibition"
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <ClientRouter />
+  </head>
+  <body class={bodyClass}>
+    <SmoothScroll />
+    <ScrollProgress />
+    <SiteNav />
+    <slot />
+  </body>
+</html>

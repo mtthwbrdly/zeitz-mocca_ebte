@@ -1,0 +1,277 @@
+---
+import HomeArticleIndexSection from "../components/home/HomeArticleIndexSection.astro";
+import HomeCategoryCardsSection from "../components/home/HomeCategoryCardsSection.astro";
+import heroPaperSvg from "../assets/home/hero-paper.svg?raw";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { cleanString } from "../sanity/lib/clean";
+import { loadArticleIndex } from "../sanity/lib/loadArticleIndex";
+import { loadHomePage } from "../sanity/lib/loadHomePage";
+
+const [homePage, articles] = await Promise.all([
+  loadHomePage(Astro.cookies),
+  loadArticleIndex(Astro.cookies)
+]);
+
+const pageTitle = cleanString(homePage.headerTitle) || "Everything but the Exhibition";
+const pageDescription =
+  cleanString(homePage.seoDescription) || "Recent articles from Everything but the Exhibition.";
+const headerText = cleanString(homePage.headerText);
+const fallbackHeaderText =
+  "Everything but the Exhibition is an online publication exploring the curatorial beyond the exhibition itself. Everything, here, means both 'preceding and surrounding' and 'aftermath,' refusing the fiction that the exhibition is the ultimate act and instead, turns instead to the research, the arguments, the false starts, the logistics, the public conversations, and all the other labour that is edited and happening elsewhere.";
+const introText = headerText || fallbackHeaderText;
+const responsiveHeroPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
+  ? heroPaperSvg.replace(/preserveAspectRatio="[^"]*"/, 'preserveAspectRatio="none"')
+  : heroPaperSvg.replace("<svg", '<svg preserveAspectRatio="none"');
+const categoryCardsSection = homePage.sections.find(
+  (section) => section._type === "categoryCardsSection"
+);
+const contentSections = homePage.sections.filter(
+  (section) => section._type !== "categoryCardsSection"
+);
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="home-page">
+    <header class="home-hero">
+      <h1 class="home-hero__sr-title">{pageTitle}</h1>
+
+      <div class="home-hero__overlay" aria-hidden="true">
+        <div class="home-hero__paper" set:html={responsiveHeroPaperSvg} />
+        <div class="home-hero__title-mask">
+          <div class="home-hero__title home-hero__title--overlay">
+            <span class="home-hero__title-line home-hero__title-line--top">Everything but</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-hero__underlay" aria-hidden="true">
+        <div class="home-hero__title home-hero__title--underlay">
+          <span class="home-hero__title-line home-hero__title-line--bottom">the Exhibition</span>
+        </div>
+      </div>
+
+ 
+
+
+    </header>
+
+
+  <div class="home-hero__intro" aria-hidden="true">
+        <p class="home-hero__intro-text">
+          {headerText ? (
+            introText
+          ) : (
+            <>
+              <em>Everything but the Exhibition</em>
+              {" is an online publication exploring the curatorial beyond the exhibition itself. "}
+              <em>Everything</em>
+              {", here, means both 'preceding and surrounding' and 'aftermath,' refusing the fiction that the exhibition is the ultimate act and instead, turns instead to the research, the arguments, the false starts, the logistics, the public conversations, and all the other labour that is edited and happening elsewhere."}
+            </>
+          )}
+        </p>
+      </div>
+
+    <HomeCategoryCardsSection section={categoryCardsSection} />
+
+    <div class="home-page__sections">
+      {contentSections.map((section) => (
+        <>
+          {section._type === "articleIndexSection" && (
+            <HomeArticleIndexSection section={section} articles={articles} />
+          )}
+        </>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .home-page {
+    min-height: 100vh;
+    background: var(--page-bg);
+  }
+
+  .home-hero {
+    --home-hero-paper-height: clamp(0rem, 52svh, 99rem);
+    --home-hero-title-mask-y: -0.45rem;
+    position: relative;
+    min-height: 125svh;
+    overflow: clip;
+    background: var(--ink);
+    color: var(--surface);
+    isolation: isolate;
+    z-index: 999;
+        user-select: none;
+  }
+
+  .home-hero__sr-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    white-space: nowrap;
+  }
+
+  .home-hero__overlay {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    height: var(--home-hero-paper-height);
+    pointer-events: none;
+  }
+
+  .home-hero__paper {
+    position: absolute;
+    inset: 0 -1px auto;
+    z-index: 1;
+    height: var(--home-hero-paper-height);
+    overflow: visible;
+     filter: blur(0.035rem);
+  }
+
+  .home-hero__paper :global(svg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: fill;
+  }
+
+  .home-hero__title,
+  .home-hero__intro {
+    margin: 0;
+  }
+
+  .home-hero__title {
+    position: absolute;
+    left: 50%;
+    display: grid;
+    width: min(100%, 80rem);
+    transform: translate(-50%, -50%);
+    font: 400 clamp(4.7rem, 12.5vw, 11.25rem) / 0.85 var(--font-display);
+    letter-spacing: 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .home-hero__title--overlay {
+    z-index: 2;
+    top: calc(clamp(0rem, 52svh, 99rem) - clamp(0rem, 8vw, 6rem));
+  }
+
+  .home-hero__title-mask {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    height: var(--home-hero-paper-height);
+    overflow: hidden;
+    -webkit-mask-image: url("/assets/home/header-title-line-1.svg");
+    mask-image: url("/assets/home/header-title-line-1.svg");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-position: center var(--home-hero-title-mask-y);
+    mask-position: center var(--home-hero-title-mask-y);
+  }
+
+  .home-hero__underlay {
+    position: relative;
+    z-index: 0;
+    min-height: 100svh;
+    margin-top: calc(-1 * var(--home-hero-paper-height));
+  }
+
+  .home-hero__title--underlay {
+    z-index: 0;
+    top: calc(clamp(0rem, 52svh, 99rem) + clamp(0rem, 7vw, 1rem));
+  }
+
+  .home-hero__title-line {
+    display: block;
+  }
+
+  .home-hero__title-line--top {
+    color: var(--ink);
+  }
+
+  .home-hero__title-line--bottom {
+    color: var(--surface);
+    mix-blend-mode: difference;
+  }
+
+  .home-hero__intro {
+    min-height: 85svh;
+    padding:1.5rem;
+    background: var(--ink);
+    color: var(--surface);
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .home-hero__intro-text {
+    font: 400 clamp(1rem, 2.5vw, 3rem) / 1 var(--font-display);
+    letter-spacing: 0;
+    max-width: clamp(20rem, 75vw, 65rem);
+    text-align: center;
+  }
+
+  .home-hero__intro em {
+    font-style: italic;
+    text-shadow: var(--text-shadow-hover-large-white);
+  }
+
+  .home-page__sections {
+    display: grid;
+    gap: 3rem;
+    padding: 4rem 1.5rem 1.5rem;
+    min-height: 100svh;
+        align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .home-hero {
+      --home-hero-paper-height: 48svh;
+      --home-hero-title-mask-y: -0.3rem;
+      min-height: 140svh;
+    }
+
+    .home-hero__title {
+      width: 100%;
+      padding-inline: 1rem;
+      font-size: clamp(4rem, 10vw, 7rem);
+      white-space: normal;
+    }
+
+    .home-hero__title--overlay {
+      top: calc(clamp(0rem, 52svh, 99rem) - clamp(0rem, 18vw, 5rem));
+    }
+
+    .home-hero__title--underlay {
+      top: calc(clamp(0rem, 52svh, 99rem) - clamp(0rem, 11vw, 3rem));
+    }
+
+    .home-hero__underlay {
+      margin-top: calc(-1 * var(--home-hero-paper-height));
+    }
+
+    .home-hero__intro {
+      right: 1rem;
+      bottom: 1rem;
+      left: 1rem;
+      font-size: clamp(1rem, 4.8vw, 1.35rem);
+    }
+
+    .home-page__sections {
+      padding: 1rem;
+    }
+  }
+</style>

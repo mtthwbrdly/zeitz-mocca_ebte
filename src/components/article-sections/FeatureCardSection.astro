@@ -1,0 +1,78 @@
+---
+import { cleanString } from "../../sanity/lib/clean";
+
+const { section } = Astro.props;
+const linkedSlug = cleanString(section.linkedArticle?.slug);
+const href = linkedSlug
+  ? `/articles/${linkedSlug}`
+  : "#";
+---
+
+<aside class="feature-card">
+  <p class="feature-card__eyebrow">{section.eyebrow}</p>
+  <div class="feature-card__body">
+    <div>
+      <h2>{section.title}</h2>
+      <p>{section.description}</p>
+    </div>
+    <a href={href}>{section.linkText || "Read more"}</a>
+  </div>
+</aside>
+
+<style>
+  .feature-card {
+    max-width: 58rem;
+    margin-left: auto;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid rgba(23, 23, 23, 0.12);
+  }
+
+  .feature-card__eyebrow,
+  .feature-card h2,
+  .feature-card p {
+    margin: 0;
+  }
+
+  .feature-card__eyebrow {
+    font: 700 0.76rem / 1.2 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .feature-card__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: end;
+    padding-top: 1rem;
+  }
+
+  .feature-card h2 {
+    font: 400 clamp(1.45rem, 2vw, 1.95rem) / 1.06 var(--font-display);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .feature-card p {
+    margin-top: 0.8rem;
+    font: 400 1rem / 1.6 var(--font-body);
+    color: var(--muted);
+  }
+
+  .feature-card a {
+    align-self: start;
+    font: 700 0.82rem / 1.2 var(--font-meta);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.18em;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 720px) {
+    .feature-card__body {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

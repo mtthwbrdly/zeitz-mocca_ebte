@@ -1,0 +1,101 @@
+---
+const { author } = Astro.props;
+const hasExtraInfo = Boolean(author?.role || author?.longBio);
+---
+
+{
+  hasExtraInfo ? (
+    <details class="author-info">
+      <summary class="author-name">
+        <span class="author-name__arrow" aria-hidden="true"></span>
+        <span>{author?.name}</span>
+      </summary>
+      <div class="author-info__body" data-lenis-prevent>
+        {author?.role && <p class="author-role">{author.role}</p>}
+        {author?.longBio && <p class="author-bio">{author.longBio}</p>}
+      </div>
+    </details>
+  ) : (
+    <section class="author-info" aria-label="Author information">
+      <p class="author-name author-name--static">{author?.name}</p>
+    </section>
+  )
+}
+
+<style>
+  .author-info {
+    display: grid;
+    font: 600 0.75rem / 1.35 var(--font-meta);
+     letter-spacing: 0.05em;
+  }
+  
+
+  .author-name,
+  .author-role,
+  .author-bio {
+    margin: 0;
+  }
+
+  .author-name {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    list-style: none;
+    transition: var(--transition-text-shadow);
+  }
+
+   .author-name:hover {
+    text-shadow: var(--text-shadow-hover-small-black);
+  }
+
+  .author-name::-webkit-details-marker {
+    display: none;
+  }
+
+  .author-name__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.7rem;
+    flex: 0 0 0.7rem;
+    transition: transform 160ms ease;
+  }
+
+  .author-name__arrow::before {
+    content: "\25b6";
+    font-size: 0.7em;
+  }
+
+  .author-info[open] .author-name__arrow {
+    transform: rotate(90deg);
+  }
+
+  .author-name--static {
+    cursor: default;
+  }
+
+  .author-info__body {
+    display: grid;
+    gap: 1rem;
+    max-height: 22rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-left: 1.1rem;
+    padding-right:1.5rem;
+    padding-top:1rem;
+  }
+
+  .author-role {
+    font: 400 .65rem / 1.5 var(--font-meta);
+    color: rgba(23, 23, 23, 0.75);
+    
+  }
+
+  .author-bio {
+    font: 600 .75rem / 1.5 var(--font-meta);
+   letter-spacing: 0.05em;
+
+  }
+</style>

@@ -1,0 +1,203 @@
+---
+import { calculateReadTime } from "../sanity/lib/calculateReadTime";
+import { cleanString } from "../sanity/lib/clean";
+
+const { article, href, variant = "page" } = Astro.props;
+const publishedAtValue = cleanString(article?.publishedAt);
+const isRelated = variant === "related";
+const articleSlug = cleanString(article?.slug?.current || article?.slug);
+const transitionName = articleSlug ? `article-header-${articleSlug}` : undefined;
+const thumbnailUrl = cleanString(article.thumbnail?.url);
+const thumbnailAlt = cleanString(article.thumbnail?.alt);
+
+const publishedAt = publishedAtValue
+  ? new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(new Date(publishedAtValue))
+  : null;
+
+const readTime = isRelated ? null : calculateReadTime(article);
+---
+
+<header class:list={["article-header", isRelated && "article-header--related"]} transition:name={transitionName}>
+  <div class="article-header__media" aria-hidden={thumbnailUrl ? undefined : "true"}>
+    {thumbnailUrl && (
+      <img
+        class="article-header__image"
+        src={thumbnailUrl}
+        alt={thumbnailAlt}
+        loading="lazy"
+      />
+    )}
+  </div>
+  <div class="article-header__inner">
+    <div class="article-header__eyebrow">
+      <p class="article-header__eyebrow-label">{article.format}</p>
+    </div>
+    <div class="article-header__title">
+    <h1>
+      {href ? (
+        <a href={href}>{article.title}</a>
+      ) : (
+        article.title
+      )}
+    </h1>
+    {article.author?.name && <p class="article-header__author">{article.author.name}</p>}
+    </div>
+    {(publishedAt || readTime) && (
+      <p class="article-header__meta">
+        {publishedAt && <span>{publishedAt}</span>}
+        {publishedAt && readTime && <span aria-hidden="true">/</span>}
+        {readTime && <span>Read time: {readTime}</span>}
+      </p>
+    )}
+  </div>
+</header>
+
+<style>
+  .article-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    isolation: isolate;
+    overflow: hidden;
+    contain: paint;
+    display: grid;
+    place-items: center;
+    min-height: min(100vh);
+    padding: 8rem 1.5rem 8rem;
+    font-family: var(--font-display);
+    background: var(--article-category-bg);
+    color: var(--ink);
+    text-align: center;
+  }
+
+  .article-header__media {
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+  }
+
+  .article-header__media::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0.001;
+  }
+
+  .article-header__inner {
+    display: grid;
+    gap: 2rem;
+    width: 100%;
+    z-index: 5;
+    max-width: 80%;
+  }
+
+  .article-header__eyebrow,
+  .article-header__author,
+  .article-header__meta {
+    margin: 0;
+  }
+
+  .article-header__eyebrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .article-header__eyebrow-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.35rem 1rem;
+    background:var(--ink);
+    color:  var(--article-category-bg);
+    margin: 0;
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .article-header h1 {
+    margin: 0;
+    font: 400 clamp(4.5rem, 7vw, 7rem) / 0.96 var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .article-header__author {
+    font: 400 clamp(2.5rem, 3.4vw, 2.5rem) / 1 var(--font-display);
+    letter-spacing: -0.03em;
+  }
+
+  .article-header__title {
+    display:flex;
+    flex-direction:column;
+    gap: 1.5rem;
+  }
+
+  .article-header__meta {
+    display: inline-flex;
+    gap: 0.5rem;
+    justify-content: center;
+    font: 700 0.78rem / 1.2 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .article-header__image {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    z-index:1;
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+    mix-blend-mode:multiply;
+    opacity:0.05;
+    pointer-events:none;
+    filter: brightness(calc(80%)) grayscale(100%) contrast(1000%);
+  }
+
+  .article-header--related {
+    position: relative;
+    height:100%;
+    min-height: calc(100svh - 12rem);
+    width: min(110rem, 100%);
+    background: var(--hero-bg);
+    color: var(--article-category-bg);
+  }
+
+  .article-header--related h1 a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-text-shadow);
+  }
+
+    .article-header--related h1 a:hover {
+      text-shadow: 
+      -0.5px -0.5px 4px var(--article-category-bg), 
+      0.5px -0.5px 4px var(--article-category-bg), 
+      -0.5px 0.5px 4px var(--article-category-bg), 
+      0.5px 0.5px 4px var(--article-category-bg);;
+  }
+
+    .article-header--related .article-header__eyebrow-label {
+    background:var(--article-category-bg);
+    color:var(--ink);
+  }
+    /* .article-header--related .article-header__image {
+    opacity:0.1;
+    filter: brightness(calc(80%)) grayscale(100%) contrast(1000%);
+    mix-blend-mode:multiply;
+  } */
+
+
+</style>

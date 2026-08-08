@@ -1,0 +1,236 @@
+export interface SlugValue {
+  current: string;
+}
+
+export interface Tag {
+  _id?: string;
+  title: string;
+  slug: SlugValue;
+}
+
+export interface AssetFile {
+  url?: string;
+  originalFilename?: string;
+}
+
+export interface MediaAsset {
+  url?: string;
+  alt?: string;
+  caption?: string;
+}
+
+export interface LinkedArticleSummary {
+  title?: string;
+  format?: string;
+  slug?: string;
+  publishedAt?: string;
+  author?: Author;
+  tags?: Tag[];
+  thumbnail?: MediaAsset;
+}
+
+export interface Author {
+  _id?: string;
+  name: string;
+  slug: SlugValue;
+  shortBio?: string;
+  longBio?: string;
+  role?: string;
+  portrait?: MediaAsset;
+}
+
+export interface PortableTextSpan {
+  _key?: string;
+  _type: "span";
+  text: string;
+  marks?: string[];
+}
+
+export interface PortableTextLinkMarkDef {
+  _key: string;
+  _type: "link";
+  href: string;
+}
+
+export interface PortableTextCitationMarkDef {
+  _key: string;
+  _type: "citation";
+  note?: string;
+  source: string;
+  url?: string;
+}
+
+export type PortableTextMarkDef =
+  | PortableTextLinkMarkDef
+  | PortableTextCitationMarkDef;
+
+export interface PortableTextBlock {
+  _key?: string;
+  _type: "block";
+  style?: string;
+  listItem?: "bullet" | "number";
+  level?: number;
+  markDefs?: PortableTextMarkDef[];
+  children: PortableTextSpan[];
+}
+
+export interface RichTextSection {
+  _key?: string;
+  _type: "richTextSection";
+  body: PortableTextBlock[];
+  pullQuotePlacement?: "top" | "bottom";
+  width?: "standard" | "wide" | "narrow";
+}
+
+export interface PullQuoteSection {
+  _key?: string;
+  _type: "pullQuoteSection";
+  quote: string;
+  attribution?: string;
+  size?: "normal" | "large";
+}
+
+export interface ShareClippingSection {
+  _key?: string;
+  _type: "shareClippingSection";
+  quote: string;
+  label?: string;
+}
+
+export interface FeatureCardSection {
+  _key?: string;
+  _type: "featureCardSection";
+  eyebrow: string;
+  title: string;
+  description: string;
+  linkText?: string;
+  linkedArticle?: {
+    title?: string;
+    slug?: string;
+  };
+}
+
+export interface RelatedReadingSection {
+  _key?: string;
+  _type: "relatedReadingSection";
+  articles: LinkedArticleSummary[];
+}
+
+export interface ImageSection {
+  _key?: string;
+  _type: "imageSection";
+  image: MediaAsset;
+  layout?: "inline" | "wide" | "full";
+}
+
+export interface AudioPlayerSection {
+  _key?: string;
+  _type: "audioPlayerSection";
+  title?: string;
+  audioFile: AssetFile;
+  transcription?: string;
+}
+
+export interface VideoSection {
+  _key?: string;
+  _type: "videoSection";
+  title?: string;
+  sourceType?: "upload" | "youtube";
+  videoFile?: AssetFile;
+  youtubeUrl?: string;
+  caption?: string;
+  transcription?: string;
+}
+
+export interface DividerSection {
+  _key?: string;
+  _type: "dividerSection";
+  style?: "line" | "space";
+}
+
+export interface CommentsSection {
+  _key?: string;
+  _type: "commentsSection";
+  title?: string;
+  intro?: string;
+  slugOverride?: string;
+}
+
+export type ArticleSection =
+  | RichTextSection
+  | PullQuoteSection
+  | ShareClippingSection
+  | FeatureCardSection
+  | ImageSection
+  | AudioPlayerSection
+  | VideoSection
+  | CommentsSection
+  | DividerSection;
+
+export interface Article {
+  _id?: string;
+  title: string;
+  subtitle?: string;
+  slug: SlugValue;
+  excerpt?: string;
+  format?: string;
+  series?: string;
+  publishedAt?: string;
+  author: Author;
+  tags: Tag[];
+  thumbnail?: MediaAsset;
+  downloadablePdf?: AssetFile;
+  contentSections: ArticleSection[];
+  furtherReading?: RelatedReadingSection;
+}
+
+export interface ArticleIndexItem {
+  _id?: string;
+  title?: string;
+  format?: string;
+  slug?: string;
+  publishedAt?: string;
+  author?: Author;
+  downloadablePdf?: {
+    size?: number;
+  };
+  tags?: Tag[];
+}
+
+export interface ArticleIndexHomeSection {
+  _key?: string;
+  _type: "articleIndexSection";
+  title?: string;
+  intro?: string;
+  categoryFilter?: "all" | "process-notes" | "footnotes" | "voice-notes";
+  maxItems?: number;
+}
+
+export interface HomeCategoryCard {
+  _key?: string;
+  _type?: "categoryCard";
+  category?: "process-notes" | "footnotes" | "voice-notes";
+  label?: string;
+  title?: string;
+  description?: string;
+  linkText?: string;
+}
+
+export interface CategoryCardsHomeSection {
+  _key?: string;
+  _type: "categoryCardsSection";
+  title?: string;
+  intro?: string;
+  cards?: HomeCategoryCard[];
+}
+
+export type HomePageSection = ArticleIndexHomeSection | CategoryCardsHomeSection;
+
+export interface HomePage {
+  _id?: string;
+  title?: string;
+  seoDescription?: string;
+  headerTitle?: string;
+  headerText?: string;
+  sections: HomePageSection[];
+}

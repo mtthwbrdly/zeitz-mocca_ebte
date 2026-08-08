@@ -1,0 +1,847 @@
+---
+import { cleanString } from "../../sanity/lib/clean";
+import watchOutlineSvg from "../../assets/icons/watch-outline.svg?raw";
+
+const { section } = Astro.props;
+const title = cleanString(section.title).trim();
+const selectedSourceType = cleanString(section.sourceType);
+const videoUrl = cleanString(section.videoFile?.url);
+const youtubeUrl = cleanString(section.youtubeUrl);
+const caption = cleanString(section.caption).trim();
+const transcription = cleanString(section.transcription).trim();
+
+const getYouTubeId = (url: string) => {
+  if (!url) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(/^https?:\/\//.test(url) ? url : `https://${url}`);
+    const hostname = parsedUrl.hostname.replace(/^www\./, "");
+
+    if (hostname === "youtu.be") {
+      return parsedUrl.pathname.split("/").filter(Boolean)[0] || "";
+    }
+
+    if (hostname === "youtube.com" || hostname === "m.youtube.com") {
+      if (parsedUrl.pathname.startsWith("/embed/")) {
+        return parsedUrl.pathname.split("/").filter(Boolean)[1] || "";
+      }
+
+      if (parsedUrl.pathname.startsWith("/shorts/")) {
+        return parsedUrl.pathname.split("/").filter(Boolean)[1] || "";
+      }
+
+      return parsedUrl.searchParams.get("v") || "";
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+};
+
+const sourceType = selectedSourceType === "youtube" || (!videoUrl && youtubeUrl)
+  ? "youtube"
+  : "upload";
+const youtubeId = sourceType === "youtube" ? getYouTubeId(youtubeUrl) : "";
+const youtubeEmbedUrl = youtubeId ? `https://www.youtube-nocookie.com/embed/${youtubeId}?enablejsapi=1&controls=0&modestbranding=1&rel=0&playsinline=1` : "";
+const hasVideo = Boolean(youtubeEmbedUrl || videoUrl);
+const shouldRenderYouTube = Boolean(youtubeEmbedUrl);
+const videoTitle = title || "Video";
+---
+
+{hasVideo && (
+  <section class="video-section" aria-label={videoTitle}>
+    <div class="video-section__player">
+      {title && (
+        <div class="section-title-row video-section__title-row">
+          <h2>{title}</h2>
+          <div class="section-header-icon video-player__decorative-icon" set:html={watchOutlineSvg}></div>
+        </div>
+      )}
+
+      <div
+        class="video-player"
+        data-video-player
+        data-video-provider={shouldRenderYouTube ? "youtube" : "upload"}
+        data-youtube-id={shouldRenderYouTube ? youtubeId : undefined}
+      >
+        <div class="video-section__media">
+        {shouldRenderYouTube ? (
+          <iframe
+            data-video-youtube
+            src={youtubeEmbedUrl}
+            title={videoTitle}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        ) : (
+          <video preload="metadata" src={videoUrl} playsinline data-video-element>
+            <a href={videoUrl}>Download video</a>
+          </video>
+        )}
+        </div>
+
+        <div class="video-player__controls">
+          <button class="video-player__button video-player__toggle" type="button" aria-label="Play video" data-video-toggle>
+            <svg class="video-player__icon video-player__icon--play" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M5 3.5v9l7-4.5-7-4.5Z" />
+            </svg>
+            <svg class="video-player__icon video-player__icon--pause" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M4.5 3.25h2.25v9.5H4.5v-9.5Zm4.75 0h2.25v9.5H9.25v-9.5Z" />
+            </svg>
+          </button>
+
+          <span class="video-player__time" data-video-current>0:00</span>
+
+          <div class="video-player__timeline">
+            <input
+              class="video-player__range video-player__progress"
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              step="0.1"
+              aria-label="Video progress"
+              data-video-progress
+            />
+          </div>
+
+          <span class="video-player__time" data-video-duration>--:--</span>
+
+          <button class="video-player__button video-player__mute" type="button" aria-label="Mute video" data-video-mute>
+            <svg class="video-player__icon video-player__icon--volume" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2 6.25h2.6L8.25 3v10L4.6 9.75H2v-3.5Z" />
+              <path d="M10 5.25c.75.68 1.2 1.64 1.2 2.75s-.45 2.07-1.2 2.75" />
+              <path d="M11.65 3.75A5.8 5.8 0 0 1 13.5 8a5.8 5.8 0 0 1-1.85 4.25" />
+            </svg>
+            <svg class="video-player__icon video-player__icon--muted" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2 6.25h2.6L8.25 3v10L4.6 9.75H2v-3.5Z" />
+              <path d="m10.25 6.25 3 3m0-3-3 3" />
+            </svg>
+          </button>
+
+          <input
+            class="video-player__range video-player__volume"
+            type="range"
+            min="0"
+            max="1"
+            value="1"
+            step="0.01"
+            aria-label="Video volume"
+            data-video-volume
+          />
+
+          <button class="video-player__button video-player__fullscreen" type="button" aria-label="Enter fullscreen" data-video-fullscreen>
+            <svg class="video-player__icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 6V3h3M10 3h3v3M13 10v3h-3M6 13H3v-3" fill="none" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {caption && <p class="video-section__caption">{caption}</p>}
+    </div>
+
+    {transcription && (
+      <details class="video-section__transcription">
+        <summary class="video-section__transcription-heading">
+          <span class="video-section__transcription-arrow" aria-hidden="true"></span>
+          <span>Transcription</span>
+        </summary>
+        <div class="video-section__transcription-body">{transcription}</div>
+      </details>
+    )}
+  </section>
+)}
+
+<script is:inline data-astro-rerun>
+  (() => {
+    if (!window.__initVideoPlayers) {
+      const formatVideoTime = (seconds) => {
+        if (!Number.isFinite(seconds) || seconds < 0) {
+          return "0:00";
+        }
+
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60).toString().padStart(2, "0");
+
+        return `${minutes}:${remainingSeconds}`;
+      };
+
+      const loadYouTubeApi = () => {
+        if (window.YT?.Player) {
+          return Promise.resolve(window.YT);
+        }
+
+        if (window.__youtubeIframeApiPromise) {
+          return window.__youtubeIframeApiPromise;
+        }
+
+        window.__youtubeIframeApiPromise = new Promise((resolve) => {
+          const previousReady = window.onYouTubeIframeAPIReady;
+          window.onYouTubeIframeAPIReady = () => {
+            previousReady?.();
+            resolve(window.YT);
+          };
+
+          const script = document.createElement("script");
+          script.src = "https://www.youtube.com/iframe_api";
+          script.async = true;
+          document.head.appendChild(script);
+        });
+
+        return window.__youtubeIframeApiPromise;
+      };
+
+      window.__initVideoPlayers = () => {
+        window.__videoPlayerCleanups?.forEach((cleanup, boundPlayer) => {
+          if (!document.contains(boundPlayer)) {
+            cleanup();
+            window.__videoPlayerCleanups.delete(boundPlayer);
+          }
+        });
+
+        document.querySelectorAll("[data-video-player]").forEach((player) => {
+          if (!(player instanceof HTMLElement) || player.dataset.videoBound === "true") {
+            return;
+          }
+
+          const provider = player.dataset.videoProvider || "upload";
+          const media = player.querySelector(".video-section__media");
+          const video = player.querySelector("[data-video-element]");
+          const iframe = player.querySelector("[data-video-youtube]");
+          const toggle = player.querySelector("[data-video-toggle]");
+          const progress = player.querySelector("[data-video-progress]");
+          const mute = player.querySelector("[data-video-mute]");
+          const volume = player.querySelector("[data-video-volume]");
+          const fullscreen = player.querySelector("[data-video-fullscreen]");
+          const currentTime = player.querySelector("[data-video-current]");
+          const duration = player.querySelector("[data-video-duration]");
+
+          if (!(toggle instanceof HTMLButtonElement) || !(progress instanceof HTMLInputElement)) {
+            return;
+          }
+
+          player.dataset.videoBound = "true";
+          window.__videoPlayerCleanups = window.__videoPlayerCleanups || new Map();
+
+          let youtubePlayer = null;
+          let isPlaying = false;
+          let isMuted = false;
+          let currentVolume = 1;
+          let progressFrame = 0;
+          const cleanupCallbacks = [];
+
+          const addCleanup = (callback) => {
+            cleanupCallbacks.push(callback);
+          };
+
+          const setRangeFill = (range, value) => {
+            range.style.setProperty("--range-fill", `${value}%`);
+            range.parentElement?.style.setProperty("--range-fill", `${value}%`);
+          };
+
+          const getDuration = () => {
+            if (provider === "youtube" && youtubePlayer?.getDuration) {
+              return youtubePlayer.getDuration() || 0;
+            }
+
+            return video instanceof HTMLVideoElement ? video.duration || 0 : 0;
+          };
+
+          const getCurrentTime = () => {
+            if (provider === "youtube" && youtubePlayer?.getCurrentTime) {
+              return youtubePlayer.getCurrentTime() || 0;
+            }
+
+            return video instanceof HTMLVideoElement ? video.currentTime || 0 : 0;
+          };
+
+          const updateToggle = () => {
+            toggle.classList.toggle("is-playing", isPlaying);
+            toggle.setAttribute("aria-label", isPlaying ? "Pause video" : "Play video");
+          };
+
+          const updateMute = () => {
+            player.classList.toggle("is-muted", isMuted || currentVolume === 0);
+            mute?.setAttribute("aria-label", isMuted || currentVolume === 0 ? "Unmute video" : "Mute video");
+          };
+
+          const updateDuration = () => {
+            if (duration) {
+              const nextDuration = getDuration();
+              duration.textContent = Number.isFinite(nextDuration) && nextDuration > 0
+                ? formatVideoTime(nextDuration)
+                : "--:--";
+            }
+          };
+
+          const updateProgress = () => {
+            const nextDuration = getDuration();
+            const nextCurrentTime = getCurrentTime();
+            const percentage = nextDuration ? (nextCurrentTime / nextDuration) * 100 : 0;
+            progress.value = String(percentage);
+            setRangeFill(progress, percentage);
+
+            if (currentTime) {
+              currentTime.textContent = formatVideoTime(nextCurrentTime);
+            }
+          };
+
+          const startProgressLoop = () => {
+            window.cancelAnimationFrame(progressFrame);
+
+            const tick = () => {
+              updateDuration();
+              updateProgress();
+
+              if (isPlaying) {
+                progressFrame = window.requestAnimationFrame(tick);
+              }
+            };
+
+            tick();
+          };
+
+          const setPlaying = (nextPlaying) => {
+            isPlaying = nextPlaying;
+            updateToggle();
+
+            if (isPlaying) {
+              startProgressLoop();
+            } else {
+              window.cancelAnimationFrame(progressFrame);
+              updateProgress();
+            }
+          };
+
+          const seekToPercent = (percentage) => {
+            const nextDuration = getDuration();
+            const nextTime = nextDuration * (percentage / 100);
+
+            if (provider === "youtube" && youtubePlayer?.seekTo) {
+              youtubePlayer.seekTo(nextTime, true);
+            } else if (video instanceof HTMLVideoElement) {
+              video.currentTime = nextTime;
+            }
+
+            updateProgress();
+          };
+
+          const setVolume = (value) => {
+            currentVolume = value;
+            isMuted = value === 0 ? true : isMuted && value === 0;
+
+            if (provider === "youtube" && youtubePlayer?.setVolume) {
+              youtubePlayer.setVolume(value * 100);
+
+              if (value === 0) {
+                youtubePlayer.mute?.();
+              } else {
+                youtubePlayer.unMute?.();
+                isMuted = false;
+              }
+            } else if (video instanceof HTMLVideoElement) {
+              video.volume = value;
+
+              if (value > 0) {
+                video.muted = false;
+                isMuted = false;
+              }
+            }
+
+            setRangeFill(volume, value * 100);
+            updateMute();
+          };
+
+          const primeVideoMetadata = () => {
+            if (!(video instanceof HTMLVideoElement)) {
+              return;
+            }
+
+            if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+              updateDuration();
+              updateProgress();
+              return;
+            }
+
+            try {
+              video.load();
+            } catch (error) {
+              console.error("Video metadata load failed.", error);
+            }
+          };
+
+          const handleToggleClick = async () => {
+            if (provider === "youtube") {
+              if (!youtubePlayer) {
+                return;
+              }
+
+              if (isPlaying) {
+                youtubePlayer.pauseVideo?.();
+              } else {
+                youtubePlayer.playVideo?.();
+              }
+
+              return;
+            }
+
+            if (!(video instanceof HTMLVideoElement)) {
+              return;
+            }
+
+            if (video.paused) {
+              if (video.readyState === HTMLMediaElement.HAVE_NOTHING) {
+                primeVideoMetadata();
+              }
+
+              await video.play();
+            } else {
+              video.pause();
+            }
+          };
+
+          toggle.addEventListener("click", handleToggleClick);
+          addCleanup(() => toggle.removeEventListener("click", handleToggleClick));
+
+          const handleProgressInput = () => {
+            seekToPercent(Number(progress.value));
+          };
+
+          progress.addEventListener("input", handleProgressInput);
+          addCleanup(() => progress.removeEventListener("input", handleProgressInput));
+
+          if (volume instanceof HTMLInputElement) {
+            const handleVolumeInput = () => {
+              setVolume(Number(volume.value));
+            };
+
+            volume.addEventListener("input", handleVolumeInput);
+            addCleanup(() => volume.removeEventListener("input", handleVolumeInput));
+          }
+
+          if (mute instanceof HTMLButtonElement) {
+            const handleMuteClick = () => {
+              if (provider === "youtube" && youtubePlayer) {
+                isMuted = !isMuted;
+                if (isMuted) {
+                  youtubePlayer.mute?.();
+                } else {
+                  youtubePlayer.unMute?.();
+                  if (currentVolume === 0) {
+                    currentVolume = 1;
+                    if (volume instanceof HTMLInputElement) {
+                      volume.value = "1";
+                      setRangeFill(volume, 100);
+                    }
+                    youtubePlayer.setVolume?.(100);
+                  }
+                }
+
+                updateMute();
+                return;
+              }
+
+              if (video instanceof HTMLVideoElement) {
+                video.muted = !video.muted;
+                isMuted = video.muted;
+                updateMute();
+              }
+            };
+
+            mute.addEventListener("click", handleMuteClick);
+            addCleanup(() => mute.removeEventListener("click", handleMuteClick));
+          }
+
+          if (fullscreen instanceof HTMLButtonElement && media instanceof HTMLElement) {
+            const handleFullscreenClick = async () => {
+              if (document.fullscreenElement) {
+                await document.exitFullscreen?.();
+                fullscreen.setAttribute("aria-label", "Enter fullscreen");
+              } else {
+                await media.requestFullscreen?.();
+                fullscreen.setAttribute("aria-label", "Exit fullscreen");
+              }
+            };
+
+            fullscreen.addEventListener("click", handleFullscreenClick);
+            addCleanup(() => fullscreen.removeEventListener("click", handleFullscreenClick));
+          }
+
+          if (provider === "youtube" && iframe instanceof HTMLIFrameElement) {
+            loadYouTubeApi().then((YT) => {
+              if (!document.contains(player)) {
+                return;
+              }
+
+              youtubePlayer = new YT.Player(iframe, {
+                events: {
+                  onReady: () => {
+                    updateDuration();
+                    updateProgress();
+                    setVolume(currentVolume);
+                  },
+                  onStateChange: (event) => {
+                    setPlaying(event.data === YT.PlayerState.PLAYING);
+                    updateDuration();
+                    updateProgress();
+                  }
+                }
+              });
+
+              addCleanup(() => youtubePlayer?.destroy?.());
+            });
+          } else if (video instanceof HTMLVideoElement) {
+            const handlePlay = () => setPlaying(true);
+            const handlePause = () => setPlaying(false);
+            const handleEnded = () => setPlaying(false);
+            const handleLoadedMetadata = () => {
+              updateDuration();
+              updateProgress();
+            };
+            const handleLoadedData = () => {
+              updateDuration();
+              updateProgress();
+            };
+            const handleCanPlay = () => {
+              updateDuration();
+              updateProgress();
+            };
+            const handleVolumeChange = () => {
+              currentVolume = video.volume;
+              isMuted = video.muted;
+              updateMute();
+            };
+
+            video.addEventListener("play", handlePlay);
+            video.addEventListener("pause", handlePause);
+            video.addEventListener("ended", handleEnded);
+            video.addEventListener("loadedmetadata", handleLoadedMetadata);
+            video.addEventListener("loadeddata", handleLoadedData);
+            video.addEventListener("canplay", handleCanPlay);
+            video.addEventListener("timeupdate", updateProgress);
+            video.addEventListener("volumechange", handleVolumeChange);
+
+            addCleanup(() => {
+              video.pause();
+              video.removeEventListener("play", handlePlay);
+              video.removeEventListener("pause", handlePause);
+              video.removeEventListener("ended", handleEnded);
+              video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+              video.removeEventListener("loadeddata", handleLoadedData);
+              video.removeEventListener("canplay", handleCanPlay);
+              video.removeEventListener("timeupdate", updateProgress);
+              video.removeEventListener("volumechange", handleVolumeChange);
+            });
+
+            primeVideoMetadata();
+            window.requestAnimationFrame(primeVideoMetadata);
+          }
+
+          setRangeFill(progress, 0);
+          if (volume instanceof HTMLInputElement) {
+            setRangeFill(volume, 100);
+          }
+          updateToggle();
+          updateMute();
+          updateDuration();
+          updateProgress();
+
+          window.__videoPlayerCleanups.set(player, () => {
+            window.cancelAnimationFrame(progressFrame);
+            cleanupCallbacks.forEach((callback) => callback());
+            player.dataset.videoBound = "false";
+          });
+        });
+      };
+
+      document.addEventListener("astro:page-load", window.__initVideoPlayers);
+      document.addEventListener("astro:before-swap", () => {
+        window.__videoPlayerCleanups?.forEach((cleanup) => cleanup());
+        window.__videoPlayerCleanups?.clear();
+      });
+    }
+
+    window.__initVideoPlayers();
+  })();
+</script>
+
+<style>
+  .video-section {
+    display: grid;
+    gap: 0;
+    width: min(51.5rem, 100%);
+    margin-left: auto;
+    background: var(--article-category-bg);
+  }
+
+  .video-section__player {
+    display: grid;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .video-section__player h2,
+  .video-section__caption {
+    margin: 0;
+  }
+
+  .video-section__player h2 {
+    font: 400 clamp(1.7rem, 3.4vw, 2.5rem) / 1 var(--font-display);
+  }
+
+  .video-section__media {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--ink);
+  }
+
+  .video-section__media iframe,
+  .video-section__media video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .video-section__media video {
+    object-fit: cover;
+  }
+
+  .video-player__controls {
+    --video-track: rgba(23, 23, 23, 0.18);
+    --video-progress: var(--ink);
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto 4rem auto;
+    gap: 0.65rem;
+    align-items: center;
+    min-width: 0;
+    padding-top: 0.25rem;
+    color: var(--ink);
+  }
+
+  .video-player__button {
+    display: inline-grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: background 160ms ease;
+  }
+
+  .video-player__button:hover {
+    background: rgba(23, 23, 23, 0.06);
+  }
+
+  .video-player__icon {
+    width: 0.92rem;
+    height: 0.92rem;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+  }
+
+  .video-player__icon--play,
+  .video-player__icon--pause {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .video-player__icon--volume path:not(:first-child),
+  .video-player__icon--muted path:last-child {
+    fill: none;
+  }
+
+  .video-player__icon--pause,
+  .video-player__icon--muted,
+  .video-player__toggle.is-playing .video-player__icon--play,
+  .video-player.is-muted .video-player__icon--volume {
+    display: none;
+  }
+
+  .video-player__toggle.is-playing .video-player__icon--pause,
+  .video-player.is-muted .video-player__icon--muted {
+    display: block;
+  }
+
+  .video-player button:focus-visible,
+  .video-player input:focus-visible {
+    outline: 1px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  .video-player__time {
+    font: 700 0.7rem / 1 var(--font-meta);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--meta-letter-spacing);
+    color: rgba(23, 23, 23, 0.72);
+    white-space: nowrap;
+  }
+
+  .video-player__timeline {
+    --range-fill: 0%;
+    min-width: 0;
+  }
+
+  .video-player__range {
+    --range-fill: 0%;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 1rem;
+    margin: 0;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    transition: --range-fill 180ms linear;
+  }
+
+  .video-player__volume {
+    width: 4rem;
+  }
+
+  .video-player__progress::-webkit-slider-runnable-track,
+  .video-player__volume::-webkit-slider-runnable-track {
+    height: 2px;
+    background:
+      linear-gradient(90deg, var(--video-progress) var(--range-fill), var(--video-track) var(--range-fill)),
+      var(--video-track);
+  }
+
+  .video-player__progress::-moz-range-track,
+  .video-player__volume::-moz-range-track {
+    height: 2px;
+    background: var(--video-track);
+  }
+
+  .video-player__progress::-moz-range-progress,
+  .video-player__volume::-moz-range-progress {
+    height: 2px;
+    background: var(--video-progress);
+  }
+
+  .video-player__range::-webkit-slider-thumb {
+    width: 0.65rem;
+    height: 0.65rem;
+    margin-top: calc((2px - 0.65rem) / 2);
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ink);
+    transition: transform 160ms ease;
+  }
+
+  .video-player__range::-moz-range-thumb {
+    width: 0.65rem;
+    height: 0.65rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ink);
+    transition: transform 160ms ease;
+  }
+
+  .video-player__range:hover::-webkit-slider-thumb {
+    transform: scale(1.12);
+  }
+
+  .video-player__range:hover::-moz-range-thumb {
+    transform: scale(1.12);
+  }
+
+  .video-section__caption {
+    font: 600 0.8rem / 1.4 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-align: center;
+  }
+
+  .video-section__transcription {
+    min-width: 0;
+  }
+
+  .video-section__transcription-heading {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    cursor: pointer;
+    list-style: none;
+    padding: 1rem;
+    background: var(--article-category-bg);
+    border-top: 1px solid rgba(23, 23, 23, 0.18);
+    font: 700 0.76rem / 1.2 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .video-section__transcription-heading::-webkit-details-marker {
+    display: none;
+  }
+
+  .video-section__transcription-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.7rem;
+    flex: 0 0 0.7rem;
+    transition: transform 160ms ease;
+  }
+
+  .video-section__transcription-arrow::before {
+    content: "\25b6";
+    font-size: 0.7em;
+  }
+
+  .video-section__transcription[open] .video-section__transcription-arrow {
+    transform: rotate(90deg);
+  }
+
+  .video-section__transcription-body {
+    padding: 1rem;
+    background: var(--surface);
+    white-space: pre-wrap;
+    font: 400 clamp(1rem, 0.8vw + 0.82rem, 1.2rem) / 1.6 var(--font-body);
+    color: var(--ink);
+  }
+
+  @media (max-width: 720px) {
+    .video-section__player,
+    .video-section__transcription-heading,
+    .video-section__transcription-body {
+      padding: 0.75rem;
+    }
+
+    .video-player__controls {
+      grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+      gap: 0.45rem;
+    }
+
+    .video-player__button {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+
+    .video-player__mute,
+    .video-player__fullscreen {
+      width: 1.9rem;
+      height: 1.9rem;
+    }
+
+    .video-player__volume {
+      grid-column: 3 / -1;
+      width: 100%;
+    }
+  }
+</style>

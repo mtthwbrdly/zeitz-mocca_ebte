@@ -1,0 +1,165 @@
+---
+import { cleanString } from "../sanity/lib/clean";
+import { getArticleCategoryClass } from "../sanity/lib/articleCategory";
+import { extractArticleCitations } from "../sanity/lib/citations";
+import ArticleHeader from "./ArticleHeader.astro";
+import ArticleMeta from "./ArticleMeta.astro";
+import DisableDraftMode from "./DisableDraftMode";
+import SanityVisualEditing from "./SanityVisualEditing";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AudioPlayerSection from "./article-sections/AudioPlayerSection.astro";
+import CommentsSection from "./article-sections/CommentsSection.astro";
+import DividerSection from "./article-sections/DividerSection.astro";
+import FeatureCardSection from "./article-sections/FeatureCardSection.astro";
+import ImageSection from "./article-sections/ImageSection.astro";
+import PullQuoteSection from "./article-sections/PullQuoteSection.astro";
+import RelatedReadingSection from "./article-sections/RelatedReadingSection.astro";
+import RichTextSection from "./article-sections/RichTextSection.astro";
+import ShareClippingSection from "./article-sections/ShareClippingSection.astro";
+import VideoSection from "./article-sections/VideoSection.astro";
+
+const { article, draftMode = false } = Astro.props;
+const { citationMap, citations } = extractArticleCitations(article.contentSections);
+
+const pageTitle = `${cleanString(article.title)} | Everything but the Exhibition`;
+const pageDescription = cleanString(article.excerpt || article.subtitle || article.title);
+const articleCategoryClass = getArticleCategoryClass(article);
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} bodyClass={articleCategoryClass}>
+  <div class="site-shell">
+
+    <ArticleHeader article={article} />
+
+    <main class="article-page">
+
+      <div class="article-grid">
+        <aside class="article-sidebar">
+          <ArticleMeta article={article} citations={citations} />
+        </aside>
+
+        <div class="article-stream">
+          {article.contentSections.map((section) => (
+            <>
+              {section._type === "richTextSection" && <RichTextSection section={section} citationMap={citationMap} article={article} />}
+              {section._type === "pullQuoteSection" && <PullQuoteSection section={section} article={article} />}
+              {section._type === "shareClippingSection" && <ShareClippingSection section={section} />}
+              {section._type === "featureCardSection" && <FeatureCardSection section={section} />}
+              {section._type === "imageSection" && <ImageSection section={section} />}
+              {section._type === "audioPlayerSection" && <AudioPlayerSection section={section} />}
+              {section._type === "videoSection" && <VideoSection section={section} />}
+              {section._type === "commentsSection" && <CommentsSection section={section} article={article} />}
+              {section._type === "dividerSection" && <DividerSection section={section} />}
+            </>
+          ))}
+        </div>
+      </div>
+
+      {article.furtherReading ? (
+        <RelatedReadingSection section={article.furtherReading} />
+      ) : (
+        <p class="back-link-wrap">
+          <a class="back-link" href="/">Back to Index</a>
+        </p>
+      )}
+    </main>
+  </div>
+  {draftMode && <SanityVisualEditing client:only="react" />}
+  {draftMode && <DisableDraftMode client:only="react" />}
+</BaseLayout>
+
+<style is:global>
+  .site-shell {
+    min-height: 100vh;
+    position: relative;
+  }
+  
+  .article-page {
+    position: relative;
+    z-index: 2;
+    background: var(--page-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(2px);
+  }
+
+  .article-grid {
+    display: grid;
+    grid-template-columns: minmax(20rem, 17.5rem) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+    max-width: 1920px;
+    width: 100%;
+    padding: 1.5rem 1.5rem 2rem;
+    min-height: 100vh;
+  }
+
+  .article-sidebar {
+    position: sticky;
+    top: 5rem;
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+    max-height: calc(100vh - 6rem);
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  .article-sidebar:has(.article-meta[open]) {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .article-sidebar:has(.citations-panel[open]) {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .article-stream {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+    justify-content: stretch;
+    padding-bottom: 3rem;
+    justify-items: end;
+  }
+
+  .back-link-wrap {
+    display: flex;
+    justify-content: center;
+    margin: auto 0;
+    padding: 1rem 0 3rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    padding: 0.55rem 1rem;
+    background: #fff;
+    color: #171717;
+    text-decoration: none;
+    font: 700 0.78rem / 1 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .u-underline {
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+  }
+
+  @media (max-width: 900px) {
+    .article-page {
+      padding-inline: 1rem;
+    }
+
+    .article-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .article-sidebar {
+      position: static;
+      max-height: none;
+      overflow: visible;
+    }
+  }
+</style>

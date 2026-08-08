@@ -1,0 +1,21 @@
+---
+import ArticleLayout from "../../components/ArticleLayout.astro";
+import { getDraftModeProps } from "../../sanity/lib/draft-mode";
+import { loadArticleBySlug } from "../../sanity/lib/loadArticleBySlug";
+
+export const prerender = false;
+
+const { slug = "" } = Astro.params;
+const draftMode = Boolean(getDraftModeProps(Astro.cookies).perspectiveCookie);
+const article = await loadArticleBySlug(slug, Astro.cookies);
+
+if (!article) {
+  Astro.response.status = 404;
+}
+---
+
+{article ? (
+  <ArticleLayout article={article} draftMode={draftMode} />
+) : (
+  <p>Article not found.</p>
+)}

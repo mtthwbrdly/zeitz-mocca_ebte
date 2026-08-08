@@ -1,0 +1,310 @@
+---
+import PullQuoteSection from "./PullQuoteSection.astro";
+import { cleanString } from "../../sanity/lib/clean";
+import { renderPortableText } from "../../sanity/lib/renderPortableText";
+import { extractPullQuoteRuns } from "../../sanity/lib/pullQuotes";
+
+const { article, section, citationMap = {} } = Astro.props;
+const pullQuotes = extractPullQuoteRuns(section.body);
+const html = renderPortableText(section.body, citationMap);
+const pullQuotePlacement = cleanString(section.pullQuotePlacement) || "top";
+const width = cleanString(section.width) || "standard";
+---
+
+<section class={`rich-text rich-text--${width}`}>
+  {pullQuotes.length > 0 && pullQuotePlacement === "top" && (
+    <div class="rich-text__pull-quotes">
+      {pullQuotes.map((pullQuote) => (
+        <PullQuoteSection section={{ quote: pullQuote.quote, size: "normal" }} article={article}>
+          <div slot="context" class="rich-text__context-wrap">
+            <button
+              class="rich-text__context-link"
+              type="button"
+              data-pull-quote-target-id={pullQuote.targetId}
+            >
+              [ Show in Context ]
+            </button>
+          </div>
+        </PullQuoteSection>
+      ))}
+    </div>
+  )}
+
+  <div class="rich-text__panel prose" set:html={html} />
+
+  {pullQuotes.length > 0 && pullQuotePlacement === "bottom" && (
+    <div class="rich-text__pull-quotes">
+      {pullQuotes.map((pullQuote) => (
+        <PullQuoteSection section={{ quote: pullQuote.quote, size: "normal" }} article={article}>
+          <div slot="context" class="rich-text__context-wrap">
+            <button
+              class="rich-text__context-link"
+              type="button"
+              data-pull-quote-target-id={pullQuote.targetId}
+            >
+              [ Show in Context ]
+            </button>
+          </div>
+        </PullQuoteSection>
+      ))}
+    </div>
+  )}
+</section>
+
+<script is:inline data-astro-rerun>
+  if (!window.__bindPullQuoteContextButtons) {
+    window.__bindPullQuoteContextButtons = () => {
+      const activeTargets = new WeakMap();
+      const buttons = document.querySelectorAll("[data-pull-quote-target-id]");
+
+      const getQuoteTarget = (trigger) => {
+        if (!(trigger instanceof HTMLButtonElement)) {
+          return null;
+        }
+
+        const targetId = trigger.dataset.pullQuoteTargetId;
+        return targetId ? document.getElementById(targetId) : null;
+      };
+      const setPreviewState = (trigger, isActive) => {
+        const quoteTarget = getQuoteTarget(trigger);
+
+        if (!quoteTarget) {
+          return;
+        }
+
+        quoteTarget.classList.toggle("is-context-preview", isActive);
+      };
+
+      buttons.forEach((button) => {
+        if (!(button instanceof HTMLButtonElement) || button.dataset.contextBound === "true") {
+          return;
+        }
+
+        button.dataset.contextBound = "true";
+
+        button.addEventListener("mouseenter", () => {
+          setPreviewState(button, true);
+        });
+
+        button.addEventListener("mouseleave", () => {
+          setPreviewState(button, false);
+        });
+
+        button.addEventListener("focus", () => {
+          setPreviewState(button, true);
+        });
+
+        button.addEventListener("blur", () => {
+          setPreviewState(button, false);
+        });
+
+        button.addEventListener("click", () => {
+          const quoteTarget = getQuoteTarget(button);
+
+          if (!quoteTarget) {
+            return;
+          }
+
+          quoteTarget.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest"
+          });
+
+          quoteTarget.classList.remove("is-context-active");
+          quoteTarget.offsetWidth;
+          quoteTarget.classList.add("is-context-active");
+
+          const existingTimeout = activeTargets.get(quoteTarget);
+          if (existingTimeout) {
+            window.clearTimeout(existingTimeout);
+          }
+
+          const timeout = window.setTimeout(() => {
+            quoteTarget.classList.remove("is-context-active");
+          }, 1600);
+
+          activeTargets.set(quoteTarget, timeout);
+        });
+      });
+    };
+
+    document.addEventListener("astro:page-load", window.__bindPullQuoteContextButtons);
+  }
+
+  if (window.__bindPullQuoteContextButtons) {
+    window.__bindPullQuoteContextButtons();
+  }
+</script>
+
+<style>
+  .rich-text {
+    display: grid;
+    gap: 1rem;
+    justify-items: end;
+  }
+
+  .rich-text__panel {
+    max-width: 51.5rem;
+    padding: 0.75rem 1.5rem 1.5rem 0.75rem;
+      background: var(--surface);
+  }
+
+  .rich-text__pull-quotes {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .rich-text__context-wrap {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    margin-top: 1.1rem;
+  }
+
+  .rich-text__context-link {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: rgba(23, 23, 23, 0.72);
+    font: 600 0.65rem / 1 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition-text-shadow);
+  }
+
+    .rich-text__context-link:hover {
+      text-shadow: var(--text-shadow-hover-small-black);
+  }
+
+  .rich-text--wide .rich-text__panel {
+    max-width: 58rem;
+  }
+
+  .rich-text--narrow .rich-text__panel {
+    max-width: 43rem;
+  }
+
+  .prose :global(*) {
+    margin: 0;
+  }
+
+  .prose :global(* + *) {
+    margin-top: 1.3rem;
+  }
+
+  .prose :global(p),
+  .prose :global(li),
+  .prose :global(blockquote) {
+    font: 400 clamp(1.1rem, 1vw + 1rem, 1.5rem) / 1.6 var(--font-body);
+    color: var(--ink);
+  }
+
+  .prose :global(h2),
+  .prose :global(h3) {
+    font-family: var(--font-display);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .prose :global(h2) {
+    font-size: clamp(2rem, 3vw, 2.7rem);
+  }
+
+  .prose :global(h3) {
+    font-size: clamp(1.55rem, 2.4vw, 2rem);
+  }
+
+  .prose :global(blockquote) {
+    padding-left: 1rem;
+    border-left: 2px solid rgba(23, 23, 23, 0.25);
+    font-style: italic;
+  }
+
+  .prose :global(.u-citation-target) {
+    text-decoration: none;
+  }
+
+  .prose :global(.u-citation-ref) {
+    font: 700 0.68em / 1 var(--font-meta);
+    letter-spacing: 0;
+  }
+
+  .prose :global(.u-citation-ref button) {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-decoration: none!important;
+    transition: var(--transition-text-shadow);
+  }
+
+    .prose :global(.u-citation-ref button):hover {
+      text-shadow: var(--text-shadow-hover-small-black);
+  }
+
+  .prose :global(.u-citation-ref button:focus-visible) {
+    outline: 1px solid var(--ink);
+    outline-offset: 0.12rem;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.5rem;
+  }
+
+  .prose :global(a) {
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.16em;
+  }
+
+  .prose :global(code) {
+    padding: 0.15rem 0.3rem;
+    background: rgba(23, 23, 23, 0.06);
+    font: 400 0.92em/1.2 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .prose :global(.u-highlight) {
+    padding: 0.05em 0.18em;
+    background: #fdffd4;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .prose :global(.u-pull-quote-target) {
+    padding: 0.02em 0.06em;
+    border-bottom: 1px dotted rgba(23, 23, 23, 0.58);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition:
+      background-color 200ms ease,
+      box-shadow 200ms ease;
+  }
+
+  .prose :global(.u-pull-quote-target.is-context-preview),
+  .prose :global(.u-pull-quote-target.is-context-active) {
+      background: var(--article-category-bg);
+      border-bottom: 0px dotted rgba(23, 23, 23, 0.58);
+
+  }
+
+  @media (max-width: 900px) {
+    .rich-text {
+      padding-left: 0;
+    }
+
+    .rich-text__panel {
+      padding-right: 0;
+      background: transparent;
+      border-inline-start: 0;
+    }
+
+    .rich-text__pull-quote {
+      padding-inline: 1rem;
+    }
+  }
+</style>

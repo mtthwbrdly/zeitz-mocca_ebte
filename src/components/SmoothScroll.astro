@@ -1,0 +1,76 @@
+---
+import "lenis/dist/lenis.css";
+---
+
+<script>
+  import Lenis from "lenis";
+
+  const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const isSafari = /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
+  let lenis;
+
+  document.documentElement.classList.toggle("is-safari", isSafari);
+
+  const startLenis = () => {
+    if (lenis || reducedMotionQuery.matches || isSafari) {
+      return;
+    }
+
+    lenis = new Lenis({
+      autoRaf: true,
+      anchors: true,
+      lerp: 0.25,
+      wheelMultiplier: 0.95,
+      stopInertiaOnNavigate: true
+    });
+  };
+
+  const stopLenis = () => {
+    if (!lenis) {
+      return;
+    }
+
+    lenis.destroy();
+    lenis = undefined;
+  };
+
+  const syncMotionPreference = () => {
+    if (reducedMotionQuery.matches) {
+      stopLenis();
+      return;
+    }
+
+    startLenis();
+  };
+
+  syncMotionPreference();
+
+  const bindPreferenceListener = () => {
+    if ("addEventListener" in reducedMotionQuery) {
+      reducedMotionQuery.addEventListener("change", syncMotionPreference);
+      return;
+    }
+
+    reducedMotionQuery.addListener(syncMotionPreference);
+  };
+
+  const unbindPreferenceListener = () => {
+    if ("removeEventListener" in reducedMotionQuery) {
+      reducedMotionQuery.removeEventListener("change", syncMotionPreference);
+      return;
+    }
+
+    reducedMotionQuery.removeListener(syncMotionPreference);
+  };
+
+  bindPreferenceListener();
+
+  window.addEventListener(
+    "pagehide",
+    () => {
+      unbindPreferenceListener();
+      stopLenis();
+    },
+    { once: true }
+  );
+</script>

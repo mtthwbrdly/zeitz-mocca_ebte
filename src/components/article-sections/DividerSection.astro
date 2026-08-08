@@ -1,0 +1,27 @@
+---
+import { cleanString } from "../../sanity/lib/clean";
+
+const { section } = Astro.props;
+const style = cleanString(section.style);
+---
+
+{
+  style === "space" ? (
+    <div class="divider-space" aria-hidden="true"></div>
+  ) : (
+    <hr class="divider-line" />
+  )
+}
+
+<style>
+  .divider-line {
+    width: min(58rem, 100%);
+    margin: 0 0 0 auto;
+    border: 0;
+    border-top: 1px solid rgba(23, 23, 23, 0.14);
+  }
+
+  .divider-space {
+    height: 2rem;
+  }
+</style>

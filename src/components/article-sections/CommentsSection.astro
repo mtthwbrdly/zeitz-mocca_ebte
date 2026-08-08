@@ -1,0 +1,116 @@
+---
+import { cleanString } from "../../sanity/lib/clean";
+import commentOutlineSvg from "../../assets/icons/comment-outline.svg?raw";
+
+const { section, article } = Astro.props;
+
+const siteKey = import.meta.env.PUBLIC_OPEN_REMARK_SITE_KEY || "";
+const articleSlug = article?.slug?.current ? `/articles/${cleanString(article.slug.current)}` : "/";
+const commentSlug = cleanString(section.slugOverride).trim() || articleSlug;
+const title = section.title || "Comments";
+---
+
+<section class="comments-section" aria-label={title}>
+  <div class="comments-section__inner">
+    <div class="comments-section__header">
+      <div class="section-title-row comments-section__title-row">
+        <h2>{title}</h2>
+        <div class="section-header-icon comments-section__decorative-icon" set:html={commentOutlineSvg}></div>
+      </div>
+      {section.intro && <p>{section.intro}</p>}
+    </div>
+
+    {
+      siteKey ? (
+        <>
+          <div
+            class="comments-section__widget"
+            data-open-remark
+            data-site-key={siteKey}
+            data-slug={commentSlug}
+          ></div>
+
+          <script is:inline data-astro-rerun>
+            (() => {
+              if (!window.__initOpenRemarkComments) {
+                window.__initOpenRemarkComments = () => {
+                  const widgets = document.querySelectorAll("[data-open-remark]");
+
+                  if (widgets.length === 0) {
+                    return;
+                  }
+
+                  document.querySelectorAll("script[data-open-remark-embed]").forEach((script) => {
+                    script.remove();
+                  });
+
+                  const script = document.createElement("script");
+                  script.async = true;
+                  script.src = "https://open-remark.zeon.studio/embed.js";
+                  script.dataset.openRemarkEmbed = "true";
+                  document.head.appendChild(script);
+                };
+
+                document.addEventListener("astro:page-load", window.__initOpenRemarkComments);
+              }
+
+              window.__initOpenRemarkComments();
+            })();
+          </script>
+        </>
+      ) : (
+        <div class="comments-section__config-notice">
+          <p>
+            Comments are enabled for this article, but the widget needs
+            <code>PUBLIC_OPEN_REMARK_SITE_KEY</code>
+            set in your environment before it can render.
+          </p>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .comments-section {
+    width: min(51.5rem, 100%);
+    margin-left: auto;
+    padding: 1.25rem;
+    background: var(--article-category-bg);
+
+  }
+
+  .comments-section__inner {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .comments-section__header h2,
+  .comments-section__header p,
+  .comments-section__config-notice p {
+    margin: 0;
+  }
+
+  .comments-section__header h2 {
+    font: 400 clamp(1.7rem, 3.4vw, 2.5rem) / 1 var(--font-display);
+    letter-spacing: -0.03em;
+  }
+
+  .comments-section__header p,
+  .comments-section__config-notice p {
+    margin-top: 1rem;
+    font: 400 clamp(1.1rem, 1vw + .82rem, 1.35rem) / 1.6 var(--font-body);
+    color: var(--ink);
+  }
+
+  .comments-section__config-notice {
+    padding: 1rem 1.1rem;
+    background: #feffe8;
+    border: 1px dashed rgba(23, 23, 23, 0.18);
+  }
+
+  .comments-section__config-notice code {
+    font: 400 0.9em / 1.2 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+  }
+</style>

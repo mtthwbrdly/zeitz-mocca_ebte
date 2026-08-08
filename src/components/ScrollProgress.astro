@@ -1,0 +1,69 @@
+<div class="scroll-progress" aria-hidden="true" transition:persist="scroll-progress" transition:animate="none">
+  <span class="scroll-progress__bar" data-scroll-progress-bar></span>
+</div>
+
+<script is:inline data-astro-rerun>
+  (() => {
+    if (!window.__initScrollProgress) {
+      let progressFrame = 0;
+
+      window.__initScrollProgress = () => {
+        const bar = document.querySelector("[data-scroll-progress-bar]");
+
+        if (!(bar instanceof HTMLElement)) {
+          return;
+        }
+
+        const updateProgress = () => {
+          progressFrame = 0;
+
+          const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = scrollable > 0
+            ? Math.min(1, Math.max(0, window.scrollY / scrollable))
+            : 0;
+
+          bar.style.transform = `scaleX(${progress})`;
+        };
+
+        const requestUpdate = () => {
+          if (progressFrame) {
+            return;
+          }
+
+          progressFrame = window.requestAnimationFrame(updateProgress);
+        };
+
+        window.removeEventListener("scroll", requestUpdate);
+        window.removeEventListener("resize", requestUpdate);
+        window.addEventListener("scroll", requestUpdate, { passive: true });
+        window.addEventListener("resize", requestUpdate);
+        updateProgress();
+      };
+
+      document.addEventListener("astro:page-load", window.__initScrollProgress);
+    }
+
+    window.__initScrollProgress();
+  })();
+</script>
+
+<style>
+  .scroll-progress {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 998;
+    height: 0.15rem;
+    pointer-events: none;
+   
+  }
+
+  .scroll-progress__bar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left center;
+    will-change: transform;
+  }
+</style>

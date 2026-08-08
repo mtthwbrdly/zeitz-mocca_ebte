@@ -1,0 +1,134 @@
+---
+import { cleanString } from "../../sanity/lib/clean";
+
+const { section } = Astro.props;
+const layout = cleanString(section.layout) || "inline";
+const imageUrl = cleanString(section.image?.url);
+const imageAlt = cleanString(section.image?.alt) || cleanString(section.image?.caption) || "";
+---
+
+<figure class={`image-section image-section--${layout}`}>
+  <img src={imageUrl} alt={imageAlt} loading="lazy" />
+  {section.image.caption && <figcaption>{section.image.caption}</figcaption>}
+</figure>
+
+<style>
+  .image-section {
+    overflow: hidden;
+    background: var(--article-category-bg);
+    margin: 0;
+
+  }
+
+  .image-section--inline {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 1fr);
+    max-width: 67.5rem;
+    margin-left: auto;
+    padding: 0.75rem;
+  }
+
+  .image-section--wide,
+  .image-section--full {
+    display: grid;
+    max-width: 67.5rem;
+    margin-left: auto;
+    padding: 0.75rem;
+    height: 100%;
+  }
+
+  .image-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter:grayscale(100);
+    mix-blend-mode: multiply;
+    filter: brightness(calc(80%)) grayscale(100%) contrast(500%);
+    transition: filter 0.3s ease;
+  }
+
+  .image-section img:hover  {
+    filter: brightness(calc(100%)) grayscale(0%) contrast(100%);
+  }
+
+  .image-section--inline img {
+    aspect-ratio: 331 / 480;
+  }
+
+  .image-section--wide img,
+  .image-section--full img {
+  /*   max-height: 40rem; */
+  }
+
+  .image-section figcaption {
+    display: grid;
+    place-items: center;
+    padding: 4rem 4rem 3.25rem 4rem;
+    font: 600 0.8rem / 1.4 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-align: center;
+  }
+
+  @media (max-width: 720px) {
+    .image-section--inline {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /*
+  TEMP halftone experiment:
+
+  Markup:
+  <span class="image-section__media" style={`--image-url: url("${imageUrl}");`}>
+    <img src={imageUrl} alt={imageAlt} loading="lazy" />
+  </span>
+
+  .image-section__media {
+    --halftone-dot-size: 2px;
+    --halftone-dots: radial-gradient(circle, #000 0 38%, #fff 42% 100%) 0 0 / var(--halftone-dot-size) var(--halftone-dot-size) space;
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--article-category-bg);
+    mix-blend-mode: multiply;
+  }
+
+  .image-section__media::before,
+  .image-section__media::after {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    content: "";
+    transition: opacity 0.3s ease;
+  }
+
+  .image-section__media::before {
+    z-index: 1;
+    background: var(--halftone-dots);
+    filter: contrast(19);
+    mix-blend-mode: multiply;
+  }
+
+  .image-section__media::after {
+    z-index: 2;
+    background: var(--image-url) center / cover;
+    filter: blur(0) brightness(1.15) grayscale(1);
+    mix-blend-mode: multiply;
+  }
+
+  .image-section__media:hover::before,
+  .image-section__media:hover::after {
+    opacity: 0;
+  }
+
+  .image-section__media:hover img {
+    filter: brightness(100%) grayscale(0%) contrast(100%);
+  }
+
+  .image-section--inline .image-section__media,
+  .image-section--inline img {
+    aspect-ratio: 331 / 480;
+  }
+  */
+
+</style>

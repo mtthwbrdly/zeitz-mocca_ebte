@@ -1,0 +1,39 @@
+---
+import ArticleHeader from "../ArticleHeader.astro";
+import { cleanString } from "../../sanity/lib/clean";
+import { getArticleCategoryClass } from "../../sanity/lib/articleCategory";
+
+const { section } = Astro.props;
+const articles = (section.articles || []).filter((article) => cleanString(article?.slug));
+const article = articles[0];
+const href = article ? `/articles/${cleanString(article.slug)}` : "";
+---
+
+{
+  article && (
+    <section class={`related-reading ${getArticleCategoryClass(article)}`}>
+      <ArticleHeader article={article} href={href} variant="related" />
+    </section>
+  )
+}
+
+<style>
+  .related-reading {
+    display: grid;
+    place-items: center;
+    width: 100vw;
+    min-height: 100svh;
+    margin-left: calc(50% - 50vw);
+    background: var(--hero-bg);
+  }
+
+  .article-header--related {
+    width:100%;
+    text-decoration: none;
+  }
+
+   .article-header--related a {
+    text-decoration: none;
+  }
+
+</style>

@@ -1,0 +1,136 @@
+---
+import { cleanString } from "../../sanity/lib/clean";
+
+const { article, section } = Astro.props;
+const size = cleanString(section.size) || "normal";
+const articleTitle = cleanString(article?.title);
+---
+
+<section class={`pull-quote pull-quote--${size}`}>
+  <blockquote>
+    <p>{section.quote}</p>
+    {section.attribution && <footer>{section.attribution}</footer>}
+  </blockquote>
+  {Astro.slots.has("context") && (
+    <div class="pull-quote__context">
+      <slot name="context" />
+    </div>
+  )}
+  <!-- {articleTitle && <div class="pull-quote__title" aria-hidden="true">{articleTitle}</div>} -->
+   <span class="pull-quote__marker pull-quote__marker--top-left" aria-hidden="true"></span>
+  <span class="pull-quote__marker pull-quote__marker--top-right" aria-hidden="true"></span>
+  <span class="pull-quote__marker pull-quote__marker--bottom-left" aria-hidden="true"></span>
+  <span class="pull-quote__marker pull-quote__marker--bottom-right" aria-hidden="true"></span>
+</section>
+
+<style>
+  .pull-quote {
+    max-width: 58rem;
+    width: 100%;
+    margin-left: auto;
+    padding: 5rem 2rem;
+    background: var(--article-category-bg);
+    text-align: center;
+    position: relative;
+  }
+
+  .pull-quote blockquote {
+    margin: 0;
+  }
+
+  .pull-quote p,
+  .pull-quote footer {
+    margin: 0;
+  }
+
+  .pull-quote p {
+    font: 400 clamp(2rem, 3.6vw, 3rem) / 1 var(--font-display);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .pull-quote--normal p {
+    font-size: clamp(2.5rem, 3vw, 3rem);
+  }
+
+  .pull-quote footer {
+    margin-top: 1rem;
+    font: 700 0.78rem / 1.4 var(--font-meta);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .pull-quote__context {
+    margin-top: 1.25rem;
+  }
+
+  .pull-quote__title {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    font: 600 .65rem / 1 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+    color: var(--ink);
+    pointer-events: none;
+    user-select: none;
+    text-wrap: balance;
+    display: block;
+    z-index: 10;
+  }
+
+
+.pull-quote__marker {
+  --marker-size: 1rem;
+  --marker-offset: 1rem;
+  position: absolute;
+  width: var(--marker-size);
+  height: var(--marker-size);
+  pointer-events: none;
+}
+
+.pull-quote__marker::before,
+.pull-quote__marker::after {
+  content: "";
+  position: absolute;
+  background: var(--ink);
+}
+
+.pull-quote__marker::before {
+  width: 100%;
+  height: 1px;
+  top:0;
+  left:0;
+}
+
+.pull-quote__marker::after {
+  width: 1px;
+  height: 100%;
+   top:0;
+  left:0;
+}
+
+.pull-quote__marker--top-left {
+  top: var(--marker-offset);
+  left: var(--marker-offset);
+  transform: rotate(180deg);
+
+}
+
+.pull-quote__marker--top-right {
+  top: var(--marker-offset);
+  right: var(--marker-offset);
+  transform: rotate(-90deg);
+}
+
+.pull-quote__marker--bottom-left {
+  bottom: var(--marker-offset);
+  left: var(--marker-offset);
+  transform: rotate(90deg);
+}
+
+.pull-quote__marker--bottom-right {
+  right: var(--marker-offset);
+  bottom: var(--marker-offset);
+}
+</style>

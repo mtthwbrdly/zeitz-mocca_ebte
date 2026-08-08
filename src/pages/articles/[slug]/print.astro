@@ -1,0 +1,15 @@
+---
+import PrintArticleLayout from "../../../components/PrintArticleLayout.astro";
+import { loadArticleBySlug } from "../../../sanity/lib/loadArticleBySlug";
+
+export const prerender = false;
+
+const { slug = "" } = Astro.params;
+const article = await loadArticleBySlug(slug, Astro.cookies);
+
+if (!article) {
+  Astro.response.status = 404;
+}
+---
+
+{article ? <PrintArticleLayout article={article} /> : <p>Article not found.</p>}
