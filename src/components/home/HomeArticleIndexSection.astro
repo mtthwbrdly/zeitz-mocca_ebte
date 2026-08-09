@@ -1,5 +1,5 @@
 ---
-import searchOutlineSvg from "../../assets/icons/search-outline.svg?raw";
+import { getCategoryIconSvg } from "../../lib/categoryIcons";
 import { getArticleCategory, getArticleCategoryClass } from "../../sanity/lib/articleCategory";
 import { cleanString } from "../../sanity/lib/clean";
 import type { ArticleIndexHomeSection, ArticleIndexItem } from "../../sanity/lib/types";
@@ -29,6 +29,7 @@ const formatCategory = (article: ArticleIndexItem) =>
 const title = cleanString(section.title) || "Latest";
 const intro = cleanString(section.intro);
 const categoryFilter = cleanString(section.categoryFilter) || "all";
+const headerIconSvg = getCategoryIconSvg(categoryFilter);
 const sectionId =
   categoryFilter && categoryFilter !== "all" ? `articles-${categoryFilter}` : `article-index-${section._key || "latest"}`;
 const filteredArticles = articles
@@ -47,7 +48,7 @@ const fillerRows = Array.from({
      
     </h2>
     {intro && <p>{intro}</p>}
-     <span class="section-header-icon article-index__header-icon" set:html={searchOutlineSvg}></span>
+     <span class="section-header-icon article-index__header-icon" set:html={headerIconSvg}></span>
   </header>
 
   <div class="article-index__list" role="list">
@@ -91,12 +92,15 @@ const fillerRows = Array.from({
   .article-index {
     width: 100%;
     margin: 0 auto;
-    border: 1px solid black;
+    
+        padding: 1.5rem 1.5rem 1.5rem;
+
   }
 
   .article-index__header {
+    border: 1px solid black;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: space-between;
     min-height: 4rem;
     background: var(--surface);
@@ -106,6 +110,8 @@ const fillerRows = Array.from({
   }
 
   .article-index__header h2 {
+    display: flex;
+    align-items: center;
     margin: 0;
     padding: 1rem clamp(1rem, 5vw, 4rem);
     border-right: 1px solid var(--ink);
@@ -113,11 +119,11 @@ const fillerRows = Array.from({
     letter-spacing: 0;
     text-transform: uppercase;
     width: auto;
-    hieght: 100%;
   }
 
   .article-index__header-icon {
-    width: clamp(2rem, 3.4vw, 3.25rem);
+    width: clamp(3rem, 2vw, 3.25rem);
+    align-self: center;
   }
 
   .article-index__header p {
@@ -128,6 +134,8 @@ const fillerRows = Array.from({
   }
 
   .article-index__list {
+    border: solid black;
+    border-width: 0 1px 1px 1px;
     display: grid;
     gap: 0.25rem;
     padding: 0.5rem;

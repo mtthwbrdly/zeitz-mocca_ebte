@@ -224,7 +224,24 @@ export interface CategoryCardsHomeSection {
   cards?: HomeCategoryCard[];
 }
 
-export type HomePageSection = ArticleIndexHomeSection | CategoryCardsHomeSection;
+export interface HomeQuoteSection {
+  _key?: string;
+  _type: "homeQuoteSection";
+  quote?: string;
+  linkText?: string;
+  linkedArticle?: {
+    title?: string;
+    format?: string;
+    slug?: string;
+    tags?: Tag[];
+    author?: Author;
+  };
+}
+
+export type HomePageSection =
+  | ArticleIndexHomeSection
+  | CategoryCardsHomeSection
+  | HomeQuoteSection;
 
 export interface HomePage {
   _id?: string;

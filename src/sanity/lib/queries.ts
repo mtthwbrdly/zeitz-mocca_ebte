@@ -10,7 +10,25 @@ export const homePageQuery = groq`
     sections[]{
       _key,
       _type,
-      ...
+      ...,
+      _type == "homeQuoteSection" => {
+        ...,
+        linkedArticle->{
+          title,
+          format,
+          "slug": slug.current,
+          "tags": tags[]->{
+            _id,
+            title,
+            slug
+          },
+          author->{
+            _id,
+            name,
+            slug
+          }
+        }
+      }
     }
   }
 `;
@@ -127,6 +145,21 @@ export const articlesIndexQuery = groq`
       _id,
       title,
       slug
+    }
+  }
+`;
+
+export const authorsIndexQuery = groq`
+  *[_type == "author" && defined(name)] | order(name asc){
+    _id,
+    name,
+    slug,
+    shortBio,
+    longBio,
+    role,
+    "portrait": {
+      "url": portrait.asset->url,
+      "alt": portrait.alt
     }
   }
 `;

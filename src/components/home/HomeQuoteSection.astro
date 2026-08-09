@@ -1,0 +1,127 @@
+---
+import { getArticleCategoryClass } from "../../sanity/lib/articleCategory";
+import { cleanString } from "../../sanity/lib/clean";
+import type { HomeQuoteSection } from "../../sanity/lib/types";
+
+const { section } = Astro.props as {
+  section: HomeQuoteSection;
+};
+
+const quote = cleanString(section.quote);
+const articleTitle = cleanString(section.linkedArticle?.title);
+const authorName = cleanString(section.linkedArticle?.author?.name);
+const slug = cleanString(section.linkedArticle?.slug);
+const href = slug ? `/articles/${slug}` : "#";
+const linkText = cleanString(section.linkText) || "Read more";
+const categoryLabel = cleanString(
+  section.linkedArticle?.format || section.linkedArticle?.tags?.[0]?.title
+).toUpperCase();
+const categoryClass = getArticleCategoryClass(section.linkedArticle);
+---
+
+{quote && (
+  <section class={`home-quote ${categoryClass}`} aria-label={articleTitle ? `Quote from ${articleTitle}` : "Featured quote"}>
+    <figure class="home-quote__figure">
+      {categoryLabel && <p class="home-quote__category">{categoryLabel}</p>}
+
+      <blockquote class="home-quote__quote">
+        <p>{quote}</p>
+      </blockquote>
+
+      {(articleTitle || authorName) && (
+        <figcaption class="home-quote__meta">
+          {authorName && <span class="home-quote__author">{authorName}</span>}, 
+          {articleTitle && <cite class="home-quote__title">{articleTitle}</cite>}
+        </figcaption>
+      )}
+
+      {slug && (
+        <a class="home-quote__link" href={href}>
+          {linkText}
+        </a>
+      )}
+    </figure>
+  </section>
+)}
+
+<style>
+  .home-quote {
+    width: 100%;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--article-category-bg);
+  }
+
+  .home-quote__figure {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    align-content: center;
+    gap: 2rem;
+    margin: 0;
+    padding: clamp(2rem, 7vw, 7rem);
+    text-align: center;
+    min-height: 80vh;
+  }
+
+  .home-quote__quote {
+    margin: 0;
+    max-width: 90rem;
+  }
+
+  .home-quote__category {
+    margin: 0;
+    padding: 0.3rem 1rem 0.35rem;
+    font: 700 0.85rem / 1 var(--font-display);
+    color: var(--ink);
+    background: var(--article-category-bg);
+    text-transform: uppercase;
+  }
+
+  .home-quote__quote p {
+    margin: 0;
+    font: 400 clamp(3rem, 4.5vw, 8rem) / 0.9 var(--font-display);
+    letter-spacing: 0;
+    /* text-wrap: balance; */
+  }
+
+
+
+  .home-quote__author,
+  .home-quote__title {
+    font: 400 clamp(0.85rem, 2.5vw, 2.25rem) / 1.15 var(--font-display);
+    letter-spacing: 0;
+  }
+
+  .home-quote__title {
+    font-style: italic;
+    margin-left: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .home-quote__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--article-category-bg);
+    color: var(--article-category-bg);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background 160ms ease, color 160ms ease, var(--transition-text-shadow);
+    padding: 0.3rem 1rem 0.35rem;
+    font: 700 0.85rem / 1 var(--font-display);
+  }
+
+  .home-quote__link:hover,
+  .home-quote__link:focus-visible {
+    background: var(--article-category-bg);
+    color: var(--ink);
+    outline: 0;
+  }
+
+  @media (max-width: 700px) {
+    .home-quote__figure {
+      padding-block: clamp(2rem, 16vw, 4rem);
+    }
+  }
+</style>

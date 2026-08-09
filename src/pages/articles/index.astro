@@ -1,0 +1,48 @@
+---
+import HomeArticleIndexSection from "../../components/home/HomeArticleIndexSection.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { cleanString } from "../../sanity/lib/clean";
+import { loadArticleIndex } from "../../sanity/lib/loadArticleIndex";
+import type { ArticleIndexHomeSection } from "../../sanity/lib/types";
+
+const articles = await loadArticleIndex(Astro.cookies);
+
+const categoryParam = cleanString(Astro.url.searchParams.get("category"));
+const allowedCategories = ["process-notes", "footnotes", "voice-notes"] as const;
+const categoryFilter = allowedCategories.includes(categoryParam as (typeof allowedCategories)[number])
+  ? categoryParam
+  : "all";
+
+const categoryTitles = {
+  all: "Index",
+  "process-notes": "Process Notes",
+  footnotes: "Footnotes",
+  "voice-notes": "Voice Notes"
+};
+
+const section: ArticleIndexHomeSection = {
+  _key: "standalone-index",
+  _type: "articleIndexSection",
+  title: categoryTitles[categoryFilter],
+  categoryFilter
+};
+
+const pageTitle =
+  categoryFilter === "all"
+    ? "Index | Everything but the Exhibition"
+    : `${categoryTitles[categoryFilter]} | Everything but the Exhibition`;
+---
+
+<BaseLayout title={pageTitle} description="Browse articles from Everything but the Exhibition.">
+  <main class="article-index-page">
+    <HomeArticleIndexSection section={section} articles={articles} />
+  </main>
+</BaseLayout>
+
+<style>
+  .article-index-page {
+    min-height: 100vh;
+    padding-top: 5rem;
+    background: var(--page-bg);
+  }
+</style>

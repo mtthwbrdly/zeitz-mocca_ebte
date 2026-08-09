@@ -8,6 +8,7 @@ import { dividerSection } from "./dividerSection.ts";
 import { featureCardSection } from "./featureCardSection.ts";
 import { imageSection } from "./imageSection.ts";
 import { homePage } from "./homePage.ts";
+import { homeQuoteSection } from "./homeQuoteSection.ts";
 import { portableText } from "./portableText.ts";
 import { pullQuoteSection } from "./pullQuoteSection.ts";
 import { relatedReadingSection } from "./relatedReadingSection.ts";
@@ -21,6 +22,7 @@ export const schemaTypes = [
   article,
   articleIndexSection,
   categoryCardsSection,
+  homeQuoteSection,
   audioPlayerSection,
   videoSection,
   author,

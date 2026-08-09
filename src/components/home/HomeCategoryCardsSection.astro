@@ -1,4 +1,5 @@
 ---
+import { getCategoryIconSvg } from "../../lib/categoryIcons";
 import { cleanString } from "../../sanity/lib/clean";
 import type { CategoryCardsHomeSection, HomeCategoryCard } from "../../sanity/lib/types";
 
@@ -47,7 +48,7 @@ const categoryLabel = (category: HomeCategoryCard["category"]) => {
 };
 
 const categoryHref = (category: HomeCategoryCard["category"]) =>
-  `#articles-${cleanString(category) || "process-notes"}`;
+  `/articles?category=${cleanString(category) || "process-notes"}`;
 ---
 
 <section class="home-categories" aria-labelledby="home-categories-title">
@@ -71,10 +72,13 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
       // allow HTML (e.g. <em>) in descriptions — render via set:html below
       const description = card.description;
       const linkText = cleanString(card.linkText) || `All ${categoryLabel(category)}`;
+      const iconSvg = getCategoryIconSvg(category);
 
       return (
         <article class={`home-category-card article-category-${category}`} role="listitem">
-          <h3 class="home-category-card__title">{cardTitle}</h3>
+          <h3 class="home-category-card__title">
+            <span>{cardTitle}</span>
+          </h3>
           <div class="home-category-card__content">
             <p class="home-category-card__label">{label}</p>
             {description && (
@@ -83,6 +87,8 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
             <a class="home-category-card__link" href={categoryHref(category)}>
               {linkText} 
             </a>
+                        <span class="home-category-card__icon" aria-hidden="true" set:html={iconSvg}></span>
+
           </div>
         </article>
       );
@@ -94,13 +100,13 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
   .home-categories {
     display: grid;
     gap: clamp(1.5rem, 3vw, 2.625rem);
-    padding: 4rem 1.5rem 1.5rem;
+    padding: 1.5rem 1.5rem 5rem 1.5rem;
     color: var(--ink);
   }
 
   .home-categories__header {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: space-between;
     min-height: 4rem;
     border: 1px solid var(--ink);
@@ -109,6 +115,8 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
   }
 
   .home-categories__header h2 {
+    display: flex;
+    align-items: center;
     margin: 0;
     padding: 1rem clamp(1rem, 5vw, 4rem);
     border-right: 1px solid var(--ink);
@@ -154,6 +162,7 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
     grid-area: 1 / 1;
     z-index: 5;
     display: grid;
+    gap: clamp(0.75rem, 1.5vw, 1.5rem);
     place-items: center;
     margin: 0;
     padding: clamp(1.25rem, 2.2vw, 2rem);
@@ -163,6 +172,29 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
     text-align: center;
     pointer-events: none;
     transition: opacity 220ms ease;
+  }
+
+  .home-category-card__icon {
+    display: block;
+    width: clamp(2.5rem, 5vw, 5.5rem);
+    color: var(--ink);
+    position: absolute;
+    right: clamp(0.5rem, 1.5vw, 2.5rem);
+    bottom: clamp(0.5rem, 1.5vw, 2.5rem);
+  }
+
+  .home-category-card__icon :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .home-category-card__icon :global(svg *) {
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 0.15;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
   }
 
   .home-category-card__content {

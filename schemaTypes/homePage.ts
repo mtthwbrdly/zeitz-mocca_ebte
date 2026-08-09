@@ -58,6 +58,9 @@ export const homePage = defineType({
           type: "categoryCardsSection"
         }),
         defineArrayMember({
+          type: "homeQuoteSection"
+        }),
+        defineArrayMember({
           type: "articleIndexSection"
         })
       ],

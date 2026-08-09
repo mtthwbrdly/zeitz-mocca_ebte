@@ -1,6 +1,7 @@
 ---
 import HomeArticleIndexSection from "../components/home/HomeArticleIndexSection.astro";
 import HomeCategoryCardsSection from "../components/home/HomeCategoryCardsSection.astro";
+import HomeQuoteSection from "../components/home/HomeQuoteSection.astro";
 import heroPaperSvg from "../assets/home/hero-paper.svg?raw";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { cleanString } from "../sanity/lib/clean";
@@ -57,6 +58,10 @@ const contentSections = homePage.sections.filter(
 
 
   <div class="home-hero__intro" aria-hidden="true">
+       <span class="pull-quote__marker pull-quote__marker--top-left" aria-hidden="true"></span>
+  <span class="pull-quote__marker pull-quote__marker--top-right" aria-hidden="true"></span>
+  <span class="pull-quote__marker pull-quote__marker--bottom-left" aria-hidden="true"></span>
+  <span class="pull-quote__marker pull-quote__marker--bottom-right" aria-hidden="true"></span>
         <p class="home-hero__intro-text">
           {headerText ? (
             introText
@@ -69,6 +74,7 @@ const contentSections = homePage.sections.filter(
             </>
           )}
         </p>
+        
       </div>
 
     <HomeCategoryCardsSection section={categoryCardsSection} />
@@ -78,6 +84,9 @@ const contentSections = homePage.sections.filter(
         <>
           {section._type === "articleIndexSection" && (
             <HomeArticleIndexSection section={section} articles={articles} />
+          )}
+          {section._type === "homeQuoteSection" && (
+            <HomeQuoteSection section={section} />
           )}
         </>
       ))}
@@ -93,6 +102,7 @@ const contentSections = homePage.sections.filter(
 
   .home-hero {
     --home-hero-paper-height: clamp(0rem, 52svh, 99rem);
+    --home-hero-paper-opacity: 0.99;
     --home-hero-title-mask-y: -0.45rem;
     position: relative;
     min-height: 125svh;
@@ -101,7 +111,7 @@ const contentSections = homePage.sections.filter(
     color: var(--surface);
     isolation: isolate;
     z-index: 999;
-        user-select: none;
+    user-select: none;
   }
 
   .home-hero__sr-title {
@@ -130,7 +140,6 @@ const contentSections = homePage.sections.filter(
     z-index: 1;
     height: var(--home-hero-paper-height);
     overflow: visible;
-     filter: blur(0.035rem);
   }
 
   .home-hero__paper :global(svg) {
@@ -140,6 +149,7 @@ const contentSections = homePage.sections.filter(
     height: 100%;
     max-width: none;
     object-fit: fill;
+    opacity: var(--home-hero-paper-opacity);
   }
 
   .home-hero__title,
@@ -215,6 +225,11 @@ const contentSections = homePage.sections.filter(
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
+  }
+
+  .home-hero__intro:hover .pull-quote__marker {
+    --marker-offset: 10rem;
   }
 
   .home-hero__intro-text {
@@ -231,10 +246,8 @@ const contentSections = homePage.sections.filter(
 
   .home-page__sections {
     display: grid;
-    gap: 3rem;
-    padding: 4rem 1.5rem 1.5rem;
     min-height: 100svh;
-        align-items: start;
+    align-items: start;
   }
 
   @media (max-width: 700px) {
@@ -274,4 +287,59 @@ const contentSections = homePage.sections.filter(
       padding: 1rem;
     }
   }
+
+  .pull-quote__marker {
+  --marker-size: 1rem;
+  --marker-offset: 5rem;
+  position: absolute;
+  width: var(--marker-size);
+  height: var(--marker-size);
+  pointer-events: none;
+  transition: top 1s ease, right 1s ease, bottom 1s ease, left 1s ease;
+}
+
+.pull-quote__marker::before,
+.pull-quote__marker::after {
+  content: "";
+  position: absolute;
+  background: var(--surface);
+}
+
+.pull-quote__marker::before {
+  width: 100%;
+  height: 1px;
+  top:0;
+  left:0;
+}
+
+.pull-quote__marker::after {
+  width: 1px;
+  height: 100%;
+   top:0;
+  left:0;
+}
+
+.pull-quote__marker--top-left {
+  top: var(--marker-offset);
+  left: var(--marker-offset);
+  transform: rotate(180deg);
+
+}
+
+.pull-quote__marker--top-right {
+  top: var(--marker-offset);
+  right: var(--marker-offset);
+  transform: rotate(-90deg);
+}
+
+.pull-quote__marker--bottom-left {
+  bottom: var(--marker-offset);
+  left: var(--marker-offset);
+  transform: rotate(90deg);
+}
+
+.pull-quote__marker--bottom-right {
+  right: var(--marker-offset);
+  bottom: var(--marker-offset);
+}
 </style>

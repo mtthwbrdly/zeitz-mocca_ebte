@@ -1,0 +1,168 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { cleanString } from "../sanity/lib/clean";
+import { loadAuthors } from "../sanity/lib/loadAuthors";
+
+const authors = await loadAuthors(Astro.cookies);
+---
+
+<BaseLayout
+  title="Authors | Everything but the Exhibition"
+  description="Authors and contributors from Everything but the Exhibition."
+>
+  <main class="authors-page">
+    <section class="authors-index" aria-labelledby="authors-title">
+      <header class="authors-index__header">
+        <h1 id="authors-title">Authors</h1>
+      </header>
+
+      <div class="authors-index__list" role="list">
+        {authors.map((author) => {
+          const name = cleanString(author.name);
+          const role = cleanString(author.role);
+          const shortBio = cleanString(author.shortBio);
+          const longBio = cleanString(author.longBio);
+          const bio = shortBio;
+          const portraitUrl = cleanString(author.portrait?.url);
+          const portraitAlt = cleanString(author.portrait?.alt) || name;
+
+          return (
+            <article class="author-card" role="listitem">
+              {portraitUrl && (
+                <div class="author-card__portrait">
+                  <img src={portraitUrl} alt={portraitAlt} loading="lazy" />
+                </div>
+              )}
+              <div class="author-card__content">
+                <header class="author-card__header">
+                  <h2>{name}</h2>
+                  {role && <p>{role}</p>}
+                </header>
+              
+              </div>
+            </article>
+          );
+        })}
+
+        {authors.length === 0 && (
+          <p class="authors-index__empty" role="listitem">No authors published yet.</p>
+        )}
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .authors-page {
+    min-height: 100vh;
+    padding: 5rem 1.5rem 1.5rem;
+    background: var(--page-bg);
+    color: var(--ink);
+  }
+
+  .authors-index {
+    width: 100%;
+    border: 1px solid var(--ink);
+    background: var(--surface);
+  }
+
+  .authors-index__header {
+    display: flex;
+    align-items: stretch;
+    min-height: 4rem;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .authors-index__header h1 {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin: 0;
+    padding: 1rem clamp(1rem, 5vw, 4rem);
+    border-right: 1px solid var(--ink);
+    font: 700 clamp(1.1rem, 1.6vw, 1.55rem) / 1 var(--font-display);
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .authors-index__list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .author-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--page-bg);
+    color: var(--ink);
+  }
+
+  .author-card__portrait {
+    border: 1px solid var(--ink);
+    background: var(--surface);
+    aspect-ratio: 1 / 1;
+    overflow: hidden; 
+  }
+
+  .author-card__portrait img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1);
+  }
+
+  .author-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+
+  .author-card__header {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .author-card__header h2,
+  .author-card__header p,
+  .author-card__bio,
+  .authors-index__empty {
+    margin: 0;
+  }
+
+  .author-card__header h2 {
+    font: 400 clamp(2.5rem, 2vw, 2rem) / 0.88 var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .author-card__header p {
+    font: 700 clamp(0.85rem, 1.15vw, 1rem) / 1 var(--font-display);
+    text-transform: uppercase;
+  }
+
+  .author-card__bio {
+    max-width: 64rem;
+    font: 400 clamp(1.1rem, 1vw, 2rem) / 1.05 var(--font-display);
+    letter-spacing: 0;
+  }
+
+  .authors-index__empty {
+    padding: 1rem;
+    font: 400 1.1rem / 1.4 var(--font-body);
+  }
+
+  @media (max-width: 760px) {
+    .author-card {
+      grid-template-columns: 1fr;
+    }
+
+    .author-card__portrait {
+      aspect-ratio: 4 / 3;
+      border-right: 0;
+      border-bottom: 1px solid var(--ink);
+    }
+  }
+</style>
