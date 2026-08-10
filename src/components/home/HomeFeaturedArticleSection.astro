@@ -1,0 +1,14 @@
+---
+import type { HomeFeaturedArticleSection } from "../../sanity/lib/types";
+import HomeFeatureArticleCard from "./HomeFeatureArticleCard.astro";
+
+const { section } = Astro.props as {
+  section: HomeFeaturedArticleSection;
+};
+---
+
+{section.article && (
+  <section class="home-featured-article" aria-label={section.article.title || "Featured article"}>
+    <HomeFeatureArticleCard article={section.article} />
+  </section>
+)}

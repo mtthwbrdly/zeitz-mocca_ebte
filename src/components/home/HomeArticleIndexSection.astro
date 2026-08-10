@@ -1,6 +1,6 @@
 ---
 import { getCategoryIconSvg } from "../../lib/categoryIcons";
-import { getArticleCategory, getArticleCategoryClass } from "../../sanity/lib/articleCategory";
+import { getArticleCategory, getArticleCategoryClass, getFormatTitle } from "../../sanity/lib/articleCategory";
 import { cleanString } from "../../sanity/lib/clean";
 import type { ArticleIndexHomeSection, ArticleIndexItem } from "../../sanity/lib/types";
 
@@ -23,13 +23,22 @@ const formatDate = (value: string | undefined) => {
   }).format(new Date(cleanValue)).toUpperCase();
 };
 
-const formatCategory = (article: ArticleIndexItem) =>
-  cleanString(article.format || article.tags?.[0]?.title).toUpperCase();
+const formatCategory = (article: ArticleIndexItem) => {
+  const title = getFormatTitle(article.format) || article.tags?.[0]?.title;
+  return cleanString(title).toUpperCase();
+};
 
 const title = cleanString(section.title) || "Latest";
 const intro = cleanString(section.intro);
 const categoryFilter = cleanString(section.categoryFilter) || "all";
 const headerIconSvg = getCategoryIconSvg(categoryFilter);
+const showCategoryFilter = Boolean(section.showCategoryFilter);
+const categoryFilterItems = [
+  { label: "All", value: "all", href: "/articles" },
+  { label: "Process Notes", value: "process-notes", href: "/articles?category=process-notes" },
+  { label: "Voice Notes", value: "voice-notes", href: "/articles?category=voice-notes" },
+  { label: "Foot Notes", value: "footnotes", href: "/articles?category=footnotes" }
+];
 const sectionId =
   categoryFilter && categoryFilter !== "all" ? `articles-${categoryFilter}` : `article-index-${section._key || "latest"}`;
 const filteredArticles = articles
@@ -48,7 +57,25 @@ const fillerRows = Array.from({
      
     </h2>
     {intro && <p>{intro}</p>}
-     <span class="section-header-icon article-index__header-icon" set:html={headerIconSvg}></span>
+    {showCategoryFilter ? (
+      <nav class="article-index__filter" aria-label="Article category">
+        {categoryFilterItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "article-index__filter-link",
+              `article-index__filter-link--${item.value}`,
+              categoryFilter === item.value && "article-index__filter-link--active"
+            ]}
+            aria-current={categoryFilter === item.value ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    ) : (
+      <span class="section-header-icon article-index__header-icon" set:html={headerIconSvg}></span>
+    )}
   </header>
 
   <div class="article-index__list" role="list">
@@ -106,7 +133,6 @@ const fillerRows = Array.from({
     background: var(--surface);
     color: var(--ink);
     border-bottom: 1px solid var(--ink);
-    padding-right: 1rem;
   }
 
   .article-index__header h2 {
@@ -124,6 +150,57 @@ const fillerRows = Array.from({
   .article-index__header-icon {
     width: clamp(3rem, 2vw, 3.25rem);
     align-self: center;
+  }
+
+  .article-index__filter {
+    display: flex;
+    align-items: stretch;
+    align-self: stretch;
+    flex: 0 1 auto;
+    min-width: 0;
+    border-left: 1px solid var(--ink);
+  }
+
+  .article-index__filter-link {
+    --filter-bg: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: clamp(5.5rem, 10vw, 8.5rem);
+    padding: 0.75rem 0.85rem;
+    border-right: 1px solid var(--ink);
+    background: var(--surface);
+    color: var(--ink);
+    font: 700 clamp(0.72rem, 0.9vw, 0.9rem) / 1 var(--font-display);
+    letter-spacing: 0;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background 180ms ease, text-shadow 180ms ease;
+  }
+
+  .article-index__filter-link:last-child {
+    border-right: 0;
+  }
+
+  .article-index__filter-link--process-notes {
+    --filter-bg: var(--color-process-notes);
+  }
+
+  .article-index__filter-link--voice-notes {
+    --filter-bg: var(--color-voice-notes);
+  }
+
+  .article-index__filter-link--footnotes {
+    --filter-bg: var(--color-footnotes);
+  }
+
+  .article-index__filter-link:hover,
+  .article-index__filter-link:focus-visible,
+  .article-index__filter-link--active {
+    background: var(--filter-bg);
+    text-shadow: var(--text-shadow-hover-small-black);
+    outline: 0;
   }
 
   .article-index__header p {
@@ -151,14 +228,29 @@ const fillerRows = Array.from({
     color: var(--ink);
     text-decoration: none;
     transition: var(--transition-text-shadow), background 0.3s ease;
+    min-height: 2.25rem;
   }
 
   .article-index__row--filler {
-    background: #eeeeee;
-    color: #e1e0e0;
+    background: #ffffff;
+    color: #00000034;
     text-shadow: -0.5px -0.5px 1px #e1e0e0, 0.5px -0.5px 1px #e1e0e0, -0.5px 0.5px 1px #e1e0e0, 0.5px 0.5px 1px #e1e0e0;;
     pointer-events: none;
   }
+
+  .article-index__row--filler .article-index__title,
+  .article-index__row--filler .article-index__author,
+  .article-index__row--filler .article-index__date,
+  .article-index__row--filler .article-index__category {
+    color: #black;
+    text-shadow:none;
+    pointer-events: none;
+    font-family: var(--font-meta);
+    font-size: clamp(0.8rem, 1.5vw, 0.8rem);
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
 
   .article-index__row:hover,
   .article-index__row:focus-visible {
@@ -208,12 +300,34 @@ const fillerRows = Array.from({
 
   @media (max-width: 980px) {
     .article-index__header {
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      padding-right: 0;
     }
 
     .article-index__header h2 {
       border-right: 0;
       border-bottom: 1px solid var(--ink);
+    }
+
+    .article-index__filter {
+      flex-wrap: wrap;
+      border-left: 0;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .article-index__filter-link {
+      flex: 1 1 50%;
+      min-width: 0;
+      min-height: 2.75rem;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .article-index__filter-link:nth-child(2n) {
+      border-right: 0;
+    }
+
+    .article-index__filter-link:nth-last-child(-n + 2) {
+      border-bottom: 0;
     }
 
     .article-index__row {

@@ -1,0 +1,53 @@
+---
+import type { HomeSplitFeatureSection } from "../../sanity/lib/types";
+import HomeFeatureArticleCard from "./HomeFeatureArticleCard.astro";
+
+const { section } = Astro.props as {
+  section: HomeSplitFeatureSection;
+};
+
+const articles = (section.articles || []).filter((article) => article?.title).slice(0, 2);
+---
+
+{articles.length > 0 && (
+  <section class="home-split-feature" aria-label="Featured articles">
+    {articles.map((article) => (
+      <div class="home-split-feature__item">
+        <HomeFeatureArticleCard article={article} compact />
+      </div>
+    ))}
+  </section>
+)}
+
+<style>
+  .home-split-feature {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    background: var(--surface);
+  }
+
+  .home-split-feature__item {
+    display: block;
+    min-width: 0;
+    border-top:1px solid var(--ink);
+    border-bottom:1px solid var(--ink);
+  }
+
+  .home-split-feature__item + .home-split-feature__item {
+    border-left: 1px solid var(--ink);
+    
+  }
+
+  @media (max-width: 900px) {
+    .home-split-feature {
+      grid-template-columns: 1fr;
+    }
+
+    .home-split-feature__item + .home-split-feature__item {
+      border-left: 0;
+      border-top: 1px solid var(--ink);
+    }
+  }
+</style>

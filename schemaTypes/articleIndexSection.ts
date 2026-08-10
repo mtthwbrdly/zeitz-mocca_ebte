@@ -1,11 +1,9 @@
 import { defineField, defineType } from "sanity";
-import { icons } from "@sanity/icons";
 
 export const articleIndexSection = defineType({
   name: "articleIndexSection",
   title: "Article Index Section",
   type: "object",
-  icon: icons["document-text"],
   fields: [
     defineField({
       name: "title",

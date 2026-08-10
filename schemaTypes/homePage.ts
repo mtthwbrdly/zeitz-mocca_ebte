@@ -1,11 +1,9 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { icons } from "@sanity/icons";
 
 export const homePage = defineType({
   name: "homePage",
   title: "Home Page",
   type: "document",
-  icon: icons.home,
   groups: [
     {
       name: "header",
@@ -59,6 +57,12 @@ export const homePage = defineType({
         }),
         defineArrayMember({
           type: "homeQuoteSection"
+        }),
+        defineArrayMember({
+          type: "homeFeaturedArticleSection"
+        }),
+        defineArrayMember({
+          type: "homeSplitFeatureSection"
         }),
         defineArrayMember({
           type: "articleIndexSection"

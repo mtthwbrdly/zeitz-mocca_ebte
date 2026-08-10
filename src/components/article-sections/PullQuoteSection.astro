@@ -87,6 +87,8 @@ const articleTitle = cleanString(article?.title);
   width: var(--marker-size);
   height: var(--marker-size);
   pointer-events: none;
+    transition: top 1s ease, right 1s ease, bottom 1s ease, left 1s ease;
+
 }
 
 .pull-quote__marker::before,
@@ -133,4 +135,9 @@ const articleTitle = cleanString(article?.title);
   right: var(--marker-offset);
   bottom: var(--marker-offset);
 }
+
+.pull-quote:has(.rich-text__context-link:hover) .pull-quote__marker {
+   --marker-offset: 2rem;
+}
+
 </style>

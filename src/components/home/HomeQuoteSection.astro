@@ -1,5 +1,5 @@
 ---
-import { getArticleCategoryClass } from "../../sanity/lib/articleCategory";
+import { getArticleCategoryClass, getFormatTitle } from "../../sanity/lib/articleCategory";
 import { cleanString } from "../../sanity/lib/clean";
 import type { HomeQuoteSection } from "../../sanity/lib/types";
 
@@ -14,7 +14,7 @@ const slug = cleanString(section.linkedArticle?.slug);
 const href = slug ? `/articles/${slug}` : "#";
 const linkText = cleanString(section.linkText) || "Read more";
 const categoryLabel = cleanString(
-  section.linkedArticle?.format || section.linkedArticle?.tags?.[0]?.title
+  getFormatTitle(section.linkedArticle?.format) || section.linkedArticle?.tags?.[0]?.title
 ).toUpperCase();
 const categoryClass = getArticleCategoryClass(section.linkedArticle);
 ---
@@ -66,7 +66,7 @@ const categoryClass = getArticleCategoryClass(section.linkedArticle);
 
   .home-quote__quote {
     margin: 0;
-    max-width: 90rem;
+    max-width: 80rem;
   }
 
   .home-quote__category {

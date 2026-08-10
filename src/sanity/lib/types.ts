@@ -203,7 +203,27 @@ export interface ArticleIndexHomeSection {
   title?: string;
   intro?: string;
   categoryFilter?: "all" | "process-notes" | "footnotes" | "voice-notes";
+  showCategoryFilter?: boolean;
   maxItems?: number;
+}
+
+export type HomeFeaturedArticle = Omit<LinkedArticleSummary, "slug"> & {
+  slug?: string;
+  excerpt?: string;
+  subtitle?: string;
+  contentSections?: ArticleSection[];
+};
+
+export interface HomeFeaturedArticleSection {
+  _key?: string;
+  _type: "homeFeaturedArticleSection";
+  article?: HomeFeaturedArticle;
+}
+
+export interface HomeSplitFeatureSection {
+  _key?: string;
+  _type: "homeSplitFeatureSection";
+  articles?: HomeFeaturedArticle[];
 }
 
 export interface HomeCategoryCard {
@@ -241,7 +261,9 @@ export interface HomeQuoteSection {
 export type HomePageSection =
   | ArticleIndexHomeSection
   | CategoryCardsHomeSection
-  | HomeQuoteSection;
+  | HomeQuoteSection
+  | HomeFeaturedArticleSection
+  | HomeSplitFeatureSection;
 
 export interface HomePage {
   _id?: string;

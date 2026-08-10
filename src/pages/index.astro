@@ -1,7 +1,9 @@
 ---
 import HomeArticleIndexSection from "../components/home/HomeArticleIndexSection.astro";
 import HomeCategoryCardsSection from "../components/home/HomeCategoryCardsSection.astro";
+import HomeFeaturedArticleSection from "../components/home/HomeFeaturedArticleSection.astro";
 import HomeQuoteSection from "../components/home/HomeQuoteSection.astro";
+import HomeSplitFeatureSection from "../components/home/HomeSplitFeatureSection.astro";
 import heroPaperSvg from "../assets/home/hero-paper.svg?raw";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { cleanString } from "../sanity/lib/clean";
@@ -88,6 +90,12 @@ const contentSections = homePage.sections.filter(
           {section._type === "homeQuoteSection" && (
             <HomeQuoteSection section={section} />
           )}
+          {section._type === "homeFeaturedArticleSection" && (
+            <HomeFeaturedArticleSection section={section} />
+          )}
+          {section._type === "homeSplitFeatureSection" && (
+            <HomeSplitFeatureSection section={section} />
+          )}
         </>
       ))}
     </div>
@@ -164,7 +172,7 @@ const contentSections = homePage.sections.filter(
     width: min(100%, 80rem);
     transform: translate(-50%, -50%);
     font: 400 clamp(4.7rem, 12.5vw, 11.25rem) / 0.85 var(--font-display);
-    letter-spacing: 0;
+    letter-spacing: -0.025em;
     text-align: center;
     white-space: nowrap;
   }
@@ -229,7 +237,7 @@ const contentSections = homePage.sections.filter(
   }
 
   .home-hero__intro:hover .pull-quote__marker {
-    --marker-offset: 10rem;
+    --marker-offset: 7rem;
   }
 
   .home-hero__intro-text {
@@ -342,4 +350,5 @@ const contentSections = homePage.sections.filter(
   right: var(--marker-offset);
   bottom: var(--marker-offset);
 }
+
 </style>

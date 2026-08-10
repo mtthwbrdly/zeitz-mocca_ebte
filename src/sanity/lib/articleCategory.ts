@@ -33,3 +33,14 @@ export function getArticleCategory(article: ArticleCategoryInput = {}): ArticleC
 export function getArticleCategoryClass(article: ArticleCategoryInput = {}) {
   return `article-category-${getArticleCategory(article)}`;
 }
+
+export function getFormatTitle(format?: string) {
+  if (!format) return undefined;
+  const map: Record<string, string> = {
+    "footnote": "Footnote",
+    "process-note": "Process Note",
+    "voice-note": "Voice Note"
+  };
+
+  return map[format] || format;
+}

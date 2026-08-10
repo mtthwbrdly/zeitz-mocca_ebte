@@ -3,6 +3,10 @@ import type { Article, ArticleSection, PortableTextBlock } from "./types";
 
 const WORDS_PER_MINUTE = 220;
 
+type ReadTimeArticle = Partial<Pick<Article, "title" | "subtitle" | "excerpt">> & {
+  contentSections?: ArticleSection[];
+};
+
 function countWords(value: unknown = "") {
   if (typeof value !== "string") {
     return 0;
@@ -46,7 +50,7 @@ function sectionWordCount(section: ArticleSection) {
   }
 }
 
-export function calculateReadTime(article: Article) {
+export function calculateReadTime(article: ReadTimeArticle = {}) {
   const totalWords =
     countWords(cleanString(article.title)) +
     countWords(cleanString(article.subtitle)) +

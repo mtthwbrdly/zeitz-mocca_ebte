@@ -1,0 +1,196 @@
+---
+import { getArticleCategoryClass, getFormatTitle } from "../../sanity/lib/articleCategory";
+import { calculateReadTime } from "../../sanity/lib/calculateReadTime";
+import { cleanString } from "../../sanity/lib/clean";
+import type { HomeFeaturedArticle } from "../../sanity/lib/types";
+
+const { article, compact = false } = Astro.props as {
+  article?: HomeFeaturedArticle;
+  compact?: boolean;
+};
+
+const title = cleanString(article?.title);
+const slug = cleanString(article?.slug);
+const href = slug ? `/articles/${slug}` : "";
+const authorName = cleanString(article?.author?.name);
+const thumbnailUrl = cleanString(article?.thumbnail?.url);
+const thumbnailAlt = cleanString(article?.thumbnail?.alt);
+const categoryClass = getArticleCategoryClass(article);
+const categoryLabel = cleanString(getFormatTitle(article?.format) || article?.tags?.[0]?.title).toUpperCase();
+const readTime = article ? calculateReadTime(article) : "";
+const publishedAtValue = cleanString(article?.publishedAt);
+const publishedAt = publishedAtValue
+  ? new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(new Date(publishedAtValue))
+  : "";
+---
+
+{title && (
+  <article class:list={["home-feature-card", categoryClass, compact && "home-feature-card--compact"]}>
+    <div class="home-feature-card__media" aria-hidden={thumbnailUrl ? undefined : "true"}>
+      {thumbnailUrl && (
+        <img
+          class="home-feature-card__image"
+          src={thumbnailUrl}
+          alt={thumbnailAlt}
+          loading="lazy"
+        />
+      )}
+    </div>
+
+    <div class="home-feature-card__inner">
+      {categoryLabel && <p class="home-feature-card__category">{categoryLabel}</p>}
+
+      <div class="home-feature-card__title-group">
+        <h2 class="home-feature-card__title">
+          {href ? <a href={href}>{title}</a> : title}
+        </h2>
+        {authorName && <p class="home-feature-card__author">{authorName}</p>}
+      </div>
+
+      {(publishedAt || readTime) && (
+        <p class="home-feature-card__meta">
+          {publishedAt && <span>{publishedAt}</span>}
+          {publishedAt && readTime && <span aria-hidden="true">/</span>}
+          {readTime && <span>Read time: {readTime}</span>}
+        </p>
+      )}
+    </div>
+  </article>
+)}
+
+<style>
+  .home-feature-card {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    min-height: 100svh;
+    overflow: hidden;
+    padding: clamp(5rem, 10vw, 9rem) 1.5rem;
+    background: var(--article-category-bg);
+    color: var(--ink);
+    text-align: center;
+    border-top:1px solid var(--ink);
+  }
+
+  .home-feature-card__media {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .home-feature-card__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: brightness(80%) grayscale(100%) contrast(1000%);
+    mix-blend-mode: multiply;
+    opacity: 0.05;
+  }
+
+  .home-feature-card__inner {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    justify-items: center;
+    gap: clamp(2rem, 4vw, 2.75rem);
+    width: min(100%, 70rem);
+  }
+
+  .home-feature-card__category,
+  .home-feature-card__author,
+  .home-feature-card__meta {
+    margin: 0;
+  }
+
+  .home-feature-card__category {
+    padding: 0.35rem 1rem;
+    background: var(--ink);
+    color: var(--article-category-bg);
+    font: 700 0.75rem / 1 var(--font-display);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .home-feature-card__title-group {
+    display: grid;
+    justify-items: center;
+    gap: clamp(0.5rem, 3vw, 1rem);
+  }
+
+  .home-feature-card__title {
+    margin: 0;
+    font: 400 clamp(4.5rem, 6vw, 6rem) / 0.96 var(--font-display);
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .home-feature-card__title a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-text-shadow);
+  }
+
+  .home-feature-card__title a:hover,
+  .home-feature-card__title a:focus-visible {
+    text-shadow: var(--text-shadow-hover-large-black);
+    outline: 0;
+  }
+
+  .home-feature-card__author {
+    font: 400 clamp(2.25rem, 3.4vw, 2.875rem) / 1 var(--font-display);
+    letter-spacing: 0;
+  }
+
+  .home-feature-card__meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    font: 700 0.68rem / 1.2 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .home-feature-card--compact {
+    min-height: 100svh;
+    padding: clamp(4rem, 10vw, 9rem) clamp(1.5rem, 5vw, 9rem);
+  }
+
+  .home-feature-card--compact .home-feature-card__inner {
+    gap: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  .home-feature-card--compact .home-feature-card__title {
+    font-size: clamp(3.5rem, 4.5vw, 5.6rem);
+  }
+
+  @media (max-width: 760px) {
+    .home-feature-card,
+    .home-feature-card--compact {
+      min-height: 82svh;
+      padding: clamp(4rem, 18vw, 6rem) 1.25rem;
+    }
+
+    .home-feature-card__title,
+    .home-feature-card--compact .home-feature-card__title {
+      font-size: clamp(3rem, 15vw, 4.5rem);
+      line-height: 0.95;
+    }
+
+    .home-feature-card__author {
+      font-size: clamp(2rem, 10vw, 2.5rem);
+    }
+  }
+</style>

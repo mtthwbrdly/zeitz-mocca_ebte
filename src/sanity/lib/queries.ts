@@ -1,5 +1,31 @@
 import groq from "groq";
 
+const homeFeaturedArticleFields = groq`
+  title,
+  subtitle,
+  excerpt,
+  format,
+  publishedAt,
+  "slug": slug.current,
+  "tags": tags[]->{
+    _id,
+    title,
+    slug
+  },
+  author->{
+    _id,
+    name,
+    slug
+  },
+  "thumbnail": {
+    "url": thumbnail.asset->url,
+    "alt": thumbnail.alt
+  },
+  contentSections[]{
+    ...
+  }
+`;
+
 export const homePageQuery = groq`
   *[_id == "homePage"][0]{
     _id,
@@ -27,6 +53,18 @@ export const homePageQuery = groq`
             name,
             slug
           }
+        }
+      },
+      _type == "homeFeaturedArticleSection" => {
+        ...,
+        article->{
+          ${homeFeaturedArticleFields}
+        }
+      },
+      _type == "homeSplitFeatureSection" => {
+        ...,
+        "articles": articles[]->{
+          ${homeFeaturedArticleFields}
         }
       }
     }

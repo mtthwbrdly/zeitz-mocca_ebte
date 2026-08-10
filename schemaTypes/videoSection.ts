@@ -1,11 +1,9 @@
-import { icons } from "@sanity/icons";
 import { defineField, defineType } from "sanity";
 
 export const videoSection = defineType({
   name: "videoSection",
   title: "Video Section",
   type: "object",
-  icon: icons.video,
   fields: [
     defineField({
       name: "title",

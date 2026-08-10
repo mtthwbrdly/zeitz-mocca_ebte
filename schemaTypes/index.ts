@@ -7,8 +7,10 @@ import { commentsSection } from "./commentsSection.ts";
 import { dividerSection } from "./dividerSection.ts";
 import { featureCardSection } from "./featureCardSection.ts";
 import { imageSection } from "./imageSection.ts";
+import { homeFeaturedArticleSection } from "./homeFeaturedArticleSection.ts";
 import { homePage } from "./homePage.ts";
 import { homeQuoteSection } from "./homeQuoteSection.ts";
+import { homeSplitFeatureSection } from "./homeSplitFeatureSection.ts";
 import { portableText } from "./portableText.ts";
 import { pullQuoteSection } from "./pullQuoteSection.ts";
 import { relatedReadingSection } from "./relatedReadingSection.ts";
@@ -22,6 +24,8 @@ export const schemaTypes = [
   article,
   articleIndexSection,
   categoryCardsSection,
+  homeFeaturedArticleSection,
+  homeSplitFeatureSection,
   homeQuoteSection,
   audioPlayerSection,
   videoSection,

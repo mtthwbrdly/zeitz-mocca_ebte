@@ -66,13 +66,14 @@ export const article = defineType({
       name: "format",
       title: "Format / Category",
       type: "string",
-      group: "meta"
-    }),
-    defineField({
-      name: "series",
-      title: "Series / Project",
-      type: "string",
-      group: "meta"
+      group: "meta",
+      options: {
+        list: [
+          { title: "Footnote", value: "footnote" },
+          { title: "Process Note", value: "process-note" },
+          { title: "Voice Note", value: "voice-note" }
+        ]
+      }
     }),
     defineField({
       name: "excerpt",
@@ -131,11 +132,30 @@ export const article = defineType({
         "Select one related article."
     })
   ],
-  preview: {
-    select: {
-      title: "title",
-      subtitle: "format",
-      media: "thumbnail"
-    }
+preview: {
+  select: {
+    title: "title",
+    authorName: "author.name",
+    format: "format",
+    media: "thumbnail"
+  },
+  prepare({ title, authorName, format, media }) {
+    const formatTitles: Record<string, string> = {
+      "footnote": "Footnote",
+      "process-note": "Process Note",
+      "voice-note": "Voice Note"
+    };
+
+    const formatLabel = format ? formatTitles[format] || format : undefined;
+    const subtitleParts: string[] = [];
+    if (formatLabel) subtitleParts.push(formatLabel);
+    if (authorName) subtitleParts.push(`by ${authorName}`);
+
+    return {
+      title,
+      subtitle: subtitleParts.length ? subtitleParts.join(" ") : undefined,
+      media
+    };
   }
+}
 });

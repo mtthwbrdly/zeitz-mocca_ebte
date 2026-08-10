@@ -1,6 +1,7 @@
 ---
 import { calculateReadTime } from "../sanity/lib/calculateReadTime";
 import { cleanString } from "../sanity/lib/clean";
+import { getFormatTitle } from "../sanity/lib/articleCategory";
 
 const { article, href, variant = "page" } = Astro.props;
 const publishedAtValue = cleanString(article?.publishedAt);
@@ -37,7 +38,7 @@ const readTime = isRelated ? null : calculateReadTime(article);
   </div>
   <div class="article-header__inner">
     <div class="article-header__eyebrow">
-      <p class="article-header__eyebrow-label">{article.format}</p>
+      <p class="article-header__eyebrow-label">{getFormatTitle(article.format)}</p>
     </div>
     <div class="article-header__title">
     <h1>

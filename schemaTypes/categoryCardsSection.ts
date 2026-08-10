@@ -1,5 +1,4 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { icons } from "@sanity/icons";
 
 export const defaultCategoryCards = [
   {
@@ -35,7 +34,6 @@ export const categoryCardsSection = defineType({
   name: "categoryCardsSection",
   title: "Category Cards Section",
   type: "object",
-  icon: icons.tags,
   fields: [
     defineField({
       name: "title",
