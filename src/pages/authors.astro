@@ -58,12 +58,17 @@ const authors = await loadAuthors(Astro.cookies);
     padding: 5rem 1.5rem 1.5rem;
     background: var(--page-bg);
     color: var(--ink);
+    display: flex;
+    flex-direction: column;
   }
 
   .authors-index {
     width: 100%;
     border: 1px solid var(--ink);
     background: var(--surface);
+    height: 100%;
+    flex-grow: 1;
+
   }
 
   .authors-index__header {
@@ -87,7 +92,7 @@ const authors = await loadAuthors(Astro.cookies);
 
   .authors-index__list {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
     padding: 0.5rem;
   }
@@ -112,18 +117,29 @@ const authors = await loadAuthors(Astro.cookies);
     height: 100%;
     object-fit: cover;
     filter: grayscale(1);
+    transition: filter 0.3s ease, transform 0.3s ease;
+  }
+
+   .author-card:hover .author-card__portrait img {
+    filter: grayscale(0);
+    transform: scale(1.025);
+  }
+
+     .author-card:hover .author-card__header {
+    text-shadow: var(--text-shadow-hover-small-black);
   }
 
   .author-card__content {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
   }
 
   .author-card__header {
     display: grid;
     gap: 0.4rem;
+    transition: var(--transition-text-shadow);
   }
 
   .author-card__header h2,
@@ -134,13 +150,12 @@ const authors = await loadAuthors(Astro.cookies);
   }
 
   .author-card__header h2 {
-    font: 400 clamp(2.5rem, 2vw, 2rem) / 0.88 var(--font-display);
+    font: 400 clamp(1rem, 2vw, 1.5rem) / 1 var(--font-display);
     letter-spacing: -0.02em;
   }
 
   .author-card__header p {
-    font: 700 clamp(0.85rem, 1.15vw, 1rem) / 1 var(--font-display);
-    text-transform: uppercase;
+    font: 400 clamp(0.85rem, 1vw, 1rem) / 1 var(--font-display);
   }
 
   .author-card__bio {

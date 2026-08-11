@@ -1,6 +1,7 @@
 import { defineConfig } from "sanity";
 import { presentationTool } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
+import { media } from "sanity-plugin-media";
 import { schemaTypes } from "./schemaTypes/index.ts";
 import { resolve } from "./src/sanity/presentation/resolve.ts";
 import { structure } from "./src/sanity/structure.ts";
@@ -12,6 +13,7 @@ export default defineConfig({
   dataset: import.meta.env.PUBLIC_SANITY_DATASET || "production",
   plugins: [
     structureTool({ structure }),
+    media(),
     presentationTool({
       resolve,
       previewUrl: {

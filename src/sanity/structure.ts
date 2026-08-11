@@ -1,6 +1,6 @@
 import type { StructureResolver } from "sanity/structure";
 
-const singletonTypes = ["homePage"];
+const hiddenTypes = ["homePage", "media.tag"];
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -16,6 +16,6 @@ export const structure: StructureResolver = (S) =>
         ),
       S.divider(),
       ...S.documentTypeListItems().filter(
-        (listItem) => !singletonTypes.includes(listItem.getId() || "")
+        (listItem) => !hiddenTypes.includes(listItem.getId() || "")
       )
     ]);
