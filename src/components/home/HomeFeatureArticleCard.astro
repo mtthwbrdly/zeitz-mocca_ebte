@@ -97,6 +97,7 @@ const publishedAt = publishedAtValue
     filter: brightness(80%) grayscale(100%) contrast(1000%);
     mix-blend-mode: multiply;
     opacity: 0.05;
+    transition: transform 0.6s ease;
   }
 
   .home-feature-card__inner {
@@ -106,7 +107,17 @@ const publishedAt = publishedAtValue
     justify-items: center;
     gap: clamp(2rem, 4vw, 2.75rem);
     width: min(100%, 70rem);
+    transition: var(--transition-text-shadow);
+    cursor: pointer;
   }
+
+    .home-feature-card__inner:hover {
+       text-shadow: var(--text-shadow-hover-large-black);
+  }
+
+ .home-feature-card:has(.home-feature-card__inner:hover) .home-feature-card__image {
+transform: scale(1.025);
+}
 
   .home-feature-card__category,
   .home-feature-card__author,
@@ -139,12 +150,11 @@ const publishedAt = publishedAtValue
   .home-feature-card__title a {
     color: inherit;
     text-decoration: none;
-    transition: var(--transition-text-shadow);
   }
 
   .home-feature-card__title a:hover,
   .home-feature-card__title a:focus-visible {
-    text-shadow: var(--text-shadow-hover-large-black);
+
     outline: 0;
   }
 
