@@ -1,5 +1,6 @@
 ---
 import { calculateReadTime } from "../sanity/lib/calculateReadTime";
+import { formatAuthorNames } from "../sanity/lib/authors";
 import { extractArticleCitations } from "../sanity/lib/citations";
 import { cleanString } from "../sanity/lib/clean";
 import { extractPullQuoteRuns } from "../sanity/lib/pullQuotes";
@@ -12,7 +13,7 @@ const { citationMap } = extractArticleCitations(article.contentSections);
 
 const title = cleanString(article.title);
 const subtitle = cleanString(article.subtitle);
-const authorName = cleanString(article.author?.name);
+const authorName = formatAuthorNames(article);
 const publishedAtValue = cleanString(article.publishedAt);
 const publishedAt = publishedAtValue
   ? new Intl.DateTimeFormat("en-GB", {

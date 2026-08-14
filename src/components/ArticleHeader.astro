@@ -2,6 +2,7 @@
 import { calculateReadTime } from "../sanity/lib/calculateReadTime";
 import { cleanString } from "../sanity/lib/clean";
 import { getFormatTitle } from "../sanity/lib/articleCategory";
+import { formatAuthorNames } from "../sanity/lib/authors";
 
 const { article, href, variant = "page" } = Astro.props;
 const publishedAtValue = cleanString(article?.publishedAt);
@@ -10,6 +11,7 @@ const articleSlug = cleanString(article?.slug?.current || article?.slug);
 const transitionName = articleSlug ? `article-header-${articleSlug}` : undefined;
 const thumbnailUrl = cleanString(article.thumbnail?.url);
 const thumbnailAlt = cleanString(article.thumbnail?.alt);
+const authorNames = formatAuthorNames(article);
 
 const publishedAt = publishedAtValue
   ? new Intl.DateTimeFormat("en-GB", {
@@ -44,12 +46,12 @@ const readTime = isRelated ? null : calculateReadTime(article);
       {href ? (
         <a class="article-header__title-link" href={href}>
           <h1>{article.title}</h1>
-          {article.author?.name && <p class="article-header__author">{article.author.name}</p>}
+          {authorNames && <p class="article-header__author">{authorNames}</p>}
         </a>
       ) : (
         <>
           <h1>{article.title}</h1>
-          {article.author?.name && <p class="article-header__author">{article.author.name}</p>}
+          {authorNames && <p class="article-header__author">{authorNames}</p>}
         </>
       )}
     </div>

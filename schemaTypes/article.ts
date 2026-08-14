@@ -43,11 +43,29 @@ export const article = defineType({
     }),
     defineField({
       name: "author",
-      title: "Author",
+      title: "Legacy author",
       type: "reference",
       group: "meta",
       to: [{ type: "author" }],
-      validation: (rule) => rule.required()
+      description: "Deprecated fallback for older articles. Use Authors instead.",
+      hidden: true
+    }),
+    defineField({
+      name: "authors",
+      title: "Authors",
+      type: "array",
+      group: "meta",
+      of: [defineArrayMember({ type: "reference", to: [{ type: "author" }] })],
+      validation: (rule) =>
+        rule
+          .unique()
+          .custom((value, context) => {
+            if ((value || []).length > 0 || context.document?.author) {
+              return true;
+            }
+
+            return "Select at least one author.";
+          })
     }),
     defineField({
       name: "publishedAt",
@@ -135,11 +153,14 @@ export const article = defineType({
 preview: {
   select: {
     title: "title",
-    authorName: "author.name",
+    firstAuthorName: "authors.0.name",
+    secondAuthorName: "authors.1.name",
+    thirdAuthorName: "authors.2.name",
+    legacyAuthorName: "author.name",
     format: "format",
     media: "thumbnail"
   },
-  prepare({ title, authorName, format, media }) {
+  prepare({ title, firstAuthorName, secondAuthorName, thirdAuthorName, legacyAuthorName, format, media }) {
     const formatTitles: Record<string, string> = {
       "footnote": "Footnote",
       "process-note": "Process Note",
@@ -147,9 +168,13 @@ preview: {
     };
 
     const formatLabel = format ? formatTitles[format] || format : undefined;
+    const authorNames = [firstAuthorName, secondAuthorName, thirdAuthorName].filter(Boolean);
+    const authorLabel = authorNames.length
+      ? `${authorNames.join(", ")}${authorNames.length === 3 ? "+" : ""}`
+      : legacyAuthorName;
     const subtitleParts: string[] = [];
     if (formatLabel) subtitleParts.push(formatLabel);
-    if (authorName) subtitleParts.push(`by ${authorName}`);
+    if (authorLabel) subtitleParts.push(`by ${authorLabel}`);
 
     return {
       title,

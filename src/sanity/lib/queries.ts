@@ -1,5 +1,45 @@
 import groq from "groq";
 
+const articleAuthorFields = groq`
+  author->{
+    _id,
+    name,
+    slug,
+    shortBio,
+    longBio,
+    role,
+    "portrait": {
+      "url": portrait.asset->url,
+      "alt": portrait.alt
+    }
+  },
+  "authors": authors[]->{
+    _id,
+    name,
+    slug,
+    shortBio,
+    longBio,
+    role,
+    "portrait": {
+      "url": portrait.asset->url,
+      "alt": portrait.alt
+    }
+  }
+`;
+
+const articleAuthorSummaryFields = groq`
+  author->{
+    _id,
+    name,
+    slug
+  },
+  "authors": authors[]->{
+    _id,
+    name,
+    slug
+  }
+`;
+
 const homeFeaturedArticleFields = groq`
   title,
   subtitle,
@@ -12,11 +52,7 @@ const homeFeaturedArticleFields = groq`
     title,
     slug
   },
-  author->{
-    _id,
-    name,
-    slug
-  },
+  ${articleAuthorSummaryFields},
   "thumbnail": {
     "url": thumbnail.asset->url,
     "alt": thumbnail.alt
@@ -49,6 +85,11 @@ export const homePageQuery = groq`
             slug
           },
           author->{
+            _id,
+            name,
+            slug
+          },
+          "authors": authors[]->{
             _id,
             name,
             slug
@@ -89,18 +130,7 @@ export const articleBySlugQuery = groq`
       "url": downloadablePdf.asset->url,
       "originalFilename": downloadablePdf.asset->originalFilename
     },
-    author->{
-      _id,
-      name,
-      slug,
-      shortBio,
-      longBio,
-      role,
-      "portrait": {
-        "url": portrait.asset->url,
-        "alt": portrait.alt
-      }
-    },
+    ${articleAuthorFields},
     "tags": tags[]->{
       _id,
       title,
@@ -118,11 +148,7 @@ export const articleBySlugQuery = groq`
           title,
           slug
         },
-        author->{
-          _id,
-          name,
-          slug
-        },
+        ${articleAuthorSummaryFields},
         "thumbnail": {
           "url": thumbnail.asset->url,
           "alt": thumbnail.alt
@@ -171,11 +197,7 @@ export const articlesIndexQuery = groq`
     format,
     publishedAt,
     "slug": slug.current,
-    author->{
-      _id,
-      name,
-      slug
-    },
+    ${articleAuthorSummaryFields},
     "downloadablePdf": {
       "size": downloadablePdf.asset->size
     },
@@ -214,11 +236,7 @@ export const relatedReadingFallbackArticlesQuery = groq`
       title,
       slug
     },
-    author->{
-      _id,
-      name,
-      slug
-    },
+    ${articleAuthorSummaryFields},
     "thumbnail": {
       "url": thumbnail.asset->url,
       "alt": thumbnail.alt

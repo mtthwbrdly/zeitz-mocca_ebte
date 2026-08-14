@@ -25,6 +25,7 @@ export interface LinkedArticleSummary {
   slug?: string;
   publishedAt?: string;
   author?: Author;
+  authors?: Author[];
   tags?: Tag[];
   thumbnail?: MediaAsset;
 }
@@ -176,7 +177,8 @@ export interface Article {
   format?: string;
   series?: string;
   publishedAt?: string;
-  author: Author;
+  author?: Author;
+  authors?: Author[];
   tags: Tag[];
   thumbnail?: MediaAsset;
   downloadablePdf?: AssetFile;
@@ -191,6 +193,7 @@ export interface ArticleIndexItem {
   slug?: string;
   publishedAt?: string;
   author?: Author;
+  authors?: Author[];
   downloadablePdf?: {
     size?: number;
   };
@@ -255,6 +258,7 @@ export interface HomeQuoteSection {
     slug?: string;
     tags?: Tag[];
     author?: Author;
+    authors?: Author[];
   };
 }
 

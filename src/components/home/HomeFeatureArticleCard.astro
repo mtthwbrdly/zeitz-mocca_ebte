@@ -1,5 +1,6 @@
 ---
 import { getArticleCategoryClass, getFormatTitle } from "../../sanity/lib/articleCategory";
+import { formatAuthorNames } from "../../sanity/lib/authors";
 import { calculateReadTime } from "../../sanity/lib/calculateReadTime";
 import { cleanString } from "../../sanity/lib/clean";
 import type { HomeFeaturedArticle } from "../../sanity/lib/types";
@@ -12,7 +13,7 @@ const { article, compact = false } = Astro.props as {
 const title = cleanString(article?.title);
 const slug = cleanString(article?.slug);
 const href = slug ? `/articles/${slug}` : "";
-const authorName = cleanString(article?.author?.name);
+const authorName = formatAuthorNames(article);
 const thumbnailUrl = cleanString(article?.thumbnail?.url);
 const thumbnailAlt = cleanString(article?.thumbnail?.alt);
 const categoryClass = getArticleCategoryClass(article);

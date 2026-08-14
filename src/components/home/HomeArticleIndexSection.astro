@@ -1,6 +1,7 @@
 ---
 import { getCategoryIconSvg } from "../../lib/categoryIcons";
 import { getArticleCategory, getArticleCategoryClass, getFormatTitle } from "../../sanity/lib/articleCategory";
+import { formatAuthorNames } from "../../sanity/lib/authors";
 import { cleanString } from "../../sanity/lib/clean";
 import type { ArticleIndexHomeSection, ArticleIndexItem } from "../../sanity/lib/types";
 
@@ -91,7 +92,7 @@ const fillerRows = Array.from({
           role="listitem"
         >
           <span class="article-index__title">{article.title}</span>
-          <span class="article-index__author">{cleanString(article.author?.name)}</span>
+          <span class="article-index__author">{formatAuthorNames(article)}</span>
           <time class="article-index__date" datetime={cleanString(article.publishedAt)}>
             {formatDate(article.publishedAt)}
           </time>

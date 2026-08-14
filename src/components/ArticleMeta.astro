@@ -1,6 +1,7 @@
 ---
 import AuthorInfo from "./AuthorInfo.astro";
 import { calculateReadTime } from "../sanity/lib/calculateReadTime";
+import { getArticleAuthors } from "../sanity/lib/authors";
 import { cleanString } from "../sanity/lib/clean";
 
 const { article, citations = [] } = Astro.props;
@@ -19,6 +20,7 @@ const publishedAt = publishedAtValue
 
 const readTime = calculateReadTime(article);
 const articleSlug = cleanString(article?.slug?.current);
+const authors = getArticleAuthors(article);
 ---
 
 <details class="article-meta" open data-sidebar-panel="information">
@@ -29,7 +31,7 @@ const articleSlug = cleanString(article?.slug?.current);
 
   <div class="meta-stack" data-lenis-prevent>
     <p class="meta-title">{article.title}</p>
-    <AuthorInfo author={article.author} />
+    {authors.map((author) => <AuthorInfo author={author} />)}
     {publishedAt && <p class="meta-item">{publishedAt}</p>}
 
     {
