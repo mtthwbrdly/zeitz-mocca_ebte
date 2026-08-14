@@ -1,4 +1,5 @@
 import { cleanString } from "./clean";
+import { pullQuoteToPlainText } from "./renderPullQuote";
 import type { Article, ArticleSection, PortableTextBlock } from "./types";
 
 const WORDS_PER_MINUTE = 220;
@@ -32,7 +33,10 @@ function sectionWordCount(section: ArticleSection) {
     case "richTextSection":
       return portableTextWordCount(section.body);
     case "pullQuoteSection":
-      return countWords(section.quote) + countWords(section.attribution);
+      return (
+        countWords(pullQuoteToPlainText(section.quote)) +
+        countWords(section.attribution)
+      );
     case "shareClippingSection":
       return countWords(section.quote) + countWords(section.label);
     case "featureCardSection":

@@ -85,7 +85,7 @@ export interface RichTextSection {
 export interface PullQuoteSection {
   _key?: string;
   _type: "pullQuoteSection";
-  quote: string;
+  quote: string | PortableTextBlock[];
   attribution?: string;
   size?: "normal" | "large";
 }

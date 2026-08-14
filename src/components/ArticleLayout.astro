@@ -42,7 +42,7 @@ const articleCategoryClass = getArticleCategoryClass(article);
           {article.contentSections.map((section) => (
             <>
               {section._type === "richTextSection" && <RichTextSection section={section} citationMap={citationMap} article={article} />}
-              {section._type === "pullQuoteSection" && <PullQuoteSection section={section} article={article} />}
+              {section._type === "pullQuoteSection" && <PullQuoteSection section={section} citationMap={citationMap} article={article} />}
               {section._type === "shareClippingSection" && <ShareClippingSection section={section} />}
               {section._type === "featureCardSection" && <FeatureCardSection section={section} />}
               {section._type === "imageSection" && <ImageSection section={section} />}

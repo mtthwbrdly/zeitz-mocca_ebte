@@ -69,11 +69,18 @@ export function extractArticleCitations(sections: ArticleSection[] = []) {
   const citationMap: CitationReferenceMap = {};
 
   sections.forEach((section) => {
-    if (section._type !== "richTextSection") {
+    const blocks =
+      section._type === "richTextSection"
+        ? section.body
+        : section._type === "pullQuoteSection" && Array.isArray(section.quote)
+          ? section.quote
+          : [];
+
+    if (blocks.length === 0) {
       return;
     }
 
-    extractCitationsFromBlocks(section.body).forEach((citation) => {
+    extractCitationsFromBlocks(blocks).forEach((citation) => {
       if (citationMap[citation._key]) {
         return;
       }

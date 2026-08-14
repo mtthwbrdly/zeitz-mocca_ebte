@@ -573,7 +573,10 @@ const articleSlug = cleanString(article?.slug?.current);
     display: grid;
     gap: 1.25rem;
     min-height: 0;
+    max-height: calc(100vh - 10rem);
     margin: 1rem 0 0.5rem;
+    padding: 0 0.35rem 0rem 0;
+    scroll-padding-bottom: 2rem;
     transform-origin: top;
   }
 
@@ -626,9 +629,11 @@ const articleSlug = cleanString(article?.slug?.current);
     display: grid;
     gap: 0.85rem;
     min-height: 0;
+    max-height: calc(100vh - 10rem);
     margin-top: 1rem;
-    padding: 0;
+    padding: 0 0.35rem 4rem 0;
     list-style: none;
+    scroll-padding-bottom: 2rem;
     transform-origin: top;
   }
 
@@ -743,6 +748,13 @@ const articleSlug = cleanString(article?.slug?.current);
   }
 
   @media (max-width: 900px) {
+    .meta-stack,
+    .citations-panel ol {
+      max-height: none;
+      padding-right: 0;
+      padding-bottom: 0;
+    }
+
     .pdf-status {
       right: 0.75rem;
       bottom: 0.75rem;

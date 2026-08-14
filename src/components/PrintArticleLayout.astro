@@ -1,11 +1,14 @@
 ---
 import { calculateReadTime } from "../sanity/lib/calculateReadTime";
+import { extractArticleCitations } from "../sanity/lib/citations";
 import { cleanString } from "../sanity/lib/clean";
 import { extractPullQuoteRuns } from "../sanity/lib/pullQuotes";
+import { renderPullQuote } from "../sanity/lib/renderPullQuote";
 import { renderPortableText } from "../sanity/lib/renderPortableText";
 import type { Article } from "../sanity/lib/types";
 
 const { article } = Astro.props as { article: Article };
+const { citationMap } = extractArticleCitations(article.contentSections);
 
 const title = cleanString(article.title);
 const subtitle = cleanString(article.subtitle);
@@ -59,11 +62,11 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
         }
 
         if (section._type === "pullQuoteSection") {
-          const quote = cleanString(section.quote);
+          const quoteHtml = renderPullQuote(section.quote, citationMap);
           const attribution = cleanString(section.attribution);
           return (
             <figure class={`print-pull-quote print-pull-quote--${section.size || "normal"}`}>
-              <blockquote>{quote}</blockquote>
+              <blockquote set:html={quoteHtml} />
               {attribution && <figcaption>— {attribution}</figcaption>}
             </figure>
           );
@@ -327,6 +330,14 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
     font-family: var(--font-display);
     font-size: 15pt;
     line-height: 1;
+  }
+
+  .print-pull-quote blockquote p {
+    margin: 0;
+  }
+
+  .print-pull-quote blockquote p + p {
+    margin-top: 0.7em;
   }
 
   .print-pull-quote--large blockquote {

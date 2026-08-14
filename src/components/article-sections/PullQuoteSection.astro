@@ -1,14 +1,16 @@
 ---
 import { cleanString } from "../../sanity/lib/clean";
+import { renderPullQuote } from "../../sanity/lib/renderPullQuote";
 
-const { article, section } = Astro.props;
+const { article, section, citationMap = {} } = Astro.props;
 const size = cleanString(section.size) || "normal";
 const articleTitle = cleanString(article?.title);
+const quoteHtml = renderPullQuote(section.quote, citationMap);
 ---
 
 <section class={`pull-quote pull-quote--${size}`}>
   <blockquote>
-    <p>{section.quote}</p>
+    <Fragment set:html={quoteHtml} />
     {section.attribution && <footer>{section.attribution}</footer>}
   </blockquote>
   {Astro.slots.has("context") && (
@@ -28,7 +30,7 @@ const articleTitle = cleanString(article?.title);
     max-width: 58rem;
     width: 100%;
     margin-left: auto;
-    padding: 5rem 2rem 4rem 2rem;
+    padding: 5rem 2rem 5rem 2rem;
     background: var(--article-category-bg);
     text-align: center;
     position: relative;
@@ -37,20 +39,58 @@ const articleTitle = cleanString(article?.title);
   .pull-quote blockquote {
     margin: 0;
   }
+  
 
   .pull-quote p,
   .pull-quote footer {
     margin: 0;
   }
 
-  .pull-quote p {
+  .pull-quote blockquote  {
     font: 400 clamp(2rem, 3.6vw, 3rem) / 1 var(--font-display);
     letter-spacing: -0.03em;
     text-wrap: balance;
   }
 
-  .pull-quote--normal p {
+  .pull-quote :global(p + p) {
+    margin-top: 0.7em;
+  }
+
+  .pull-quote--normal blockquote  {
     font-size: clamp(2.5rem, 3vw, 3rem);
+  }
+
+.pull-quote--normal blockquote :global(p) {
+  margin: 0.25rem !important;
+}
+
+  .pull-quote :global(.u-citation-target) {
+    text-decoration: none;
+  }
+
+  .pull-quote :global(.u-citation-ref) {
+    font: 700 0.42em / 1 var(--font-meta);
+    letter-spacing: 0;
+  }
+
+  .pull-quote :global(.u-citation-ref button) {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-decoration: none !important;
+    transition: var(--transition-text-shadow);
+  }
+
+  .pull-quote :global(.u-citation-ref button):hover {
+    text-shadow: var(--text-shadow-hover-small-black);
+  }
+
+  .pull-quote :global(.u-citation-ref button:focus-visible) {
+    outline: 1px solid var(--ink);
+    outline-offset: 0.12rem;
   }
 
   .pull-quote footer {
