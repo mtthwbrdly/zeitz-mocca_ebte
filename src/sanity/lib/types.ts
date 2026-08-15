@@ -16,7 +16,7 @@ export interface AssetFile {
 export interface MediaAsset {
   url?: string;
   alt?: string;
-  caption?: string;
+  formattedCaption?: PortableTextBlock[];
 }
 
 export interface LinkedArticleSummary {
@@ -56,8 +56,7 @@ export interface PortableTextLinkMarkDef {
 export interface PortableTextCitationMarkDef {
   _key: string;
   _type: "citation";
-  note?: string;
-  source: string;
+  formattedSource?: PortableTextBlock[];
   url?: string;
 }
 
@@ -121,7 +120,13 @@ export interface ImageSection {
   _key?: string;
   _type: "imageSection";
   image: MediaAsset;
-  layout?: "inline" | "wide" | "full";
+  layout?:
+    | "portrait"
+    | "caption-left"
+    | "landscape"
+    | "inline"
+    | "wide"
+    | "full";
 }
 
 export interface AudioPlayerSection {

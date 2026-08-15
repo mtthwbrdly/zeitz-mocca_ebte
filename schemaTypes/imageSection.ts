@@ -1,4 +1,4 @@
-import { defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 
 export const imageSection = defineType({
   name: "imageSection",
@@ -12,9 +12,36 @@ export const imageSection = defineType({
       validation: (rule) => rule.required()
     }),
     defineField({
-      name: "caption",
-      title: "Caption",
-      type: "string"
+      name: "formattedCaption",
+      title: "Formatted caption",
+      type: "array",
+      of: [
+        defineArrayMember({
+          type: "block",
+          styles: [{ title: "Paragraph", value: "normal" }],
+          lists: [],
+          marks: {
+            decorators: [
+              { title: "Strong", value: "strong" },
+              { title: "Emphasis", value: "em" }
+            ],
+            annotations: [
+              {
+                name: "link",
+                title: "Link",
+                type: "object",
+                fields: [
+                  defineField({
+                    name: "href",
+                    title: "URL",
+                    type: "url"
+                  })
+                ]
+              }
+            ]
+          }
+        })
+      ]
     }),
     defineField({
       name: "altText",
@@ -25,12 +52,12 @@ export const imageSection = defineType({
       name: "layout",
       title: "Layout",
       type: "string",
-      initialValue: "inline",
+      initialValue: "portrait",
       options: {
         list: [
-          { title: "Inline", value: "inline" },
-          { title: "Wide", value: "wide" },
-          { title: "Full", value: "full" }
+          { title: "Portrait", value: "portrait" },
+          { title: "Portrait (Caption Left)", value: "caption-left" },
+          { title: "Landscape", value: "landscape" }
         ],
         layout: "radio"
       }
@@ -39,8 +66,34 @@ export const imageSection = defineType({
   preview: {
     select: {
       media: "image",
-      title: "caption",
+      title: "formattedCaption",
       subtitle: "layout"
+    },
+    prepare({ media, title, subtitle }) {
+      const layoutLabels: Record<string, string> = {
+        portrait: "Portrait",
+        "caption-left": "Portrait (Caption Left)",
+        landscape: "Landscape",
+        inline: "Portrait (Caption Left)",
+        wide: "Landscape",
+        full: "Landscape"
+      };
+      const caption = Array.isArray(title)
+        ? title
+            .map((block) =>
+              Array.isArray(block?.children)
+                ? block.children.map((child) => child?.text || "").join("")
+                : ""
+            )
+            .filter(Boolean)
+            .join(" ")
+        : "";
+
+      return {
+        media,
+        title: caption || "Image Section",
+        subtitle: subtitle ? layoutLabels[subtitle] || subtitle : undefined
+      };
     }
   }
 });

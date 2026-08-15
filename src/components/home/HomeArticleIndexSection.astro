@@ -301,14 +301,9 @@ const fillerRows = Array.from({
 
   @media (max-width: 980px) {
     .article-index__header {
-      flex-direction: column;
       padding-right: 0;
     }
 
-    .article-index__header h2 {
-      border-right: 0;
-      border-bottom: 1px solid var(--ink);
-    }
 
     .article-index__filter {
       flex-wrap: wrap;
@@ -344,6 +339,11 @@ const fillerRows = Array.from({
 
     .article-index__category {
       text-align: left;
+    }
+
+    .article-index__row--filler {
+      display:flex;
+      justify-content: space-evenly;
     }
   }
 </style>

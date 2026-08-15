@@ -224,5 +224,15 @@ const readTime = isRelated ? null : calculateReadTime(article);
   transform: scale(1.025);
 }
 
+@media (max-width: 900px) {
+  .article-header__inner {
+    max-width: none;
+  }
+  .article-header__meta {
+    display:flex;
+    flex-direction:column;
+  }
+
+}
 
 </style>

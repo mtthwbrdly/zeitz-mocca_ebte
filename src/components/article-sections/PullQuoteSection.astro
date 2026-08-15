@@ -30,7 +30,7 @@ const quoteHtml = renderPullQuote(section.quote, citationMap);
     max-width: 58rem;
     width: 100%;
     margin-left: auto;
-    padding: 5rem 2rem 5rem 2rem;
+    padding: 5rem 4rem;
     background: var(--article-category-bg);
     text-align: center;
     position: relative;
@@ -178,6 +178,12 @@ const quoteHtml = renderPullQuote(section.quote, citationMap);
 
 .pull-quote:has(.rich-text__context-link:hover) .pull-quote__marker {
    --marker-offset: 2rem;
+}
+
+@media (max-width: 900px) {
+  .pull-quote {
+   padding: 3rem 2rem;
+  }
 }
 
 </style>

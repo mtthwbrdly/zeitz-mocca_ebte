@@ -290,7 +290,7 @@ const contentSections = homePage.sections.filter(
   }
 
   .home-hero__intro-text {
-    font: 400 clamp(1rem, 2.5vw, 3rem) / 1 var(--font-display);
+    font: 400 clamp(1.5rem, 2.5vw, 3rem) / 1 var(--font-display);
     letter-spacing: 0;
     max-width: clamp(20rem, 75vw, 65rem);
     text-align: center;
@@ -307,7 +307,7 @@ const contentSections = homePage.sections.filter(
     align-items: start;
   }
 
-  @media (max-width: 700px) {
+  @media (max-width: 900px) {
     .home-hero {
       --home-hero-paper-height: 48svh;
       --home-hero-title-mask-y: -0.3rem;
@@ -332,17 +332,7 @@ const contentSections = homePage.sections.filter(
     .home-hero__underlay {
       margin-top: calc(-1 * var(--home-hero-paper-height));
     }
-
-    .home-hero__intro {
-      right: 1rem;
-      bottom: 1rem;
-      left: 1rem;
-      font-size: clamp(1rem, 4.8vw, 1.35rem);
-    }
-
-    .home-page__sections {
-      padding: 1rem;
-    }
+    
   }
 
   .pull-quote__marker {

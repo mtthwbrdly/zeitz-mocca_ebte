@@ -1,115 +1,192 @@
 # Everything but the Exhibition
 
-An Astro + Sanity editorial site for Everything but the Exhibition.
+Production repository for the Everything but the Exhibition editorial site.
 
-The frontend is intentionally lightweight:
+The site is built with Astro, served with the Vercel adapter, and powered by Sanity for structured editorial content. The Sanity Studio is embedded at `/studio`, and articles can be exported as print-ready PDFs from the frontend.
 
-- Semantic Astro templates
-- Modern CSS for layout and typography
-- Small amounts of vanilla browser JavaScript only where useful
-- Sanity used for structured editorial content, not a single long rich-text field
+## Production Stack
 
-## What is included
+- Astro server output with `@astrojs/vercel`
+- Sanity Content Lake and embedded Sanity Studio
+- Sanity Presentation Tool and draft mode
+- Vanilla browser JavaScript for small interactions
+- Puppeteer plus `@sparticuz/chromium` for production PDF generation
+- Open Remark embed support for article comments
 
-- A Sanity-driven article route at `/articles/[slug]`
-- An embedded Sanity Studio at `/studio`
-- Reorderable modular article sections
-- Sanity-controlled homepage sections
+## Key Routes
 
-## Project structure
+- `/` - homepage
+- `/articles` - article index
+- `/articles/[slug]` - article page
+- `/articles/[slug]/print` - print HTML used for PDF generation
+- `/api/articles/[slug]/pdf` - generated PDF endpoint
+- `/articles/print-preview` - internal print layout preview tool
+- `/studio` - embedded Sanity Studio
+- `/api/draft-mode/enable` - Sanity preview entry point
+- `/api/draft-mode/disable` - exits draft mode
 
-- `src/components/ArticleLayout.astro`
-- `src/components/ArticleHeader.astro`
-- `src/components/ArticleMeta.astro`
-- `src/components/AuthorInfo.astro`
-- `src/components/article-sections/*`
-- `src/components/home/*`
-- `src/pages/index.astro`
-- `src/pages/articles/[slug].astro`
-- `schemaTypes/*`
-- `src/sanity/lib/queries.ts`
+## Environment Variables
 
-## Run locally
+Set these in Vercel and in local `.env` files as needed.
 
-1. Install dependencies:
+```bash
+PUBLIC_SANITY_PROJECT_ID=p7t0rr17
+PUBLIC_SANITY_DATASET=production
+PUBLIC_OPEN_REMARK_SITE_KEY=
+PUBLIC_ENABLE_AUTHORS_INDEX=false
+SANITY_API_READ_TOKEN=
+SANITY_STUDIO_PREVIEW_URL=https://your-production-domain
+SANITY_STUDIO_URL=https://your-production-domain/studio
+```
 
-   ```bash
-   npm install
-   ```
+`PUBLIC_SANITY_PROJECT_ID` and `PUBLIC_SANITY_DATASET` default to the production Sanity project if omitted, but production should still define them explicitly.
 
-2. Add your Sanity project details to `.env` if you want to override the default project settings:
+`PUBLIC_OPEN_REMARK_SITE_KEY` is required only for articles that include a comments section.
 
-   ```bash
-   cp .env.example .env
-   ```
+`PUBLIC_ENABLE_AUTHORS_INDEX=true` enables the authors index page and menu item. Leave it unset or set it to `false` to hide `/authors` from production while it is still in progress.
 
-   Then set:
+`SANITY_API_READ_TOKEN` is used for draft-mode reads and private preview access.
 
-   - `PUBLIC_SANITY_PROJECT_ID`
-   - `PUBLIC_SANITY_DATASET`
+`SANITY_STUDIO_PREVIEW_URL` should point to the deployed frontend URL. `SANITY_STUDIO_URL` should point to the deployed Studio route.
 
-3. Start the Astro dev server:
+## Feature Flags
 
-   ```bash
-   npm run dev
-   ```
+Feature flags live in `src/lib/featureFlags.ts`. They are intended for hiding in-progress routes and navigation items without deleting the underlying page.
 
-4. Visit:
+To add another flagged page:
 
-   - `http://localhost:4321/`
-   - `http://localhost:4321/articles/[article-slug]`
-   - `http://localhost:4321/studio`
+1. Add a key and env var to `featureFlagEnvVars`.
+2. Add `featureFlag: "yourFlag"` to any nav link that should be hidden.
+3. Add an early redirect or 404 in the page frontmatter when the flag is disabled.
 
-You can also run the Studio directly from the project root:
+## Local Setup
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a local environment file:
+
+```bash
+cp .env.example .env
+```
+
+Run the frontend and embedded Studio:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:4321`.
+
+The Studio can also be run directly:
 
 ```bash
 npm run studio
 ```
 
-## Sanity content model
+## Production Build
 
-The project includes these schema types:
+Run the Astro production build:
 
-- `homePage`
-- `articleIndexSection`
-- `article`
-- `author`
-- `tag`
-- `richTextSection`
-- `pullQuoteSection`
-- `shareClippingSection`
-- `featureCardSection`
-- `relatedReadingSection`
-- `imageSection`
-- `commentsSection`
-- `dividerSection`
+```bash
+npm run build
+```
 
-The key idea is the `contentSections` array on the `article` document. Each array item maps directly to an Astro component.
+Preview the production build locally:
 
-`Read Time` is not authored manually in Sanity. It is calculated automatically on the frontend from the article's textual content and shown in the metadata panel.
+```bash
+npm run preview
+```
 
-Further Reading is also editor-friendly now: the section only stores one or two linked article references, while each article document provides its own `thumbnail`, `title`, and `slug`.
-It is configured on the article document itself, not inside the reorderable article stream, so it always renders as the full-width footer section after the main content.
+Build the Sanity Studio bundle:
 
-## How to author and reorder sections
+```bash
+npm run studio:build
+```
 
-1. Run `npm run dev` and open `/studio`.
-2. Create or open an `Article`.
-3. Fill in the metadata fields at the top.
-4. Add section blocks to `contentSections`.
-5. Drag the array items up or down to reorder them.
-6. Reload the article route to confirm the frontend updates in the same order.
+Deploy the standalone Sanity Studio if needed:
 
-To enable comments for a specific article:
+```bash
+npm run studio:deploy
+```
 
-1. Add a `commentsSection` block to that article's `contentSections`.
-2. Set `PUBLIC_OPEN_REMARK_SITE_KEY` in your environment.
-3. Leave the slug override blank unless you want a custom comment-thread key.
+## Deployment
 
-## Notes
+The app is configured for Vercel in `astro.config.mjs`:
 
-- The frontend itself avoids React, Vue, or client-side frameworks.
-- `@astrojs/react` is included only because the embedded Sanity Studio currently depends on it.
-- The share interaction uses a small vanilla script with the Web Share API and clipboard fallback.
-- The root `sanity.config.ts`, `sanity.cli.ts`, and `schemaTypes/` folder are the canonical Studio setup for this project.
-- The comments integration uses Open Remark's documented embed pattern: `data-open-remark`, `data-site-key`, `data-slug`, and `https://open-remark.zeon.studio/embed.js`.
+```js
+output: "server",
+adapter: vercel()
+```
+
+Use Vercel as the production host. The server output is required for article routes, draft mode, and PDF generation.
+
+Before deploying, confirm:
+
+- Vercel environment variables match production Sanity settings.
+- Sanity CORS allows the production domain.
+- Sanity Presentation preview URLs point to the production domain.
+- PDF generation works from `/api/articles/[slug]/pdf`.
+- Comments render on articles with `commentsSection` when `PUBLIC_OPEN_REMARK_SITE_KEY` is set.
+
+## Editorial Model
+
+Articles are built from the `contentSections` array on the `article` document. Each section maps to an Astro component.
+
+Supported article sections include:
+
+- Rich text
+- Pull quotes
+- Share clippings
+- Feature cards
+- Related reading
+- Images with formatted captions
+- Audio
+- Video
+- Comments
+- Dividers
+
+Read time is calculated on the frontend from article content and is not authored manually.
+
+## PDF Workflow
+
+The PDF button loads `/api/articles/[slug]/pdf`. That endpoint opens the print route in Puppeteer and returns a generated PDF.
+
+The print layout can be checked in HTML at:
+
+```text
+/articles/[slug]/print
+```
+
+The print preview tool is available at:
+
+```text
+/articles/print-preview
+```
+
+Use the preview route for layout and baseline-grid CSS adjustments before testing the generated PDF.
+
+## Sanity Notes
+
+The canonical Studio setup is in:
+
+- `sanity.config.ts`
+- `sanity.cli.ts`
+- `schemaTypes/`
+- `src/sanity/lib/queries.ts`
+
+When changing Sanity schemas, also check frontend projections and TypeScript interfaces in `src/sanity/lib`.
+
+## Maintenance Checks
+
+Before production release, run:
+
+```bash
+npm run build
+npm run studio:build
+```
+
+Use `npm run check` when touching Astro templates or TypeScript-heavy code.

@@ -154,12 +154,14 @@ const articleCategoryClass = getArticleCategoryClass(article);
 
     .article-grid {
       grid-template-columns: 1fr;
+      padding: 1rem 0 2rem;
+      gap: 1rem;
     }
 
     .article-sidebar {
-      position: static;
-      max-height: none;
-      overflow: visible;
+      top: 4rem;
+      z-index: 50;
     }
+
   }
 </style>

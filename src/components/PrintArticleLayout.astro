@@ -5,11 +5,12 @@ import { extractArticleCitations } from "../sanity/lib/citations";
 import { cleanString } from "../sanity/lib/clean";
 import { extractPullQuoteRuns } from "../sanity/lib/pullQuotes";
 import { renderPullQuote } from "../sanity/lib/renderPullQuote";
+import { renderInlinePortableText } from "../sanity/lib/renderInlinePortableText";
 import { renderPortableText } from "../sanity/lib/renderPortableText";
 import type { Article } from "../sanity/lib/types";
 
 const { article } = Astro.props as { article: Article };
-const { citationMap } = extractArticleCitations(article.contentSections);
+const { citationMap, citations } = extractArticleCitations(article.contentSections);
 
 const title = cleanString(article.title);
 const subtitle = cleanString(article.subtitle);
@@ -23,7 +24,7 @@ const publishedAt = publishedAtValue
     }).format(new Date(publishedAtValue))
   : "";
 const readTime = calculateReadTime(article);
-const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
+const detailLine = [publishedAt, readTime ? `${readTime} read` : ""]
   .filter(Boolean)
   .join("   /   ");
 ---
@@ -39,12 +40,13 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
       <header class="masthead">
         <h1 class="masthead__title">{title}</h1>
         {subtitle && <p class="masthead__subtitle">{subtitle}</p>}
-        {byline && <p class="masthead__byline">{byline}</p>}
+        {authorName && <p class="masthead__meta">{authorName}</p>}
+        {detailLine && <p class="masthead__meta">{detailLine}</p>}
       </header>
 
       {article.contentSections.map((section) => {
         if (section._type === "richTextSection") {
-          const html = renderPortableText(section.body);
+          const html = renderPortableText(section.body, citationMap);
           const placement = cleanString(section.pullQuotePlacement) || "top";
           const extractedQuotes = extractPullQuoteRuns(section.body);
           const quoteBlocks = extractedQuotes.map((pullQuote) => (
@@ -99,8 +101,8 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
 
         if (section._type === "imageSection") {
           const url = cleanString(section.image?.url);
-          const caption = cleanString(section.image?.caption);
-          const alt = cleanString(section.image?.alt) || caption;
+          const captionHtml = renderInlinePortableText(section.image?.formattedCaption);
+          const alt = cleanString(section.image?.alt);
 
           if (!url) {
             return null;
@@ -109,7 +111,7 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
           return (
             <figure class="print-image">
               <img src={url} alt={alt} />
-              {caption && <figcaption>{caption}</figcaption>}
+              {captionHtml && <figcaption set:html={captionHtml} />}
             </figure>
           );
         }
@@ -123,6 +125,20 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
 
         return null;
       })}
+
+      {citations.length > 0 && (
+        <section class="print-citations" aria-labelledby="print-citations-title">
+          <h2 id="print-citations-title">Citations</h2>
+          <ol>
+            {citations.map((citation) => (
+              <li id={citation.id}>
+                <span class="print-citations__source" set:html={citation.sourceHtml} />
+                {citation.url && <span class="print-citations__url"> {citation.url}</span>}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
     </div>
 
   </body>
@@ -139,6 +155,7 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
     --font-body: "TeX Gyre Schola", "Century Schoolbook", Georgia, serif;
     --font-meta: "TeX Gyre Cursor", "Courier New", Courier, monospace;
     --meta-letter-spacing: 0.04em;
+    --baseline: 7pt;
     --ink: #171717;
     --muted: rgba(23, 23, 23, 0.7);
     --line: rgba(23, 23, 23, 0.25);
@@ -214,7 +231,7 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
     color: var(--ink);
     font-family: var(--font-body);
     font-size: 10.5pt;
-    line-height: 1.35;
+    line-height: calc(var(--baseline) * 2);
   }
 
   img {
@@ -223,40 +240,45 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
   }
 
   .masthead {
-    margin: 32pt 16pt 64pt 16pt;
+    margin: 0 0 calc(var(--baseline) * 5) 0;
     text-align: center;
   }
 
   .masthead__title {
-    margin: 0 0 6pt;
+    margin: 0 0 var(--baseline);
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 21pt;
-    line-height: 1;
+    font-size: 24pt;
+    line-height: calc(var(--baseline) * 3.5);
     letter-spacing: -0.02em;
     
   }
 
   .masthead__subtitle {
-    margin: 0 0 6pt;
+    margin: 0 0 var(--baseline);
     font-family: var(--font-display);
     font-size: 12pt;
+    line-height: calc(var(--baseline) * 2);
     color: var(--muted);
   }
 
-  .masthead__byline {
+  .masthead__meta {
     margin: 0;
     font-family: var(--font-meta);
     font-size: 7pt;
     font-weight: 600;
+    line-height: var(--baseline);
     color: var(--muted);
     letter-spacing: var(--meta-letter-spacing);
   }
 
+  /* .masthead__meta + .masthead__meta {
+    margin-top: var(--baseline);
+  } */
+
   .print-body {
     column-count: 2;
     column-gap: 24pt;
-    column-fill: auto;
   }
 
   .print-prose {
@@ -266,9 +288,9 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
 
   .print-prose p,
   .print-prose li {
-    margin: 0 0 8pt;
+    margin: 0 0 var(--baseline);
     font-size: 10.5pt;
-    line-height: 1.4;
+    line-height: calc(var(--baseline) * 2);
   }
 
   .print-prose h2,
@@ -276,7 +298,8 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
     column-span: all;
     font-family: var(--font-display);
     font-weight: 700;
-    margin: 14pt 0 8pt;
+    margin: calc(var(--baseline) * 2) 0 var(--baseline);
+    line-height: calc(var(--baseline) * 2);
   }
 
   .print-prose h2 {
@@ -288,7 +311,7 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
   }
 
   .print-prose blockquote {
-    margin: 8pt 0 8pt 14pt;
+    margin: var(--baseline) 0 var(--baseline) 14pt;
     padding-left: 10pt;
     border-left: 2pt solid var(--ink);
     color: var(--muted);
@@ -296,7 +319,7 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
 
   .print-prose ul,
   .print-prose ol {
-    margin: 0 0 8pt;
+    margin: 0 0 var(--baseline);
     padding-left: 16pt;
   }
 
@@ -306,11 +329,35 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
     letter-spacing: var(--meta-letter-spacing);
   }
 
+  .print-prose .u-citation-target,
+  .print-pull-quote .u-citation-target {
+    white-space: normal;
+  }
+
+  .print-prose .u-citation-ref,
+  .print-pull-quote .u-citation-ref {
+    font-family: var(--font-meta);
+    font-size: 0.56em;
+    font-weight: 700;
+    letter-spacing: var(--meta-letter-spacing);
+    line-height: 0;
+  }
+
+  .print-prose .u-citation-ref button,
+  .print-pull-quote .u-citation-ref button {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+  }
+
   .print-prose .u-pull-quote-target {
   }
 
   .print-pull-quote--inline {
-    margin: 10pt 0;
+    margin: calc(var(--baseline) * 2) 0;
   }
 
   .print-share-clipping,
@@ -321,8 +368,8 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
   }
 
   .print-pull-quote {
-    margin: 12pt 0;
-    padding: 10pt 10pt;
+    margin: calc(var(--baseline) * 2) 0;
+    padding: var(--baseline) 10pt;
     text-align: center;
   }
 
@@ -330,40 +377,43 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
     margin: 0;
     font-family: var(--font-display);
     font-size: 15pt;
-    line-height: 1;
+    line-height: calc(var(--baseline) * 2.5);
   }
 
   .print-pull-quote blockquote p {
     margin: 0;
   }
-
+/* 
   .print-pull-quote blockquote p + p {
-    margin-top: 0.7em;
-  }
+    margin-top: var(--baseline);
+  } */
 
   .print-pull-quote--large blockquote {
     font-size: 18pt;
+    line-height: calc(var(--baseline) * 3);
   }
 
   .print-pull-quote figcaption {
-    margin-top: 6pt;
+    margin-top: var(--baseline);
     font-family: var(--font-meta);
     font-size: 8pt;
     font-weight: 700;
+    line-height: var(--baseline);
     letter-spacing: var(--meta-letter-spacing);
   }
 
   .print-share-clipping {
-    margin: 10pt 0;
-    padding: 8pt 10pt;
+    margin: calc(var(--baseline) * 2) 0;
+    padding: var(--baseline) 10pt;
     border: 0.75pt solid var(--ink);
   }
 
   .print-share-clipping__label {
-    margin: 0 0 4pt;
+    margin: 0 0 var(--baseline);
     font-family: var(--font-meta);
     font-size: 8pt;
     font-weight: 700;
+    line-height: var(--baseline);
     text-transform: uppercase;
     letter-spacing: var(--meta-letter-spacing);
   }
@@ -373,34 +423,37 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
   }
 
   .print-card {
-    margin: 10pt 0;
-    padding: 8pt 10pt;
+    margin: calc(var(--baseline) * 2) 0;
+    padding: var(--baseline) 10pt;
     border: 0.75pt solid var(--ink);
   }
 
   .print-card__eyebrow {
-    margin: 0 0 4pt;
+    margin: 0 0 var(--baseline);
     font-family: var(--font-meta);
     font-size: 8pt;
     font-weight: 700;
+    line-height: var(--baseline);
     text-transform: uppercase;
     letter-spacing: var(--meta-letter-spacing);
   }
 
   .print-card__title {
-    margin: 0 0 4pt;
+    margin: 0 0 var(--baseline);
     font-family: var(--font-display);
     font-weight: 700;
     font-size: 12pt;
+    line-height: calc(var(--baseline) * 2);
   }
 
   .print-card__description {
     margin: 0;
     font-size: 10pt;
+    line-height: calc(var(--baseline) * 2);
   }
 
   .print-image {
-    margin: 16pt 0;
+    margin: calc(var(--baseline) * 2) 0;
     text-align: center;
   }
 
@@ -409,24 +462,64 @@ const byline = [authorName, publishedAt, readTime ? `${readTime} read` : ""]
     margin: 0 auto;
   }
 
+  .print-image a {
+    color: inherit;
+    text-decoration: none;
+  }
+
   .print-image figcaption {
-    margin-top: 6pt;
+    margin-top: var(--baseline);
     font-family: var(--font-meta);
     font-size: 7pt;
+    line-height: var(--baseline);
     color: var(--muted);
     letter-spacing: var(--meta-letter-spacing);
     font-weight: 600;
     padding: 0 16pt;
   }
 
+  .print-citations {
+    margin: calc(var(--baseline) * 3) 0 0;
+    padding-top: var(--baseline);
+  }
+
+  .print-citations h2 {
+    margin: 0 0 var(--baseline);
+    font-family: var(--font-meta);
+    font-size: 6pt;
+    font-weight: 700;
+    line-height: var(--baseline);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .print-citations ol {
+    margin: 0;
+    padding-left: 10pt;
+  }
+
+  .print-citations li {
+    margin: 0 0 var(--baseline);
+    font-family: var(--font-meta);
+    font-size: 5.5pt;
+    line-height: var(--baseline);
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .print-citations small,
+  .print-citations__url {
+    display: block;
+    color: var(--muted);
+  }
+
   .print-divider {
-    margin: 12pt 0;
+    margin: calc(var(--baseline) * 2) 0;
     border: none;
     border-top: 0.75pt solid var(--line);
   }
 
   .print-spacer {
-    height: 12pt;
+    height: calc(var(--baseline) * 2);
   }
 
 </style>

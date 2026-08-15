@@ -9,9 +9,8 @@ import type {
 export interface CitationReference {
   _key: string;
   id: string;
-  note?: string;
   number: number;
-  source: string;
+  sourceHtml: string;
   targetId: string;
   url?: string;
 }
@@ -28,6 +27,37 @@ export function citationPanelId(citationKey: string) {
 
 function isCitationMarkDef(markDef: PortableTextMarkDef | undefined): markDef is PortableTextCitationMarkDef {
   return markDef?._type === "citation";
+}
+
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+
+function wrapCitationTextMarks(text: string, marks: string[] = []) {
+  return marks.reduce((output, mark) => {
+    if (mark === "strong") {
+      return `<strong>${output}</strong>`;
+    }
+    if (mark === "em") {
+      return `<em>${output}</em>`;
+    }
+    return output;
+  }, text);
+}
+
+export function renderCitationText(blocks: PortableTextBlock[] = []) {
+  return blocks
+    .map((block) =>
+      block.children
+        ?.map((child) => wrapCitationTextMarks(escapeHtml(child.text), child.marks))
+        .join("")
+    )
+    .filter(Boolean)
+    .join("<br>");
 }
 
 function getUsedCitationKeys(block: PortableTextBlock) {
@@ -52,7 +82,7 @@ export function extractCitationsFromBlocks(blocks: PortableTextBlock[] = []) {
         return;
       }
 
-      if (!usedCitationKeys.has(markDef._key) || !cleanString(markDef.source).trim()) {
+      if (!usedCitationKeys.has(markDef._key) || !renderCitationText(markDef.formattedSource).trim()) {
         return;
       }
 
@@ -88,9 +118,8 @@ export function extractArticleCitations(sections: ArticleSection[] = []) {
       const reference: CitationReference = {
         _key: citation._key,
         id: citationPanelId(citation._key),
-        note: cleanString(citation.note).trim(),
         number: citations.length + 1,
-        source: cleanString(citation.source).trim(),
+        sourceHtml: renderCitationText(citation.formattedSource).trim(),
         targetId: citationReferenceId(citation._key),
         url: cleanString(citation.url).trim()
       };

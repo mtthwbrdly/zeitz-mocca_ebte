@@ -1,0 +1,289 @@
+---
+import { formatAuthorNames } from "../../sanity/lib/authors";
+import { cleanString } from "../../sanity/lib/clean";
+import { loadArticleIndex } from "../../sanity/lib/loadArticleIndex";
+
+export const prerender = false;
+
+const articles = await loadArticleIndex(Astro.cookies);
+const requestedSlug = cleanString(Astro.url.searchParams.get("slug"));
+const selectedArticle =
+  articles.find((article) => cleanString(article.slug) === requestedSlug) || articles[0];
+const selectedSlug = cleanString(selectedArticle?.slug);
+const printUrl = selectedSlug ? `/articles/${selectedSlug}/print` : "";
+const pdfUrl = selectedSlug ? `/api/articles/${selectedSlug}/pdf` : "";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Print Preview</title>
+  </head>
+  <body>
+    <main class="preview-shell">
+      <header class="preview-toolbar">
+        <div class="preview-toolbar__title">
+          <h1>Print Preview</h1>
+          <p>{selectedArticle?.title || "No articles available"}</p>
+        </div>
+
+        <form class="preview-controls" method="get">
+          <label class="preview-field">
+            <span>Article</span>
+            <select name="slug" onchange="this.form.submit()">
+              {articles.map((article) => {
+                const slug = cleanString(article.slug);
+                const title = cleanString(article.title) || slug;
+                const authorNames = formatAuthorNames(article);
+                return (
+                  <option value={slug} selected={slug === selectedSlug}>
+                    {authorNames ? `${title} - ${authorNames}` : title}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+
+          <label class="preview-field preview-field--scale">
+            <span>Scale</span>
+            <input type="range" min="45" max="125" value="80" data-preview-scale />
+            <output data-preview-scale-output>80%</output>
+          </label>
+
+          <label class="preview-toggle">
+            <input type="checkbox" data-preview-grid />
+            <span>Baseline grid</span>
+          </label>
+
+          {printUrl && (
+            <a class="preview-link" href={printUrl} target="_blank" rel="noreferrer">Open HTML</a>
+          )}
+          {pdfUrl && (
+            <a class="preview-link" href={pdfUrl} target="_blank" rel="noreferrer">Open PDF</a>
+          )}
+        </form>
+      </header>
+
+      <section class="preview-stage" aria-label="Print layout preview">
+        {printUrl ? (
+          <iframe
+            class="preview-frame"
+            src={printUrl}
+            title={`Print layout preview for ${selectedArticle?.title || selectedSlug}`}
+            data-preview-frame
+          ></iframe>
+        ) : (
+          <p class="preview-empty">No articles were found.</p>
+        )}
+      </section>
+    </main>
+
+    <script>
+      const scaleInput = document.querySelector("[data-preview-scale]");
+      const scaleOutput = document.querySelector("[data-preview-scale-output]");
+      const gridInput = document.querySelector("[data-preview-grid]");
+      const frame = document.querySelector("[data-preview-frame]");
+
+      const applyScale = () => {
+        if (!(scaleInput instanceof HTMLInputElement) || !(scaleOutput instanceof HTMLOutputElement)) {
+          return;
+        }
+
+        const scale = Number(scaleInput.value);
+        document.documentElement.style.setProperty("--preview-scale", `${scale / 100}`);
+        scaleOutput.value = `${scale}%`;
+      };
+
+      const setGrid = () => {
+        if (!(frame instanceof HTMLIFrameElement) || !(gridInput instanceof HTMLInputElement)) {
+          return;
+        }
+
+        const doc = frame.contentDocument;
+        if (!doc) {
+          return;
+        }
+
+        let style = doc.getElementById("preview-baseline-grid");
+        if (!style) {
+          style = doc.createElement("style");
+          style.id = "preview-baseline-grid";
+          doc.head.append(style);
+        }
+
+        style.textContent = gridInput.checked
+          ? `body {
+              background-image: repeating-linear-gradient(
+                to bottom,
+                rgba(236, 72, 153, 0.42) 0,
+                rgba(236, 72, 153, 0.42) 0.5px,
+                transparent 0.5px,
+                transparent 7pt
+              );
+              background-position: 0 30pt;
+            }`
+          : "";
+      };
+
+      scaleInput?.addEventListener("input", applyScale);
+      gridInput?.addEventListener("change", setGrid);
+      frame?.addEventListener("load", setGrid);
+      applyScale();
+    </script>
+  </body>
+</html>
+
+<style>
+  :root {
+    --preview-scale: 0.8;
+    --ink: #171717;
+    --paper: #f4f1eb;
+    --panel: #ffffff;
+    --line: rgba(23, 23, 23, 0.16);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-width: 920px;
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--paper);
+  }
+
+  .preview-shell {
+    min-height: 100vh;
+  }
+
+  .preview-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 2fr);
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(16px);
+  }
+
+  .preview-toolbar__title h1,
+  .preview-toolbar__title p {
+    margin: 0;
+  }
+
+  .preview-toolbar__title h1 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .preview-toolbar__title p {
+    overflow: hidden;
+    color: rgba(23, 23, 23, 0.66);
+    font-size: 0.82rem;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .preview-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: end;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .preview-field {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 16rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .preview-field--scale {
+    grid-template-columns: 1fr auto;
+    min-width: 9rem;
+  }
+
+  .preview-field--scale span {
+    grid-column: 1 / -1;
+  }
+
+  select,
+  input[type="range"] {
+    width: 100%;
+  }
+
+  select {
+    height: 2rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0 0.5rem;
+    background: #fff;
+    color: var(--ink);
+  }
+
+  output {
+    min-width: 2.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: right;
+    text-transform: none;
+  }
+
+  .preview-toggle {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    height: 2rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+
+  .preview-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2rem;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    padding: 0 0.7rem;
+    color: var(--ink);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .preview-stage {
+    display: grid;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .preview-frame {
+    width: 794px;
+    height: 1123px;
+    border: 0;
+    box-shadow: 0 1.5rem 4rem rgba(23, 23, 23, 0.18);
+    background: var(--panel);
+    transform: scale(var(--preview-scale));
+    transform-origin: top center;
+  }
+
+  .preview-empty {
+    margin: 3rem 0;
+    font-size: 1rem;
+  }
+</style>

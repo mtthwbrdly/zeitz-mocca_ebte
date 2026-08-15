@@ -1,10 +1,18 @@
 ---
-const links = [
+import { isFeatureEnabled, type FeatureFlag } from "../lib/featureFlags";
+
+type NavLink = {
+  href: string;
+  label: string;
+  featureFlag?: FeatureFlag;
+};
+
+const links: NavLink[] = [
   { href: "/", label: "Home" },
   { href: "/articles", label: "Index" },
-  { href: "/authors", label: "Authors" },
+  { href: "/authors", label: "Authors", featureFlag: "authorsIndex" },
   { href: "/", label: "Contact" },
-];
+].filter((link) => !link.featureFlag || isFeatureEnabled(link.featureFlag));
 ---
 
 <div class="site-nav-shell">
@@ -190,6 +198,11 @@ const links = [
   @media (max-width: 900px) {
     .site-nav {
       padding-block: 1rem;
+      background: var(--article-category-bg);
+      mix-blend-mode: normal;
+      color: var(--ink);
+      padding:1rem;
+      border-bottom: 1px solid var(--ink);
     }
 
     .site-nav__brand,
@@ -200,7 +213,7 @@ const links = [
     }
 
     .site-menu-overlay__panel {
-      padding-block: 1rem 1.25rem;
+      padding: 1rem;
     }
 
     .site-menu-overlay__content {

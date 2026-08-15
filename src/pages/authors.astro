@@ -1,7 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { isFeatureEnabled } from "../lib/featureFlags";
 import { cleanString } from "../sanity/lib/clean";
 import { loadAuthors } from "../sanity/lib/loadAuthors";
+
+if (!isFeatureEnabled("authorsIndex")) {
+  return Astro.redirect("/articles", 307);
+}
 
 const authors = await loadAuthors(Astro.cookies);
 ---

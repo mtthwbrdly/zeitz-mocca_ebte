@@ -74,6 +74,15 @@ const hasExtraInfo = Boolean(author?.role || author?.longBio);
 
   .author-name--static {
     cursor: default;
+    text-shadow: none;
+  }
+
+   .author-name--static:hover {
+    text-shadow: none;
+  }
+
+  .author-name::before {
+    content: "—";
   }
 
   .author-info__body {

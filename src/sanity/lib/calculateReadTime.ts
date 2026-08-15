@@ -1,4 +1,5 @@
 import { cleanString } from "./clean";
+import { portableTextToPlainText } from "./renderInlinePortableText";
 import { pullQuoteToPlainText } from "./renderPullQuote";
 import type { Article, ArticleSection, PortableTextBlock } from "./types";
 
@@ -47,7 +48,10 @@ function sectionWordCount(section: ArticleSection) {
         countWords(section.linkText)
       );
     case "imageSection":
-      return countWords(section.image?.caption) + countWords(section.image?.alt);
+      return (
+        countWords(portableTextToPlainText(section.image?.formattedCaption)) +
+        countWords(section.image?.alt)
+      );
     case "dividerSection":
     default:
       return 0;

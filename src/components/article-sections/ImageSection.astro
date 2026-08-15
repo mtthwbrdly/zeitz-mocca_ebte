@@ -1,15 +1,23 @@
 ---
 import { cleanString } from "../../sanity/lib/clean";
+import { renderInlinePortableText } from "../../sanity/lib/renderInlinePortableText";
 
 const { section } = Astro.props;
-const layout = cleanString(section.layout) || "inline";
+const layoutAliases: Record<string, string> = {
+  inline: "caption-left",
+  wide: "landscape",
+  full: "landscape"
+};
+const rawLayout = cleanString(section.layout);
+const layout = layoutAliases[rawLayout] || rawLayout || "portrait";
 const imageUrl = cleanString(section.image?.url);
-const imageAlt = cleanString(section.image?.alt) || cleanString(section.image?.caption) || "";
+const imageAlt = cleanString(section.image?.alt) || "";
+const captionHtml = renderInlinePortableText(section.image?.formattedCaption);
 ---
 
 <figure class={`image-section image-section--${layout}`}>
   <img src={imageUrl} alt={imageAlt} loading="lazy" />
-  {section.image.caption && <figcaption>{section.image.caption}</figcaption>}
+  {captionHtml && <figcaption set:html={captionHtml} />}
 </figure>
 
 <style>
@@ -17,19 +25,25 @@ const imageAlt = cleanString(section.image?.alt) || cleanString(section.image?.c
     overflow: hidden;
     background: var(--article-category-bg);
     margin: 0;
-
   }
 
-  .image-section--inline {
+  .image-section--portrait {
     display: grid;
+    max-width: 51.5rem;
+    margin-left: auto;
+    padding: 0.75rem;
+  }
+
+  .image-section--caption-left {
+    display: grid;
+    align-items: center;
     grid-template-columns: minmax(0, 1fr) minmax(14rem, 1fr);
     max-width: 67.5rem;
     margin-left: auto;
     padding: 0.75rem;
   }
 
-  .image-section--wide,
-  .image-section--full {
+  .image-section--landscape {
     display: grid;
     max-width: 67.5rem;
     margin-left: auto;
@@ -51,18 +65,16 @@ const imageAlt = cleanString(section.image?.alt) || cleanString(section.image?.c
     filter: brightness(calc(100%)) grayscale(0%) contrast(100%);
   }
 
-  .image-section--inline img {
+  .image-section--portrait img,
+  .image-section--caption-left img {
     aspect-ratio: 331 / 480;
   }
 
-  .image-section--wide img,
-  .image-section--full img {
+  .image-section--landscape img {
   /*   max-height: 40rem; */
   }
 
   .image-section figcaption {
-    display: grid;
-    place-items: center;
     padding: 4rem 4rem 3.25rem 4rem;
     font: 600 0.8rem / 1.4 var(--font-meta);
     letter-spacing: var(--meta-letter-spacing);
@@ -70,7 +82,7 @@ const imageAlt = cleanString(section.image?.alt) || cleanString(section.image?.c
   }
 
   @media (max-width: 720px) {
-    .image-section--inline {
+    .image-section--caption-left {
       grid-template-columns: 1fr;
     }
   }
@@ -125,8 +137,8 @@ const imageAlt = cleanString(section.image?.alt) || cleanString(section.image?.c
     filter: brightness(100%) grayscale(0%) contrast(100%);
   }
 
-  .image-section--inline .image-section__media,
-  .image-section--inline img {
+  .image-section--caption-left .image-section__media,
+  .image-section--caption-left img {
     aspect-ratio: 331 / 480;
   }
   */

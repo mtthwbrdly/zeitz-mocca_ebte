@@ -169,7 +169,7 @@ export const articleBySlugQuery = groq`
         "image": {
           "url": image.asset->url,
           "alt": altText,
-          "caption": caption
+          "formattedCaption": formattedCaption
         }
       },
       _type == "audioPlayerSection" => {

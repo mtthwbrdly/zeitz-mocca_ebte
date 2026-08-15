@@ -179,8 +179,8 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
     width: clamp(2.5rem, 5vw, 5.5rem);
     color: var(--ink);
     position: absolute;
-    right: clamp(0.5rem, 1.5vw, 2.5rem);
-    bottom: clamp(0.5rem, 1.5vw, 2.5rem);
+    right: clamp(1rem, 1.5vw, 2.5rem);
+    bottom: clamp(1rem, 1.5vw, 2.5rem);
   }
 
   .home-category-card__icon :global(svg) {
@@ -271,6 +271,7 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
   @media (max-width: 980px) {
     .home-categories__cards {
       grid-template-columns: 1fr;
+      padding: 0 1rem;
     }
 
     .home-categories__header {
@@ -283,4 +284,21 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
       border-bottom: 1px solid var(--ink);
     }
   }
+
+@media (max-width: 900px) {
+  .home-category-card__description {
+    font-size: clamp(1.5rem, 1.65vw, 1.25rem);
+  }
+  .home-category-card__content {
+    padding: clamp(2rem, 2vw, 3rem);
+  }
+   .home-category-card__icon {
+    bottom: clamp(1.5rem, 1.5vw, 2.5rem);
+    right: clamp(1.5rem, 1.5vw, 2.5rem);
+    width: clamp(5rem, 5vw, 5.5rem);
+   }
+   .home-category-card__link {
+    font-size: 0.75rem;
+   }
+}
 </style>

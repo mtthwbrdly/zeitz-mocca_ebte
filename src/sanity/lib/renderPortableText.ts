@@ -50,17 +50,88 @@ function wrapMarks(
       return `<a href="${escapeHtml(cleanString(definition.href))}" target="_blank" rel="noreferrer">${output}</a>`;
     }
     if (definition?._type === "citation") {
-      const citation = citationMap[definition._key];
-
-      if (!citation) {
-        return output;
-      }
-
-      return `<span class="u-citation-target">${output}<sup class="u-citation-ref"><button id="${escapeHtml(citation.targetId)}" type="button" aria-label="Show citation ${citation.number}" data-citation-number="${citation.number}" data-citation-inline data-citation-panel-link>[${citation.number}]</button></sup></span>`;
+      return output;
     }
 
     return output;
   }, text);
+}
+
+function getCitationMark(
+  child: PortableTextSpan,
+  markDefs: PortableTextMarkDef[] = [],
+  citationMap: CitationReferenceMap = {}
+) {
+  return child.marks?.find((mark) => {
+    const definition = markDefs.find((item) => item._key === mark);
+    return definition?._type === "citation" && Boolean(citationMap[definition._key]);
+  });
+}
+
+function renderCitationReference(citationMap: CitationReferenceMap, citationKey: string) {
+  const citation = citationMap[citationKey];
+
+  if (!citation) {
+    return "";
+  }
+
+  return `<sup class="u-citation-ref"><button id="${escapeHtml(citation.targetId)}" type="button" aria-label="Show citation ${citation.number}" data-citation-number="${citation.number}" data-citation-inline data-citation-panel-link>[${citation.number}]</button></sup>`;
+}
+
+function renderChildRange(
+  children: PortableTextSpan[] = [],
+  markDefs: PortableTextMarkDef[] = [],
+  citationMap: CitationReferenceMap = {}
+) {
+  const output: string[] = [];
+  let childIndex = 0;
+
+  while (childIndex < children.length) {
+    const child = children[childIndex];
+    const citationMark = getCitationMark(child, markDefs, citationMap);
+
+    if (citationMark) {
+      const citedChildren: PortableTextSpan[] = [];
+
+      while (
+        childIndex < children.length &&
+        getCitationMark(children[childIndex], markDefs, citationMap) === citationMark
+      ) {
+        citedChildren.push(children[childIndex]);
+        childIndex += 1;
+      }
+
+      const citedHtml = citedChildren
+        .map((citedChild) =>
+          wrapMarks(
+            escapeHtml(citedChild.text),
+            (citedChild.marks || []).filter(
+              (mark) => mark !== PULL_QUOTE_MARK && mark !== citationMark
+            ),
+            markDefs,
+            citationMap
+          )
+        )
+        .join("");
+
+      output.push(
+        `<span class="u-citation-target">${citedHtml}${renderCitationReference(citationMap, citationMark)}</span>`
+      );
+      continue;
+    }
+
+    output.push(
+      wrapMarks(
+        escapeHtml(child.text),
+        (child.marks || []).filter((mark) => mark !== PULL_QUOTE_MARK),
+        markDefs,
+        citationMap
+      )
+    );
+    childIndex += 1;
+  }
+
+  return output.join("");
 }
 
 function renderChildren(
@@ -81,16 +152,7 @@ function renderChildren(
         pullQuoteRun.endChildIndex
       );
 
-      const quotedHtml = quotedChildren
-        .map((child) =>
-          wrapMarks(
-            escapeHtml(child.text),
-            (child.marks || []).filter((mark) => mark !== PULL_QUOTE_MARK),
-            markDefs,
-            citationMap
-          )
-        )
-        .join("");
+      const quotedHtml = renderChildRange(quotedChildren, markDefs, citationMap);
 
       output.push(
         `<span class="u-pull-quote-target" id="${escapeHtml(pullQuoteRun.targetId)}" tabindex="-1">${quotedHtml}</span>`
@@ -100,14 +162,24 @@ function renderChildren(
     }
 
     const child = children[childIndex];
-    output.push(
-      wrapMarks(
-        escapeHtml(child.text),
-        (child.marks || []).filter((mark) => mark !== PULL_QUOTE_MARK),
-        markDefs,
-        citationMap
-      )
-    );
+    const citationMark = getCitationMark(child, markDefs, citationMap);
+
+    if (citationMark) {
+      const citedChildren: PortableTextSpan[] = [];
+
+      while (
+        childIndex < children.length &&
+        getCitationMark(children[childIndex], markDefs, citationMap) === citationMark
+      ) {
+        citedChildren.push(children[childIndex]);
+        childIndex += 1;
+      }
+
+      output.push(renderChildRange(citedChildren, markDefs, citationMap));
+      continue;
+    }
+
+    output.push(renderChildRange([child], markDefs, citationMap));
     childIndex += 1;
   }
 

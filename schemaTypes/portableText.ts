@@ -76,22 +76,29 @@ export const portableText = defineType({
             },
             fields: [
               defineField({
-                name: "source",
+                name: "formattedSource",
                 title: "Citation",
-                type: "text",
-                rows: 3,
+                type: "array",
+                of: [
+                  defineArrayMember({
+                    type: "block",
+                    styles: [{ title: "Paragraph", value: "normal" }],
+                    lists: [],
+                    marks: {
+                      decorators: [
+                        { title: "Strong", value: "strong" },
+                        { title: "Emphasis", value: "em" }
+                      ],
+                      annotations: []
+                    }
+                  })
+                ],
                 validation: (rule) => rule.required()
               }),
               defineField({
                 name: "url",
                 title: "URL",
                 type: "url"
-              }),
-              defineField({
-                name: "note",
-                title: "Note",
-                type: "text",
-                rows: 2
               })
             ]
           }
