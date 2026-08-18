@@ -1,5 +1,6 @@
 ---
 import HomeArticleIndexSection from "../../components/home/HomeArticleIndexSection.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { cleanString } from "../../sanity/lib/clean";
 import { loadArticleIndex } from "../../sanity/lib/loadArticleIndex";
@@ -38,6 +39,7 @@ const pageTitle =
   <main class="article-index-page">
     <HomeArticleIndexSection section={section} articles={articles} />
   </main>
+  <SiteFooter />
 </BaseLayout>
 
 <style>

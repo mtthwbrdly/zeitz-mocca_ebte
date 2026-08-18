@@ -1,0 +1,387 @@
+---
+import heroPaperSvg from "../assets/home/hero-paper.svg?raw";
+import footerLogoUrl from "../assets/zeitz-mocaa-logo.svg?url";
+import { isFeatureEnabled, type FeatureFlag } from "../lib/featureFlags";
+
+type FooterLink = {
+  href: string;
+  label: string;
+  featureFlag?: FeatureFlag;
+};
+
+const links: FooterLink[] = [
+  { href: "/", label: "Home" },
+  { href: "/articles", label: "Index" },
+  { href: "mailto:info.everything@zeitzmocaa.museum", label: "Contact" },
+].filter((link) => !link.featureFlag || isFeatureEnabled(link.featureFlag));
+
+const socialLinks = [
+  { href: "https://www.instagram.com/zeitzmocaa/", label: "Instagram" },
+  {
+    href: "https://www.youtube.com/channel/UCDJltdsHMhBhgl_y6MMEcyQ",
+    label: "Youtube",
+  },
+  { href: "https://www.facebook.com/ZeitzMOCAA/", label: "Facebook" },
+  {
+    href: "https://za.linkedin.com/company/zeitz-museum-of-contemporary-art-africa",
+    label: "LinkedIn",
+  },
+  { href: "https://twitter.com/ZeitzMOCAA", label: "Twitter" },
+];
+
+const copyrightYear = new Date().getFullYear();
+const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
+  ? heroPaperSvg.replace(
+      /preserveAspectRatio="[^"]*"/,
+      'preserveAspectRatio="none"',
+    )
+  : heroPaperSvg.replace("<svg", '<svg preserveAspectRatio="none"');
+---
+
+<footer class="site-footer-container" aria-label="Site footer">
+  <div class="site-footer">
+    <div class="site-footer__identity">
+      <a
+        class="site-footer__logo-link"
+        href="https://zeitzmocaa.museum/"
+        aria-label="ZEITZ MOCAA"
+      >
+        <img
+          class="site-footer__logo"
+          src={footerLogoUrl}
+          alt="ZEITZ MOCAA"
+          width="169"
+          height="40"
+          loading="lazy"
+        />
+      </a>
+      <div class="site-footer__address-container">
+        <a
+          class="site-footer__address"
+          href="https://maps.app.goo.gl/i56DDDsjS6Q764LcA"
+        >
+          S Arm Rd Victoria & Alfred Waterfront<br />
+          Cape&nbsp;Town, 8002, South&nbsp;Africa
+        </a>
+        <!-- <a class="site-footer__address" href="tel:+27873504777">
+        +27 (0)87 350 4777<br />
+      </a>
+      <a class="site-footer__address" href="mailto:info@zeitzmocaa.museum">info@zeitzmocaa.museum
+      </a> -->
+      </div>
+    </div>
+
+    <div class="site-footer__column site-footer__column--navigation">
+      <h2>Navigation</h2>
+      <nav class="site-footer__nav-links" aria-label="Footer navigation">
+        {links.map((link) => <a href={link.href}>{link.label}</a>)}
+      </nav>
+    </div>
+
+    <div class="site-footer__column site-footer__column--social">
+      <h2>Social</h2>
+      <nav class="site-footer__social-links" aria-label="Social media">
+        {socialLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+      </nav>
+    </div>
+
+    <div class="site-footer__column site-footer__column--submissions">
+      <h2>Submissions</h2>
+      <div class="site-footer__submissions-content">
+        <p>
+          Submit a text to our team for review, and we&rsquo;ll review it based
+          on our <a href="/">submissions guidelines.</a>
+        </p>
+        <a
+          class="site-footer__submit-link"
+          href="mailto:info.everything@zeitzmocaa.museum?subject=Everything but the Exhibition | Submission"
+          >Submit</a
+        >
+      </div>
+    </div>
+  </div>
+  <div
+    class="site-footer__paper"
+    aria-hidden="true"
+    set:html={footerPaperSvg}
+  />
+  <div class="site-footer__copyright-wrap">
+    <p class="site-footer__copyright">
+      © {copyrightYear} ZEITZ MOCAA ALL RIGHTS RESERVED.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer-container {
+    --footer-paper-visible: 5.5rem;
+    --footer-paper-height: 100%;
+
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: max(420px, 75svh);
+    padding: 4rem 4rem 2rem 4rem;
+    background: var(--ink);
+    color: var(--surface);
+  }
+
+  .site-footer {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns:
+      minmax(10rem, 1.25fr)
+      minmax(10rem, 0.8fr)
+      minmax(10rem, 0.8fr)
+      minmax(16rem, 1.7fr);
+    gap: clamp(1rem, 3vw, 6rem);
+  }
+
+  .site-footer__identity {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100%;
+  }
+
+  .site-footer__logo-link {
+    display: block;
+    width: clamp(14rem, 18vw, 21.25rem);
+    color: inherit;
+  }
+
+  .site-footer__logo {
+    width: 75%;
+    height: auto;
+  }
+
+  .site-footer__address-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-footer__address {
+    margin: 0;
+    color: rgb(255 255 255 / 62%);
+    font: 400 clamp(0.85rem, 1vw, 1.5rem) / 1.2 var(--font-display);
+    letter-spacing: 0;
+    text-decoration: none;
+  }
+
+  .site-footer__copyright {
+    margin: 0;
+    font: 700 clamp(0.85rem, 1vw, 1rem) / 1 var(--font-display);
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .site-footer__copyright-wrap {
+    position: relative;
+    z-index: 2;
+  }
+
+  .site-footer__paper {
+    position: absolute;
+    z-index: 1;
+    left: -1px;
+    right: -1px;
+    bottom: calc(var(--footer-paper-visible) - var(--footer-paper-height));
+    height: var(--footer-paper-height);
+    opacity: 1;
+    pointer-events: none;
+    transform: rotate(180deg);
+    transform-origin: center;
+  }
+
+  .site-footer__paper :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+  }
+
+  .site-footer__column {
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+  }
+
+  .site-footer__column h2 {
+    margin: 0;
+    color: rgb(255 255 255 / 48%);
+    font: 400 clamp(0.85rem, 0.8vw, 1rem) / 1 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .site-footer__nav-links,
+  .site-footer__social-links {
+    display: grid;
+    justify-items: start;
+  }
+
+  .site-footer__nav-links {
+    gap: 0.35rem;
+  }
+
+  .site-footer__social-links {
+    gap: 0.7rem;
+  }
+
+  .site-footer__nav-links a,
+  .site-footer__social-links a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-text-shadow);
+  }
+
+  .site-footer__nav-links a {
+    font: 400 clamp(2rem, 3vw, 4rem) / 0.95 var(--font-display);
+    letter-spacing: 0;
+  }
+
+  .site-footer__social-links a {
+    font: 400 clamp(1rem, 1.25vw, 2rem) / 1 var(--font-display);
+    letter-spacing: 0;
+  }
+
+  .site-footer__column--submissions {
+    max-width: 46rem;
+  }
+
+  .site-footer__submissions-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .site-footer__column--submissions p {
+    margin: 0;
+    color: rgb(255 255 255 / 90%);
+    font: 400 clamp(1.5rem, 2vw, 1.5rem) / 1.05 var(--font-display);
+    letter-spacing: 0;
+  }
+
+  .site-footer__column--submissions p a {
+    color: inherit;
+    text-underline-offset: 0.14em;
+    transition: var(--transition-text-shadow);
+  }
+
+  .site-footer__submit-link {
+    display: inline-flex;
+    align-items: center;
+    align-self: start;
+    justify-content: center;
+    justify-self: start;
+    padding: 0.5rem 3rem;
+    background: var(--surface);
+    color: var(--ink);
+    font: 700 1rem / 1 var(--font-meta);
+    letter-spacing: var(--meta-letter-spacing);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: var(--transition-text-shadow);
+  }
+
+  .site-footer__logo-link:focus-visible,
+  .site-footer a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 0.25rem;
+  }
+
+  .site-footer__nav-links a:hover,
+  .site-footer__nav-links a:focus-visible,
+  .site-footer__social-links a:hover,
+  .site-footer__social-links a:focus-visible,
+  .site-footer__column--submissions p a:hover,
+  .site-footer__column--submissions p a:focus-visible {
+    text-shadow: var(--text-shadow-hover-small-white);
+  }
+
+  .site-footer__submit-link:hover,
+  .site-footer__submit-link:focus-visible {
+    text-shadow: var(--text-shadow-hover-small-black);
+  }
+
+  @media (max-width: 1100px) {
+    .site-footer {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .site-footer__identity {
+      min-height: 26rem;
+    }
+
+    .site-footer__column--submissions {
+      max-width: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .site-footer-container {
+      --footer-paper-visible: 5rem;
+      --footer-paper-height: 9rem;
+
+      min-height: 100svh;
+      padding: 6rem 3rem 2rem 3rem;
+    }
+
+    .site-footer {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto 1fr;
+      flex: 1;
+      gap: 5rem;
+      align-content: start;
+    }
+
+    .site-footer__nav-links a {
+      font-size: clamp(1.75rem, 10vw, 2.75rem);
+    }
+
+    .site-footer__social-links a {
+      font-size: clamp(1rem, 5vw, 1.5rem);
+    }
+
+    .site-footer__column--submissions p {
+      font: 400 clamp(1.5rem, 2vw, 2rem) / 1.05 var(--font-display);
+    }
+
+    .site-footer__column--submissions {
+      order: 0;
+      grid-column: 1 / -1;
+    }
+
+    .site-footer__column--navigation,
+    .site-footer__column--social {
+      align-self: start;
+    }
+
+    .site-footer__identity {
+      grid-column: 1 / -1;
+      order: 99;
+      gap: 2.5rem;
+      min-height: auto;
+      align-self: end;
+      margin-top: auto;
+    }
+
+    .site-footer__logo-link {
+      width: min(100%, 18rem);
+    }
+
+    .site-footer__submit-link {
+      width: 100%;
+    }
+
+    .site-footer__copyright {
+      margin-top: 5rem;
+      text-align: center;
+    }
+  }
+</style>

@@ -5,6 +5,7 @@ import HomeFeaturedArticleSection from "../components/home/HomeFeaturedArticleSe
 import HomeQuoteSection from "../components/home/HomeQuoteSection.astro";
 import HomeSplitFeatureSection from "../components/home/HomeSplitFeatureSection.astro";
 import DisableDraftMode from "../components/DisableDraftMode";
+import SiteFooter from "../components/SiteFooter.astro";
 import SanityVisualEditing from "../components/SanityVisualEditing";
 import heroPaperSvg from "../assets/home/hero-paper.svg?raw";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -124,6 +125,7 @@ const contentSections = homePage.sections.filter(
       }
     </div>
   </main>
+  <SiteFooter />
   {draftMode && <SanityVisualEditing client:only="react" />}
   {draftMode && <DisableDraftMode client:only="react" />}
 </BaseLayout>
