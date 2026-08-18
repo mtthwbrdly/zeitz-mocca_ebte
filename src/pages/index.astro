@@ -17,24 +17,29 @@ const draftMode = Boolean(getDraftModeProps(Astro.cookies).perspectiveCookie);
 
 const [homePage, articles] = await Promise.all([
   loadHomePage(Astro.cookies),
-  loadArticleIndex(Astro.cookies)
+  loadArticleIndex(Astro.cookies),
 ]);
 
-const pageTitle = cleanString(homePage.headerTitle) || "Everything but the Exhibition";
+const pageTitle =
+  cleanString(homePage.headerTitle) || "Everything but the Exhibition";
 const pageDescription =
-  cleanString(homePage.seoDescription) || "Recent articles from Everything but the Exhibition.";
+  cleanString(homePage.seoDescription) ||
+  "Recent articles from Everything but the Exhibition.";
 const headerText = cleanString(homePage.headerText);
 const fallbackHeaderText =
-  "Everything but the Exhibition is an online publication exploring the curatorial beyond the exhibition itself. Everything, here, means both 'preceding and surrounding' and 'aftermath,' refusing the fiction that the exhibition is the ultimate act and instead, turns instead to the research, the arguments, the false starts, the logistics, the public conversations, and all the other labour that is edited and happening elsewhere.";
+  "Everything but the Exhibition is an online publication exploring the curatorial beyond the exhibition itself. Everything, here, means both 'preceding and surrounding' and 'aftermath,' refusing the fiction that the exhibition is the ultimate act and instead, turns to the research, the arguments, the false starts, the logistics, the public conversations, and all the other labour that is edited and happening elsewhere.";
 const introText = headerText || fallbackHeaderText;
 const responsiveHeroPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
-  ? heroPaperSvg.replace(/preserveAspectRatio="[^"]*"/, 'preserveAspectRatio="none"')
+  ? heroPaperSvg.replace(
+      /preserveAspectRatio="[^"]*"/,
+      'preserveAspectRatio="none"',
+    )
   : heroPaperSvg.replace("<svg", '<svg preserveAspectRatio="none"');
 const categoryCardsSection = homePage.sections.find(
-  (section) => section._type === "categoryCardsSection"
+  (section) => section._type === "categoryCardsSection",
 );
 const contentSections = homePage.sections.filter(
-  (section) => section._type !== "categoryCardsSection"
+  (section) => section._type !== "categoryCardsSection",
 );
 ---
 
@@ -47,62 +52,76 @@ const contentSections = homePage.sections.filter(
         <div class="home-hero__paper" set:html={responsiveHeroPaperSvg} />
         <div class="home-hero__title-mask">
           <div class="home-hero__title home-hero__title--overlay">
-            <span class="home-hero__title-line home-hero__title-line--top">Everything but</span>
+            <span class="home-hero__title-line home-hero__title-line--top"
+              >Everything but</span
+            >
           </div>
         </div>
       </div>
 
       <div class="home-hero__underlay" aria-hidden="true">
         <div class="home-hero__title home-hero__title--underlay">
-          <span class="home-hero__title-line home-hero__title-line--bottom">the Exhibition</span>
+          <span class="home-hero__title-line home-hero__title-line--bottom"
+            >the Exhibition</span
+          >
         </div>
       </div>
-
- 
-
-
     </header>
 
-
-  <div class="home-hero__intro" aria-hidden="true">
-       <span class="pull-quote__marker pull-quote__marker--top-left" aria-hidden="true"></span>
-  <span class="pull-quote__marker pull-quote__marker--top-right" aria-hidden="true"></span>
-  <span class="pull-quote__marker pull-quote__marker--bottom-left" aria-hidden="true"></span>
-  <span class="pull-quote__marker pull-quote__marker--bottom-right" aria-hidden="true"></span>
-        <p class="home-hero__intro-text">
-          {headerText ? (
+    <div class="home-hero__intro" aria-hidden="true">
+      <span
+        class="pull-quote__marker pull-quote__marker--top-left"
+        aria-hidden="true"></span>
+      <span
+        class="pull-quote__marker pull-quote__marker--top-right"
+        aria-hidden="true"></span>
+      <span
+        class="pull-quote__marker pull-quote__marker--bottom-left"
+        aria-hidden="true"></span>
+      <span
+        class="pull-quote__marker pull-quote__marker--bottom-right"
+        aria-hidden="true"></span>
+      <p class="home-hero__intro-text">
+        {
+          headerText ? (
             introText
           ) : (
             <>
               <em>Everything but the Exhibition</em>
-              {" is an online publication exploring the curatorial beyond the exhibition itself. "}
+              {
+                " is an online publication exploring the curatorial beyond the exhibition itself. "
+              }
               <em>Everything</em>
-              {", here, means both 'preceding and surrounding' and 'aftermath,' refusing the fiction that the exhibition is the ultimate act and instead, turns instead to the research, the arguments, the false starts, the logistics, the public conversations, and all the other labour that is edited and happening elsewhere."}
+              {
+                ", here, means both 'preceding and surrounding' and 'aftermath,' refusing the fiction that the exhibition is the ultimate act and instead, turns to the research, the arguments, the false starts, the logistics, the public conversations, and all the other labour that is edited and happening elsewhere."
+              }
             </>
-          )}
-        </p>
-        
-      </div>
+          )
+        }
+      </p>
+    </div>
 
     <HomeCategoryCardsSection section={categoryCardsSection} />
 
     <div class="home-page__sections">
-      {contentSections.map((section) => (
-        <>
-          {section._type === "articleIndexSection" && (
-            <HomeArticleIndexSection section={section} articles={articles} />
-          )}
-          {section._type === "homeQuoteSection" && (
-            <HomeQuoteSection section={section} />
-          )}
-          {section._type === "homeFeaturedArticleSection" && (
-            <HomeFeaturedArticleSection section={section} />
-          )}
-          {section._type === "homeSplitFeatureSection" && (
-            <HomeSplitFeatureSection section={section} />
-          )}
-        </>
-      ))}
+      {
+        contentSections.map((section) => (
+          <>
+            {section._type === "articleIndexSection" && (
+              <HomeArticleIndexSection section={section} articles={articles} />
+            )}
+            {section._type === "homeQuoteSection" && (
+              <HomeQuoteSection section={section} />
+            )}
+            {section._type === "homeFeaturedArticleSection" && (
+              <HomeFeaturedArticleSection section={section} />
+            )}
+            {section._type === "homeSplitFeatureSection" && (
+              <HomeSplitFeatureSection section={section} />
+            )}
+          </>
+        ))
+      }
     </div>
   </main>
   {draftMode && <SanityVisualEditing client:only="react" />}
@@ -112,24 +131,27 @@ const contentSections = homePage.sections.filter(
 <script>
   const introSection = document.querySelector(".home-hero__intro");
   const titleLines = document.querySelectorAll(
-    ".home-hero__title-line--top, .home-hero__title-line--bottom"
+    ".home-hero__title-line--top, .home-hero__title-line--bottom",
   );
 
   const scrollIntroIntoView = () => {
     if (!introSection) return;
 
     const introRect = introSection.getBoundingClientRect();
-    const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
+    const maxScrollTop =
+      document.documentElement.scrollHeight - window.innerHeight;
     // Align the intro section's bottom edge with the viewport bottom edge.
     const targetScrollTop = Math.min(
       Math.max(0, introRect.bottom + window.scrollY - window.innerHeight),
-      Math.max(0, maxScrollTop)
+      Math.max(0, maxScrollTop),
     );
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     window.scrollTo({
       top: targetScrollTop,
-      behavior: prefersReducedMotion ? "auto" : "smooth"
+      behavior: prefersReducedMotion ? "auto" : "smooth",
     });
   };
 
@@ -211,7 +233,6 @@ const contentSections = homePage.sections.filter(
     white-space: nowrap;
   }
 
-
   .home-hero__title--overlay {
     z-index: 2;
     top: calc(clamp(0rem, 52svh, 99rem) - clamp(0rem, 8vw, 6rem));
@@ -255,7 +276,6 @@ const contentSections = homePage.sections.filter(
     transition: var(--transition-text-shadow);
   }
 
-
   .home-hero__title:hover .home-hero__title-line--top {
     text-shadow: var(--text-shadow-hover-large-black);
   }
@@ -263,7 +283,6 @@ const contentSections = homePage.sections.filter(
   .home-hero__title:hover .home-hero__title-line--bottom {
     text-shadow: var(--text-shadow-hover-large-white);
   }
-
 
   .home-hero__title-line--bottom {
     color: var(--surface);
@@ -274,7 +293,7 @@ const contentSections = homePage.sections.filter(
 
   .home-hero__intro {
     min-height: 75svh;
-    padding:1.5rem;
+    padding: 1.5rem;
     background: var(--ink);
     color: var(--surface);
     z-index: 0;
@@ -317,77 +336,90 @@ const contentSections = homePage.sections.filter(
     .home-hero__title {
       width: 100%;
       padding-inline: 1rem;
-      font-size: clamp(4rem, 10vw, 7rem);
+      font-size: clamp(3rem, 15vw, 7rem);
       white-space: normal;
     }
 
     .home-hero__title--overlay {
-      top: calc(clamp(0rem, 52svh, 99rem) - clamp(0rem, 18vw, 5rem));
+      top: calc(clamp(0rem, 52svh, 99rem) - clamp(0rem, 18vw, 5.5rem));
     }
 
     .home-hero__title--underlay {
-      top: calc(clamp(0rem, 52svh, 99rem) - clamp(0rem, 11vw, 3rem));
+      top: calc(clamp(0rem, 52svh, 99rem) - clamp(0rem, 11vw, 2rem));
     }
 
     .home-hero__underlay {
       margin-top: calc(-1 * var(--home-hero-paper-height));
     }
-    
   }
 
   .pull-quote__marker {
-  --marker-size: 1rem;
-  --marker-offset: 5rem;
-  position: absolute;
-  width: var(--marker-size);
-  height: var(--marker-size);
-  pointer-events: none;
-  transition: top 1s ease, right 1s ease, bottom 1s ease, left 1s ease;
-}
+    --marker-size: 1rem;
+    --marker-offset: 5rem;
+    position: absolute;
+    width: var(--marker-size);
+    height: var(--marker-size);
+    pointer-events: none;
+    transition:
+      top 1s ease,
+      right 1s ease,
+      bottom 1s ease,
+      left 1s ease;
+  }
 
-.pull-quote__marker::before,
-.pull-quote__marker::after {
-  content: "";
-  position: absolute;
-  background: var(--surface);
-}
+  .pull-quote__marker::before,
+  .pull-quote__marker::after {
+    content: "";
+    position: absolute;
+    background: var(--surface);
+  }
 
-.pull-quote__marker::before {
-  width: 100%;
-  height: 1px;
-  top:0;
-  left:0;
-}
+  .pull-quote__marker::before {
+    width: 100%;
+    height: 1px;
+    top: 0;
+    left: 0;
+  }
 
-.pull-quote__marker::after {
-  width: 1px;
-  height: 100%;
-   top:0;
-  left:0;
-}
+  .pull-quote__marker::after {
+    width: 1px;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
 
-.pull-quote__marker--top-left {
-  top: var(--marker-offset);
-  left: var(--marker-offset);
-  transform: rotate(180deg);
+  .pull-quote__marker--top-left {
+    top: var(--marker-offset);
+    left: var(--marker-offset);
+    transform: rotate(180deg);
+  }
 
-}
+  .pull-quote__marker--top-right {
+    top: var(--marker-offset);
+    right: var(--marker-offset);
+    transform: rotate(-90deg);
+  }
 
-.pull-quote__marker--top-right {
-  top: var(--marker-offset);
-  right: var(--marker-offset);
-  transform: rotate(-90deg);
-}
+  .pull-quote__marker--bottom-left {
+    bottom: var(--marker-offset);
+    left: var(--marker-offset);
+    transform: rotate(90deg);
+  }
 
-.pull-quote__marker--bottom-left {
-  bottom: var(--marker-offset);
-  left: var(--marker-offset);
-  transform: rotate(90deg);
-}
+  .pull-quote__marker--bottom-right {
+    right: var(--marker-offset);
+    bottom: var(--marker-offset);
+  }
 
-.pull-quote__marker--bottom-right {
-  right: var(--marker-offset);
-  bottom: var(--marker-offset);
-}
+  @media (max-width: 900px) {
+    .pull-quote__marker {
+      --marker-offset: 2rem;
+    }
+
+    .home-hero__intro:hover .pull-quote__marker {
+      --marker-offset: 3rem;
+    }
+  }
+
 
 </style>

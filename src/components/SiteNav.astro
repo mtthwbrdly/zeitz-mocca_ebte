@@ -198,11 +198,9 @@ const links: NavLink[] = [
   @media (max-width: 900px) {
     .site-nav {
       padding-block: 1rem;
-      background: var(--article-category-bg);
-      mix-blend-mode: normal;
-      color: var(--ink);
       padding:1rem;
-      border-bottom: 1px solid var(--ink);
+      z-index: 9999;
+      justify-content: flex-end;
     }
 
     .site-nav__brand,
@@ -211,6 +209,12 @@ const links: NavLink[] = [
     .site-menu-overlay__close {
       font-size: 1.1rem;
     }
+
+    .site-nav__brand {
+      display: none;
+    }
+
+
 
     .site-menu-overlay__panel {
       padding: 1rem;

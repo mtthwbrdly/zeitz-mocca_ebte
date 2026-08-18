@@ -175,6 +175,16 @@ const authors = getArticleAuthors(article);
         const prefersReducedMotion = window.matchMedia(
           "(prefers-reduced-motion: reduce)",
         ).matches;
+        const startsClosedOnMobile = window.matchMedia(
+          "(max-width: 900px)",
+        ).matches;
+
+        if (
+          startsClosedOnMobile &&
+          informationPanel instanceof HTMLDetailsElement
+        ) {
+          informationPanel.open = false;
+        }
 
         const setPdfStatus = (title, body, dismissible = false) => {
           if (

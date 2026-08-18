@@ -228,9 +228,12 @@ const readTime = isRelated ? null : calculateReadTime(article);
   .article-header__inner {
     max-width: none;
   }
-  .article-header__meta {
-    display:flex;
-    flex-direction:column;
+   .article-header h1 {
+    margin: 0;
+    font: 400 clamp(3rem, 7vw, 5em) / 0.9 var(--font-display);
+  }
+  .article-header__author {
+    font: 400 clamp(2rem, 3.4vw, 2.5rem) / 1 var(--font-display);
   }
 
 }
