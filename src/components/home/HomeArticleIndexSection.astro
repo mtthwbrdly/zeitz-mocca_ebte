@@ -283,10 +283,9 @@ const fillerRows = Array.from({
 
   .article-index__row {
     display: grid;
-    grid-template-columns: minmax(18rem, 1.6fr) minmax(10rem, 0.8fr) minmax(
-        9rem,
-        0.8fr
-      ) minmax(5rem, 0.45fr);
+    grid-template-columns:
+      minmax(18rem, 1.6fr) minmax(10rem, 0.8fr) minmax(9rem, 0.8fr)
+      minmax(5rem, 0.45fr);
     align-items: center;
     gap: 1.5rem;
     padding: 0.15rem 0.5rem 0.15rem;
@@ -374,6 +373,10 @@ const fillerRows = Array.from({
   }
 
   @media (max-width: 900px) {
+    .article-index {
+      padding: 1rem;
+    }
+
     .article-index__header {
       padding-right: 0;
     }
@@ -405,9 +408,10 @@ const fillerRows = Array.from({
 
     .article-index__title {
       white-space: normal;
-      font: 400 clamp(1.85rem, 3vw, 3rem) / 1.25 var(--font-display);
+      font: 400 clamp(1.85rem, 3vw, 3rem) / 1.15 var(--font-display);
       margin-bottom: 0.25rem;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.035em;
+      white-space: nowrap;
     }
 
     .article-index__category {
@@ -423,11 +427,11 @@ const fillerRows = Array.from({
       padding: 1rem clamp(1rem, 10vw, 4rem);
     }
 
-  .article-index__author,
-  .article-index__date,
-  .article-index__category {
-    padding: 0rem 0.15rem;
-  }
+    .article-index__author,
+    .article-index__date,
+    .article-index__category {
+      padding: 0rem 0.15rem;
+    }
 
     .article-index__row--filler .article-index__author,
     .article-index__row--filler .article-index__date,

@@ -1,5 +1,6 @@
 ---
 import { isFeatureEnabled, type FeatureFlag } from "../lib/featureFlags";
+import menuLogoUrl from "../assets/zeitz-logo-icon_dark.svg?url";
 
 type NavLink = {
   href: string;
@@ -16,7 +17,12 @@ const links: NavLink[] = [
 ---
 
 <div class="site-nav-shell">
-  <nav class="site-nav" aria-label="Primary" transition:persist="site-nav" transition:animate="none">
+  <nav
+    class="site-nav"
+    aria-label="Primary"
+    transition:persist="site-nav"
+    transition:animate="none"
+  >
     <a class="site-nav__brand" href="/">Everything but the Exhibition</a>
     <button
       class="site-nav__menu-button"
@@ -29,20 +35,61 @@ const links: NavLink[] = [
     </button>
   </nav>
 
-  <div class="site-menu-overlay" id="site-menu-overlay" aria-hidden="true" data-menu-overlay transition:persist="site-menu-overlay" transition:animate="none">
-    <div class="site-menu-overlay__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+  <div
+    class="site-menu-overlay"
+    id="site-menu-overlay"
+    aria-hidden="true"
+    data-menu-overlay
+    transition:persist="site-menu-overlay"
+    transition:animate="none"
+  >
+    <div
+      class="site-menu-overlay__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Site menu"
+    >
       <div class="site-menu-overlay__top">
-        <a class="site-menu-overlay__brand" href="/" data-menu-link>Everything but the Exhibition</a>
-        <button class="site-menu-overlay__close" type="button" aria-label="Close menu" data-menu-close>
+        <a class="site-menu-overlay__brand" href="/" data-menu-link
+          >Everything but the Exhibition</a
+        >
+        <button
+          class="site-menu-overlay__close"
+          type="button"
+          aria-label="Close menu"
+          data-menu-close
+        >
           Close
         </button>
       </div>
 
       <div class="site-menu-overlay__content">
         <div class="site-menu-overlay__links">
-          {links.map((link) => (
-            <a href={link.href} data-menu-link>{link.label}</a>
-          ))}
+          {
+            links.map((link) => (
+              <a href={link.href} data-menu-link>
+                {link.label}
+              </a>
+            ))
+          }
+        </div>
+        <div class="site-menu-overlay__logo">
+          <a
+            class="site-menu-overlay__logo-link"
+            href="https://zeitzmocaa.museum/"
+            aria-label="ZEITZ MOCAA"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              class="site-menu-overlay__logo"
+              src={menuLogoUrl}
+              alt="ZEITZ MOCAA"
+              width="169"
+              height="40"
+              loading="lazy"
+            />
+          </a>
         </div>
       </div>
     </div>
@@ -114,7 +161,6 @@ const links: NavLink[] = [
     background: var(--page-bg);
     color: var(--ink);
     transition: opacity 240ms ease;
-    
   }
 
   .site-menu-overlay.is-open {
@@ -148,7 +194,7 @@ const links: NavLink[] = [
     user-select: none;
   }
 
-   .site-menu-overlay__brand {
+  .site-menu-overlay__brand {
     text-transform: uppercase;
   }
 
@@ -171,6 +217,7 @@ const links: NavLink[] = [
     display: grid;
     gap: 1.25rem;
     padding-top: 7rem;
+    position: relative;
   }
 
   .site-menu-overlay__links {
@@ -182,9 +229,11 @@ const links: NavLink[] = [
     width: fit-content;
     color: inherit;
     text-decoration: none;
-    font: 400 clamp(3.25rem, 11vw, 9rem) / 0.9 var(--font-display);
-    letter-spacing: 0;
+    font: 400 clamp(3.25rem, 14vw, 17rem) / 0.8 var(--font-display);
+    letter-spacing: -0.02em;
     transition: var(--transition-text-shadow);
+    padding: 0.25rem;
+    overflow: hidden;
   }
 
   .site-menu-overlay__links a:hover {
@@ -195,11 +244,25 @@ const links: NavLink[] = [
     overflow: hidden;
   }
 
+  .site-menu-overlay__logo {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+
+  .site-menu-overlay__logo img {
+    fill: var(--ink);
+  }
+
+  .site-menu-overlay__logo {
+    width: clamp(2rem, 6vw, 8rem);
+    height: auto;
+  }
+
   @media (max-width: 900px) {
     .site-nav {
       padding-block: 1rem;
-      padding:1rem;
-      z-index: 9999;
+      padding: 1rem;
       justify-content: flex-end;
     }
 
@@ -214,8 +277,6 @@ const links: NavLink[] = [
       display: none;
     }
 
-
-
     .site-menu-overlay__panel {
       padding: 1rem;
     }
@@ -228,6 +289,11 @@ const links: NavLink[] = [
     .site-menu-overlay__links a {
       font-size: clamp(2.9rem, 18vw, 5.7rem);
     }
+
+    .site-menu-overlay__logo {
+      width: clamp(3rem, 8vw, 8rem);
+      height: auto;
+    }
   }
 </style>
 
@@ -238,11 +304,17 @@ const links: NavLink[] = [
   const menuLinks = document.querySelectorAll("[data-menu-link]");
   let previouslyFocusedElement = null;
 
-  if (menuToggle instanceof HTMLButtonElement && menuToggle.dataset.menuBound !== "true") {
+  if (
+    menuToggle instanceof HTMLButtonElement &&
+    menuToggle.dataset.menuBound !== "true"
+  ) {
     menuToggle.dataset.menuBound = "true";
 
     const setMenuOpen = (isOpen) => {
-      if (!(menuToggle instanceof HTMLButtonElement) || !(menuOverlay instanceof HTMLElement)) {
+      if (
+        !(menuToggle instanceof HTMLButtonElement) ||
+        !(menuOverlay instanceof HTMLElement)
+      ) {
         return;
       }
 
@@ -266,10 +338,15 @@ const links: NavLink[] = [
 
     menuToggle.addEventListener("click", () => setMenuOpen(true));
     menuClose?.addEventListener("click", () => setMenuOpen(false));
-    menuLinks.forEach((link) => link.addEventListener("click", () => setMenuOpen(false)));
+    menuLinks.forEach((link) =>
+      link.addEventListener("click", () => setMenuOpen(false)),
+    );
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && menuOverlay?.classList.contains("is-open")) {
+      if (
+        event.key === "Escape" &&
+        menuOverlay?.classList.contains("is-open")
+      ) {
         setMenuOpen(false);
       }
     });

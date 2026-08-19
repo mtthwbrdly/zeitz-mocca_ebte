@@ -215,12 +215,12 @@ const readTime = isRelated ? null : calculateReadTime(article);
       0.5px 0.5px 4px var(--article-category-bg);
   }
 
-.article-header__image {
+.article-header__media {
   transition: transform 0.6s ease;
   transform-origin: center;
 }
 
-.article-header.article-header--related:has(.article-header__inner:hover) .article-header__image {
+.article-header.article-header--related:has(.article-header__inner:hover) .article-header__media {
   transform: scale(1.025);
 }
 
