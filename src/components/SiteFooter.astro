@@ -33,14 +33,31 @@ const copyrightYear = new Date().getFullYear();
 const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
   ? heroPaperSvg.replace(
       /preserveAspectRatio="[^"]*"/,
-      'preserveAspectRatio="none"',
+      'preserveAspectRatio="xMidYMid meet"',
     )
-  : heroPaperSvg.replace("<svg", '<svg preserveAspectRatio="none"');
+  : heroPaperSvg.replace("<svg", '<svg preserveAspectRatio="xMidYMid meet"');
 ---
 
 <footer class="site-footer-container" aria-label="Site footer">
   <div class="site-footer">
     <div class="site-footer__identity">
+      <div class="site-footer__address-container">
+        <p class="site-footer__address">Zeitz MOCAA</p>
+        <a
+          class="site-footer__address"
+          href="https://maps.app.goo.gl/i56DDDsjS6Q764LcA"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Silo District, South Arm Road, <br />
+          V&A Waterfront, Cape Town, 8002
+        </a>
+        <!-- <a class="site-footer__address" href="tel:+27873504777">
+        +27 (0)87 350 4777<br />
+      </a>
+      <a class="site-footer__address" href="mailto:info@zeitzmocaa.museum">info@zeitzmocaa.museum
+      </a> -->
+      </div>
       <a
         class="site-footer__logo-link"
         href="https://zeitzmocaa.museum/"
@@ -55,20 +72,6 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
           loading="lazy"
         />
       </a>
-      <div class="site-footer__address-container">
-        <a
-          class="site-footer__address"
-          href="https://maps.app.goo.gl/i56DDDsjS6Q764LcA"
-        >
-          S Arm Rd Victoria & Alfred Waterfront<br />
-          Cape&nbsp;Town, 8002, South&nbsp;Africa
-        </a>
-        <!-- <a class="site-footer__address" href="tel:+27873504777">
-        +27 (0)87 350 4777<br />
-      </a>
-      <a class="site-footer__address" href="mailto:info@zeitzmocaa.museum">info@zeitzmocaa.museum
-      </a> -->
-      </div>
     </div>
 
     <div class="site-footer__column site-footer__column--navigation">
@@ -81,7 +84,13 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
     <div class="site-footer__column site-footer__column--social">
       <h2>Social</h2>
       <nav class="site-footer__social-links" aria-label="Social media">
-        {socialLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+        {
+          socialLinks.map((link) => (
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
+              {link.label}
+            </a>
+          ))
+        }
       </nav>
     </div>
 
@@ -105,17 +114,30 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
     aria-hidden="true"
     set:html={footerPaperSvg}
   />
-  <div class="site-footer__copyright-wrap">
+  <div class="site-footer__legal-wrap">
     <p class="site-footer__copyright">
-      © {copyrightYear} ZEITZ MOCAA ALL RIGHTS RESERVED.
+      © {copyrightYear} ZEITZ&nbspMOCAA ALL&nbspRIGHTS&nbspRESERVED.
     </p>
+    <div class="site-footer__legal-links">
+      <a
+        class="site-footer__legal"
+        href="https://www.zeitzmocaa.museum/privacy-policy/"
+        target="_blank"
+        rel="noopener noreferrer">Privacy Policy</a
+      >
+      <a
+        class="site-footer__legal"
+        href="https://www.zeitzmocaa.museum/terms-and-conditions/"
+        target="_blank"
+        rel="noopener noreferrer">Terms and Conditions</a
+      >
+    </div>
   </div>
 </footer>
 
 <style>
   .site-footer-container {
-    --footer-paper-visible: 5.5rem;
-    --footer-paper-height: 100%;
+    --footer-paper-visible: 5rem;
 
     position: relative;
     isolation: isolate;
@@ -124,7 +146,6 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
     flex-direction: column;
     justify-content: space-between;
     min-height: max(420px, 75svh);
-    padding: 4rem 4rem 2rem 4rem;
     background: var(--ink);
     color: var(--surface);
   }
@@ -139,6 +160,7 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
       minmax(10rem, 0.8fr)
       minmax(16rem, 1.7fr);
     gap: clamp(1rem, 3vw, 6rem);
+    padding: 4rem 4rem 2rem 4rem;
   }
 
   .site-footer__identity {
@@ -155,7 +177,7 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
   }
 
   .site-footer__logo {
-    width: 75%;
+    width: 70%;
     height: auto;
   }
 
@@ -172,17 +194,30 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
     text-decoration: none;
   }
 
-  .site-footer__copyright {
-    margin: 0;
+  .site-footer__legal-wrap {
     font: 700 clamp(0.85rem, 1vw, 1rem) / 1 var(--font-display);
-    letter-spacing: 0;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-
-  .site-footer__copyright-wrap {
     position: relative;
     z-index: 2;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    color: var(--ink);
+    background: var(--surface);
+  }
+
+  .site-footer__copyright {
+    margin: 0;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .site-footer__legal-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  a.site-footer__legal {
+    text-decoration: none;
   }
 
   .site-footer__paper {
@@ -190,18 +225,19 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
     z-index: 1;
     left: -1px;
     right: -1px;
-    bottom: calc(var(--footer-paper-visible) - var(--footer-paper-height));
-    height: var(--footer-paper-height);
+    bottom: 0;
     opacity: 1;
     pointer-events: none;
-    transform: rotate(180deg);
+    transform: translateY(calc(100% - var(--footer-paper-visible)))
+      rotate(180deg);
     transform-origin: center;
+    display: none;
   }
 
   .site-footer__paper :global(svg) {
     display: block;
     width: 100%;
-    height: 100%;
+    height: auto;
     max-width: none;
   }
 
@@ -257,7 +293,7 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
   .site-footer__submissions-content {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 2.5rem;
   }
 
   .site-footer__column--submissions p {
@@ -326,10 +362,7 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
   @media (max-width: 900px) {
     .site-footer-container {
       --footer-paper-visible: 5rem;
-      --footer-paper-height: 9rem;
-
       min-height: 100svh;
-      padding: 6rem 3rem 2rem 3rem;
     }
 
     .site-footer {
@@ -338,6 +371,7 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
       flex: 1;
       gap: 5rem;
       align-content: start;
+      padding: 6rem 3rem 4rem 3rem;
     }
 
     .site-footer__nav-links a {
@@ -379,9 +413,12 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
       width: 100%;
     }
 
-    .site-footer__copyright {
-      margin-top: 5rem;
-      text-align: center;
+    .site-footer__legal-wrap {
+      padding: 1.5rem 1.5rem;
+      align-items: flex-end;
+    }
+    .site-footer__legal-links {
+      white-space: nowrap;
     }
   }
 </style>
