@@ -4,6 +4,7 @@ import {
   getArticleCategory,
   getArticleCategoryClass,
   getFormatTitle,
+  normalizeArticleCategory,
 } from "../../sanity/lib/articleCategory";
 import { formatAuthorNames } from "../../sanity/lib/authors";
 import { cleanString } from "../../sanity/lib/clean";
@@ -40,25 +41,26 @@ const formatCategory = (article: ArticleIndexItem) => {
 
 const title = cleanString(section.title) || "Latest";
 const intro = cleanString(section.intro);
-const categoryFilter = cleanString(section.categoryFilter) || "all";
+const rawCategoryFilter = cleanString(section.categoryFilter) || "all";
+const categoryFilter = rawCategoryFilter === "all" ? "all" : normalizeArticleCategory(rawCategoryFilter);
 const headerIconSvg = getCategoryIconSvg(categoryFilter);
 const showCategoryFilter = Boolean(section.showCategoryFilter);
 const categoryFilterItems = [
   { label: "All", value: "all", href: "/articles" },
   {
     label: "Process Notes",
-    value: "process-notes",
-    href: "/articles?category=process-notes",
+    value: "process-note",
+    href: "/articles?category=process-note",
   },
   {
     label: "Voice Notes",
-    value: "voice-notes",
-    href: "/articles?category=voice-notes",
+    value: "voice-note",
+    href: "/articles?category=voice-note",
   },
   {
     label: "Foot Notes",
-    value: "footnotes",
-    href: "/articles?category=footnotes",
+    value: "foot-note",
+    href: "/articles?category=foot-note",
   },
 ];
 const sectionId =
@@ -245,16 +247,16 @@ const fillerRows = Array.from({
     border-right: 0;
   }
 
-  .article-index__filter-link--process-notes {
-    --filter-bg: var(--color-process-notes);
+  .article-index__filter-link--process-note {
+    --filter-bg: var(--color-process-note);
   }
 
-  .article-index__filter-link--voice-notes {
-    --filter-bg: var(--color-voice-notes);
+  .article-index__filter-link--voice-note {
+    --filter-bg: var(--color-voice-note);
   }
 
-  .article-index__filter-link--footnotes {
-    --filter-bg: var(--color-footnotes);
+  .article-index__filter-link--foot-note {
+    --filter-bg: var(--color-foot-note);
   }
 
   .article-index__filter-link:hover,

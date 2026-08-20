@@ -96,12 +96,12 @@
 
 :root {
   --page-bg: rgb(250 250 250 / 95%);
-  --color-process-notes: #FFDACB;
-  --color-footnotes: #E6F1F9;
-  --color-voice-notes: #FFFACC;
+  --color-process-note: #FFDACB;
+  --color-foot-note: #E6F1F9;
+  --color-voice-note: #FFFACC;
   --surface: #ffffff;
   --surface-soft: #f6f3ee;
-  --article-category-bg: var(--color-process-notes);
+  --article-category-bg: var(--color-process-note);
   --hero-bg: #141414;
   --hero-ink: #ffffff;
   --ink: #171717;
@@ -162,16 +162,16 @@
 }
 
 
-.article-category-process-notes {
-  --article-category-bg: var(--color-process-notes);
+.article-category-process-note {
+  --article-category-bg: var(--color-process-note);
 }
 
-.article-category-footnotes {
-  --article-category-bg: var(--color-footnotes);
+.article-category-foot-note {
+  --article-category-bg: var(--color-foot-note);
 }
 
-.article-category-voice-notes {
-  --article-category-bg: var(--color-voice-notes);
+.article-category-voice-note {
+  --article-category-bg: var(--color-voice-note);
 }
 
 * {

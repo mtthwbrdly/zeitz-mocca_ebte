@@ -1,5 +1,6 @@
 ---
 import { getCategoryIconSvg } from "../../lib/categoryIcons";
+import { normalizeArticleCategory } from "../../sanity/lib/articleCategory";
 import { cleanString } from "../../sanity/lib/clean";
 import type { CategoryCardsHomeSection } from "../../sanity/lib/types";
 
@@ -14,13 +15,13 @@ const intro = cleanString(section?.intro);
 const cards = section?.cards || [];
 
 const categoryLabel = (category: NonNullable<(typeof cards)[number]["category"]>) => {
-  if (category === "footnotes") return "footnotes";
-  if (category === "voice-notes") return "voice notes";
+  if (category === "foot-note") return "foot notes";
+  if (category === "voice-note") return "voice notes";
   return "process notes";
 };
 
 const categoryHref = (category: (typeof cards)[number]["category"]) =>
-  `/articles?category=${cleanString(category) || "process-notes"}`;
+  `/articles?category=${cleanString(category) || "process-note"}`;
 ---
 
 {
@@ -42,7 +43,7 @@ const categoryHref = (category: (typeof cards)[number]["category"]) =>
 
       <div class="home-categories__cards" role="list">
         {cards.map((card) => {
-          const category = card.category || "process-notes";
+          const category = normalizeArticleCategory(card.category);
           const cardTitle = cleanString(card.title) || categoryLabel(category);
           const label = cleanString(card.label) || categoryLabel(category);
           // allow HTML (e.g. <em>) in descriptions — render via set:html below

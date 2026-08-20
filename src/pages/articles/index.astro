@@ -9,16 +9,16 @@ import type { ArticleIndexHomeSection } from "../../sanity/lib/types";
 const articles = await loadArticleIndex(Astro.cookies);
 
 const categoryParam = cleanString(Astro.url.searchParams.get("category"));
-const allowedCategories = ["process-notes", "footnotes", "voice-notes"] as const;
+const allowedCategories = ["process-note", "foot-note", "voice-note"] as const;
 const categoryFilter = allowedCategories.includes(categoryParam as (typeof allowedCategories)[number])
   ? categoryParam
   : "all";
 
 const categoryTitles = {
   all: "Index",
-  "process-notes": "Process Notes",
-  footnotes: "Foot Notes",
-  "voice-notes": "Voice Notes"
+  "process-note": "Process Notes",
+  "foot-note": "Foot Notes",
+  "voice-note": "Voice Notes"
 };
 
 const section: ArticleIndexHomeSection = {

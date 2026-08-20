@@ -85,7 +85,7 @@ export const article = defineType({
       description: "Select a Category.",
       options: {
         list: [
-          { title: "Footnote", value: "footnote" },
+          { title: "Foot Note", value: "foot-note" },
           { title: "Process Note", value: "process-note" },
           { title: "Voice Note", value: "voice-note" }
         ]
@@ -153,7 +153,7 @@ preview: {
   },
   prepare({ title, firstAuthorName, secondAuthorName, thirdAuthorName, legacyAuthorName, format, media }) {
     const formatTitles: Record<string, string> = {
-      "footnote": "Footnote",
+      "foot-note": "Foot Note",
       "process-note": "Process Note",
       "voice-note": "Voice Note"
     };

@@ -183,7 +183,7 @@ export interface ArticleIndexHomeSection {
   _type: "articleIndexSection";
   title?: string;
   intro?: string;
-  categoryFilter?: "all" | "process-notes" | "footnotes" | "voice-notes";
+  categoryFilter?: "all" | "process-note" | "foot-note" | "voice-note";
   showCategoryFilter?: boolean;
   maxItems?: number;
 }
@@ -209,7 +209,7 @@ export interface HomeSplitFeatureSection {
 export interface HomeCategoryCard {
   _key?: string;
   _type?: "categoryCard";
-  category?: "process-notes" | "footnotes" | "voice-notes";
+  category?: "process-note" | "foot-note" | "voice-note";
   label?: string;
   title?: string;
   description?: string;
