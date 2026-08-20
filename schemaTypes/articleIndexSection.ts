@@ -27,7 +27,7 @@ export const articleIndexSection = defineType({
         list: [
           { title: "All articles", value: "all" },
           { title: "Process Notes", value: "process-notes" },
-          { title: "Footnotes", value: "footnotes" },
+          { title: "Foot Notes", value: "footnotes" },
           { title: "Voice Notes", value: "voice-notes" }
         ],
         layout: "radio"

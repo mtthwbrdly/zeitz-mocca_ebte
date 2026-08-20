@@ -34,7 +34,7 @@ export const categoryCardsSection = defineType({
               options: {
                 list: [
                   { title: "Process Notes", value: "process-notes" },
-                  { title: "Footnotes", value: "footnotes" },
+                  { title: "Foot Notes", value: "footnotes" },
                   { title: "Voice Notes", value: "voice-notes" }
                 ],
                 layout: "radio"
