@@ -1,0 +1,168 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import dotLogoUrl from "../assets/zeitz-logo-icon_dark.svg?url";
+---
+
+<BaseLayout
+  title="Submissions | Everything but the Exhibition"
+  description="Submission guidelines for Everything but the Exhibition."
+>
+  <main class="submissions-page">
+    <section class="submissions-page__content" aria-labelledby="submissions-title">
+      <p class="submissions-page__intro">
+        We welcome submissions that explore publishing and paracuratorial
+        practices within Foot Notes or Voice Notes formats for <em>Everything but the Exhibition.</em>
+      </p>
+
+      <ul class="submissions-page__guidelines">
+        <li>
+          Submissions imply final texts. Unfortunately, we are unable to accept
+          proposals at this stage.
+        </li>
+        <li>
+          Your text submission should be accompanied by a CV, bio and portfolio.
+        </li>
+        <li>
+          When texts require accompanying images, please ensure these are
+          original images you have ownership to. We cannot accept reproductions
+          of images, images where rights are required, or any work that is not
+          your own.
+        </li>
+        <li>
+          Foot Notes submissions should be no more than 2000 words and
+          critically engage with the subject matter. These longer-form texts
+          explicate a topic through rigorous research.
+        </li>
+        <li>
+          Voice Notes submissions are experimental, subjective forms of writing
+          of no more than 500 words to accompany a visual or sonic component. We
+          also welcome book reviews in this format.
+        </li>
+        <li>
+          Submissions do not guarantee publication. Decisions will be
+          communicated to successful submissions upon review.
+        </li>
+      </ul>
+      <div class="submissions-page__footer">
+          <h1 class="submissions-page__title" id="submissions-title">Submissions</h1>
+        <img class="submissions-page__mark" src={dotLogoUrl} alt="" aria-hidden="true" />
+      </div>
+    </section>
+
+
+  </main>
+</BaseLayout>
+
+<style>
+
+  .submissions-page__footer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+        align-items: baseline;
+  }
+  .submissions-page {
+    position: relative;
+    isolation: isolate;
+    min-height: 100svh;
+    overflow: clip;
+    padding: 1.5rem;
+    background: var(--ink);
+    color: var(--surface);
+        display: flex;
+    align-items: flex-end;
+   
+  }
+
+  .submissions-page__content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: end ;
+     gap: 2rem;
+     width: 100%;
+  }
+
+  .submissions-page__intro {
+    max-width: 79rem;
+    margin: 0;
+    font: 400 clamp(1.5rem, 2.5vw, 2.25rem) / 1 var(--font-display);
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .submissions-page__intro em {
+    text-shadow: var(--text-shadow-hover-large-white);
+  }
+
+  .submissions-page__guidelines {
+    max-width: 50rem;
+    margin: 0;
+    padding-left: 1.5rem;
+    font: 400 clamp(1.25rem, 1vw, 1.55rem) / 1.15 var(--font-display);
+    letter-spacing: 0;
+    margin-bottom: 4rem;
+  }
+
+  .submissions-page__guidelines li {
+    padding-left: 0.25rem;
+  }
+
+  .submissions-page__title {
+    margin: 0;
+    max-width: calc(100% - 10rem);
+    font: 400 clamp(3.25rem, 12vw, 17rem) / 0.8 var(--font-display);
+    letter-spacing: -0.05em;
+    padding: 0.25rem;
+  }
+
+  .submissions-page__mark {
+    height: auto;
+    filter: invert(1);
+    width: clamp(2rem, 6vw, 6rem);
+
+  }
+
+  /* @media (max-width: 1100px) {
+    .submissions-page {
+      min-height: 100svh;
+      padding-top: 8rem;
+      overflow: visible;
+    }
+
+    .submissions-page__content {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: min(100%, 68rem);
+      padding-bottom: clamp(10rem, 28vw, 16rem);
+    }
+
+    .submissions-page__title {
+      font-size: clamp(5.25rem, 16vw, 10rem);
+    }
+  } */
+
+  @media (max-width: 700px) {
+    .submissions-page {
+      padding: 5.5rem 1rem 1rem;
+    }
+
+ 
+
+
+
+    .submissions-page__guidelines {
+      max-width: none;
+    }
+
+
+
+    .submissions-page__mark {
+      width: 4rem;
+      bottom: 1.35rem;
+      right: 1rem;
+    }
+  }
+</style>

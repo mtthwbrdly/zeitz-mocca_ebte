@@ -12,7 +12,8 @@ type FooterLink = {
 const links: FooterLink[] = [
   { href: "/", label: "Home" },
   { href: "/articles", label: "Index" },
-  { href: "mailto:info.everything@zeitzmocaa.museum", label: "Contact" },
+  { href: "/contact", label: "Contact" },
+  { href: "/submissions", label: "Submit" },
 ].filter((link) => !link.featureFlag || isFeatureEnabled(link.featureFlag));
 
 const socialLinks = [
@@ -101,11 +102,11 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
       <div class="site-footer__submissions-content">
         <p>
           Submit a text to our team for review, and we&rsquo;ll review it based
-          on our <a href="/">submissions guidelines.</a>
+          on our <a href="/submissions">submissions guidelines.</a>
         </p>
         <a
           class="site-footer__submit-link"
-          href="mailto:info.everything@zeitzmocaa.museum?subject=Everything but the Exhibition | Submission"
+          href="/submissions"
           >Submit</a
         >
       </div>
