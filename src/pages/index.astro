@@ -36,12 +36,6 @@ const responsiveHeroPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
       'preserveAspectRatio="none"',
     )
   : heroPaperSvg.replace("<svg", '<svg preserveAspectRatio="none"');
-const categoryCardsSection = homePage.sections.find(
-  (section) => section._type === "categoryCardsSection",
-);
-const contentSections = homePage.sections.filter(
-  (section) => section._type !== "categoryCardsSection",
-);
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
@@ -102,11 +96,11 @@ const contentSections = homePage.sections.filter(
       </p>
     </div>
 
-    <HomeCategoryCardsSection section={categoryCardsSection} />
+    <HomeCategoryCardsSection />
 
     <div class="home-page__sections">
       {
-        contentSections.map((section) => (
+        homePage.sections.map((section) => (
           <>
             {section._type === "articleIndexSection" && (
               <HomeArticleIndexSection section={section} articles={articles} />

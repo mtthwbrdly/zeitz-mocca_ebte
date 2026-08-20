@@ -1,14 +1,7 @@
 ---
 import { getCategoryIconSvg } from "../../lib/categoryIcons";
 import { cleanString } from "../../sanity/lib/clean";
-import type {
-  CategoryCardsHomeSection,
-  HomeCategoryCard,
-} from "../../sanity/lib/types";
-
-const { section } = Astro.props as {
-  section?: Partial<CategoryCardsHomeSection>;
-};
+import type { HomeCategoryCard } from "../../sanity/lib/types";
 
 const defaultIntro =
   "The publication unfolds through three recurring editorial formats—Process Notes, Foot Notes and Voice Notes—each offering a distinct way of engaging with curatorial practice. Together, they bring interviews, essays, reflections and experimental writing into conversation, foregrounding the research, exchanges and lived experiences that shape exhibitions beyond their final public form.";
@@ -40,9 +33,9 @@ const defaultCards: HomeCategoryCard[] = [
   },
 ];
 
-const title = cleanString(section?.title) || "Categories";
-const intro = cleanString(section?.intro) || defaultIntro;
-const cards = section?.cards?.length ? section.cards : defaultCards;
+const title = "Categories";
+const intro = defaultIntro;
+const cards = defaultCards;
 
 const categoryLabel = (category: HomeCategoryCard["category"]) => {
   if (category === "footnotes") return "footnotes";
@@ -253,7 +246,7 @@ const categoryHref = (category: HomeCategoryCard["category"]) =>
   .home-category-card__description {
     position: relative;
     z-index: 1;
-    font: 400 clamp(1.75rem, 3vw, 2.25rem) / 1.15 var(--font-display);
+    font: 400 clamp(0.85rem, 1.75vw, 2rem) / 1.15 var(--font-display);
     letter-spacing: -0.01em;
     margin: 0;
   }
