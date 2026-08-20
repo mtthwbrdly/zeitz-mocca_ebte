@@ -5,7 +5,7 @@ import type { Article, ArticleSection, PortableTextBlock } from "./types";
 
 const WORDS_PER_MINUTE = 220;
 
-type ReadTimeArticle = Partial<Pick<Article, "title" | "subtitle" | "excerpt">> & {
+type ReadTimeArticle = Partial<Pick<Article, "title" | "excerpt">> & {
   contentSections?: ArticleSection[];
 };
 
@@ -38,15 +38,6 @@ function sectionWordCount(section: ArticleSection) {
         countWords(pullQuoteToPlainText(section.quote)) +
         countWords(section.attribution)
       );
-    case "shareClippingSection":
-      return countWords(section.quote) + countWords(section.label);
-    case "featureCardSection":
-      return (
-        countWords(section.eyebrow) +
-        countWords(section.title) +
-        countWords(section.description) +
-        countWords(section.linkText)
-      );
     case "imageSection":
       return (
         countWords(portableTextToPlainText(section.image?.formattedCaption)) +
@@ -61,7 +52,6 @@ function sectionWordCount(section: ArticleSection) {
 export function calculateReadTime(article: ReadTimeArticle = {}) {
   const totalWords =
     countWords(cleanString(article.title)) +
-    countWords(cleanString(article.subtitle)) +
     countWords(cleanString(article.excerpt)) +
     (article.contentSections || []).reduce(
       (total, section) => total + sectionWordCount(section),

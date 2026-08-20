@@ -10,19 +10,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import AudioPlayerSection from "./article-sections/AudioPlayerSection.astro";
 import CommentsSection from "./article-sections/CommentsSection.astro";
 import DividerSection from "./article-sections/DividerSection.astro";
-import FeatureCardSection from "./article-sections/FeatureCardSection.astro";
 import ImageSection from "./article-sections/ImageSection.astro";
 import PullQuoteSection from "./article-sections/PullQuoteSection.astro";
 import RelatedReadingSection from "./article-sections/RelatedReadingSection.astro";
 import RichTextSection from "./article-sections/RichTextSection.astro";
-import ShareClippingSection from "./article-sections/ShareClippingSection.astro";
 import VideoSection from "./article-sections/VideoSection.astro";
 
 const { article, draftMode = false } = Astro.props;
 const { citationMap, citations } = extractArticleCitations(article.contentSections);
 
 const pageTitle = `${cleanString(article.title)} | Everything but the Exhibition`;
-const pageDescription = cleanString(article.excerpt || article.subtitle || article.title);
+const pageDescription = cleanString(article.excerpt || article.title);
 const articleCategoryClass = getArticleCategoryClass(article);
 ---
 
@@ -43,8 +41,6 @@ const articleCategoryClass = getArticleCategoryClass(article);
             <>
               {section._type === "richTextSection" && <RichTextSection section={section} citationMap={citationMap} article={article} />}
               {section._type === "pullQuoteSection" && <PullQuoteSection section={section} citationMap={citationMap} article={article} />}
-              {section._type === "shareClippingSection" && <ShareClippingSection section={section} />}
-              {section._type === "featureCardSection" && <FeatureCardSection section={section} />}
               {section._type === "imageSection" && <ImageSection section={section} />}
               {section._type === "audioPlayerSection" && <AudioPlayerSection section={section} />}
               {section._type === "videoSection" && <VideoSection section={section} />}
@@ -149,7 +145,7 @@ const articleCategoryClass = getArticleCategoryClass(article);
 
   @media (max-width: 900px) {
     .article-page {
-      padding-inline: 1rem;
+      padding: 0.5rem;
     }
 
     .article-grid {
@@ -159,8 +155,17 @@ const articleCategoryClass = getArticleCategoryClass(article);
     }
 
     .article-sidebar {
-      top: 4rem;
+      top: 0.5rem;
       z-index: 50;
+      max-width: 80%;
+      max-height: none;
+      overflow: visible;
+      grid-template-rows: none;
+    }
+
+    .article-sidebar:has(.article-meta[open]),
+    .article-sidebar:has(.citations-panel[open]) {
+      grid-template-rows: none;
     }
 
   }

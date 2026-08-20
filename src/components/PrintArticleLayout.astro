@@ -13,7 +13,6 @@ const { article } = Astro.props as { article: Article };
 const { citationMap, citations } = extractArticleCitations(article.contentSections);
 
 const title = cleanString(article.title);
-const subtitle = cleanString(article.subtitle);
 const authorName = formatAuthorNames(article);
 const publishedAtValue = cleanString(article.publishedAt);
 const publishedAt = publishedAtValue
@@ -39,7 +38,6 @@ const detailLine = [publishedAt, readTime ? `${readTime} read` : ""]
     <div class="print-body">
       <header class="masthead">
         <h1 class="masthead__title">{title}</h1>
-        {subtitle && <p class="masthead__subtitle">{subtitle}</p>}
         {authorName && <p class="masthead__meta">{authorName}</p>}
         {detailLine && <p class="masthead__meta">{detailLine}</p>}
       </header>
@@ -72,30 +70,6 @@ const detailLine = [publishedAt, readTime ? `${readTime} read` : ""]
               <blockquote set:html={quoteHtml} />
               {attribution && <figcaption>— {attribution}</figcaption>}
             </figure>
-          );
-        }
-
-        if (section._type === "shareClippingSection") {
-          const label = cleanString(section.label) || "Shareable clipping";
-          const quote = cleanString(section.quote);
-          return (
-            <figure class="print-share-clipping">
-              <p class="print-share-clipping__label">{label}</p>
-              <blockquote>{quote}</blockquote>
-            </figure>
-          );
-        }
-
-        if (section._type === "featureCardSection") {
-          const eyebrow = cleanString(section.eyebrow);
-          const cardTitle = cleanString(section.title);
-          const description = cleanString(section.description);
-          return (
-            <aside class="print-card">
-              {eyebrow && <p class="print-card__eyebrow">{eyebrow}</p>}
-              {cardTitle && <p class="print-card__title">{cardTitle}</p>}
-              {description && <p class="print-card__description">{description}</p>}
-            </aside>
           );
         }
 
@@ -254,14 +228,6 @@ const detailLine = [publishedAt, readTime ? `${readTime} read` : ""]
     
   }
 
-  .masthead__subtitle {
-    margin: 0 0 var(--baseline);
-    font-family: var(--font-display);
-    font-size: 12pt;
-    line-height: calc(var(--baseline) * 2);
-    color: var(--muted);
-  }
-
   .masthead__meta {
     margin: 0;
     font-family: var(--font-meta);
@@ -360,8 +326,6 @@ const detailLine = [publishedAt, readTime ? `${readTime} read` : ""]
     margin: calc(var(--baseline) * 2) 0;
   }
 
-  .print-share-clipping,
-  .print-card,
   .print-divider,
   .print-spacer {
     column-span: all;
@@ -400,56 +364,6 @@ const detailLine = [publishedAt, readTime ? `${readTime} read` : ""]
     font-weight: 700;
     line-height: var(--baseline);
     letter-spacing: var(--meta-letter-spacing);
-  }
-
-  .print-share-clipping {
-    margin: calc(var(--baseline) * 2) 0;
-    padding: var(--baseline) 10pt;
-    border: 0.75pt solid var(--ink);
-  }
-
-  .print-share-clipping__label {
-    margin: 0 0 var(--baseline);
-    font-family: var(--font-meta);
-    font-size: 8pt;
-    font-weight: 700;
-    line-height: var(--baseline);
-    text-transform: uppercase;
-    letter-spacing: var(--meta-letter-spacing);
-  }
-
-  .print-share-clipping blockquote {
-    margin: 0;
-  }
-
-  .print-card {
-    margin: calc(var(--baseline) * 2) 0;
-    padding: var(--baseline) 10pt;
-    border: 0.75pt solid var(--ink);
-  }
-
-  .print-card__eyebrow {
-    margin: 0 0 var(--baseline);
-    font-family: var(--font-meta);
-    font-size: 8pt;
-    font-weight: 700;
-    line-height: var(--baseline);
-    text-transform: uppercase;
-    letter-spacing: var(--meta-letter-spacing);
-  }
-
-  .print-card__title {
-    margin: 0 0 var(--baseline);
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 12pt;
-    line-height: calc(var(--baseline) * 2);
-  }
-
-  .print-card__description {
-    margin: 0;
-    font-size: 10pt;
-    line-height: calc(var(--baseline) * 2);
   }
 
   .print-image {

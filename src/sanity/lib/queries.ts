@@ -42,7 +42,6 @@ const articleAuthorSummaryFields = groq`
 
 const homeFeaturedArticleFields = groq`
   title,
-  subtitle,
   excerpt,
   format,
   publishedAt,
@@ -53,7 +52,7 @@ const homeFeaturedArticleFields = groq`
     slug
   },
   ${articleAuthorSummaryFields},
-  "thumbnail": {
+  "coverImage": {
     "url": thumbnail.asset->url,
     "alt": thumbnail.alt
   },
@@ -116,19 +115,14 @@ export const articleBySlugQuery = groq`
   *[_type == "article" && slug.current == $slug][0]{
     _id,
     title,
-    subtitle,
     slug,
     excerpt,
     format,
     series,
     publishedAt,
-    "thumbnail": {
+    "coverImage": {
       "url": thumbnail.asset->url,
       "alt": thumbnail.alt
-    },
-    "downloadablePdf": {
-      "url": downloadablePdf.asset->url,
-      "originalFilename": downloadablePdf.asset->originalFilename
     },
     ${articleAuthorFields},
     "tags": tags[]->{
@@ -149,7 +143,7 @@ export const articleBySlugQuery = groq`
           slug
         },
         ${articleAuthorSummaryFields},
-        "thumbnail": {
+        "coverImage": {
           "url": thumbnail.asset->url,
           "alt": thumbnail.alt
         }
@@ -157,13 +151,6 @@ export const articleBySlugQuery = groq`
     },
     contentSections[]{
       ...,
-      _type == "featureCardSection" => {
-        ...,
-        linkedArticle->{
-          title,
-          "slug": slug.current
-        }
-      },
       _type == "imageSection" => {
         ...,
         "image": {
@@ -198,9 +185,6 @@ export const articlesIndexQuery = groq`
     publishedAt,
     "slug": slug.current,
     ${articleAuthorSummaryFields},
-    "downloadablePdf": {
-      "size": downloadablePdf.asset->size
-    },
     "tags": tags[]->{
       _id,
       title,
@@ -237,7 +221,7 @@ export const relatedReadingFallbackArticlesQuery = groq`
       slug
     },
     ${articleAuthorSummaryFields},
-    "thumbnail": {
+    "coverImage": {
       "url": thumbnail.asset->url,
       "alt": thumbnail.alt
     }

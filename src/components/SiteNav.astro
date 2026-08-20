@@ -156,6 +156,8 @@ const links: NavLink[] = [
     inset: 0;
     z-index: 1000;
     display: grid;
+    height: var(--site-menu-viewport-height, 100dvh);
+    overflow: hidden;
     pointer-events: none;
     opacity: 0;
     background: var(--page-bg);
@@ -169,9 +171,12 @@ const links: NavLink[] = [
   }
 
   .site-menu-overlay__panel {
-    min-height: 100vh;
+    height: 100%;
+    min-height: 0;
     display: grid;
     grid-template-rows: auto 1fr;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 1.5rem 1.5rem 1.5rem;
     backdrop-filter: blur(2px);
   }
@@ -242,6 +247,7 @@ const links: NavLink[] = [
 
   :global(body.site-menu-is-open) {
     overflow: hidden;
+    touch-action: none;
   }
 
   .site-menu-overlay__logo {
@@ -264,6 +270,8 @@ const links: NavLink[] = [
       padding-block: 1rem;
       padding: 1rem;
       justify-content: flex-end;
+      width: auto;
+      left:auto;
     }
 
     .site-nav__brand,
@@ -310,6 +318,46 @@ const links: NavLink[] = [
   ) {
     menuToggle.dataset.menuBound = "true";
 
+    const setMenuViewportHeight = () => {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty(
+        "--site-menu-viewport-height",
+        `${viewportHeight}px`,
+      );
+    };
+
+    const lockPageScroll = () => {
+      const lockedScrollY = window.scrollY;
+      document.body.dataset.siteMenuScrollY = String(lockedScrollY);
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${lockedScrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    };
+
+    const unlockPageScroll = () => {
+      const wasLocked =
+        document.body.classList.contains("site-menu-is-open") ||
+        document.body.dataset.siteMenuScrollY !== undefined ||
+        document.body.style.position === "fixed";
+      const lockedScrollY = Number(document.body.dataset.siteMenuScrollY || "0");
+      delete document.body.dataset.siteMenuScrollY;
+      document.body.classList.remove("site-menu-is-open");
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      if (wasLocked) {
+        window.scrollTo(0, lockedScrollY);
+      }
+    };
+
     const setMenuOpen = (isOpen) => {
       if (
         !(menuToggle instanceof HTMLButtonElement) ||
@@ -325,12 +373,17 @@ const links: NavLink[] = [
 
       if (isOpen) {
         previouslyFocusedElement = document.activeElement;
+        setMenuViewportHeight();
+        lockPageScroll();
         window.lenis?.stop?.();
         menuClose?.focus();
         return;
       }
 
-      window.lenis?.start?.();
+      unlockPageScroll();
+      if (!document.body.classList.contains("article-sidebar-panel-is-open")) {
+        window.lenis?.start?.();
+      }
       if (previouslyFocusedElement instanceof HTMLElement) {
         previouslyFocusedElement.focus();
       }
@@ -350,5 +403,18 @@ const links: NavLink[] = [
         setMenuOpen(false);
       }
     });
+
+    window.addEventListener("pagehide", unlockPageScroll);
+    window.addEventListener("pageshow", () => {
+      if (!menuOverlay.classList.contains("is-open")) {
+        unlockPageScroll();
+      }
+    });
+    document.addEventListener("astro:before-swap", unlockPageScroll);
+
+    window.visualViewport?.addEventListener("resize", setMenuViewportHeight);
+    window.visualViewport?.addEventListener("scroll", setMenuViewportHeight);
+    window.addEventListener("resize", setMenuViewportHeight);
+    setMenuViewportHeight();
   }
 </script>

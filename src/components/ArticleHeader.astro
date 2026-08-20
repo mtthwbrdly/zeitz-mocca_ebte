@@ -9,8 +9,8 @@ const publishedAtValue = cleanString(article?.publishedAt);
 const isRelated = variant === "related";
 const articleSlug = cleanString(article?.slug?.current || article?.slug);
 const transitionName = articleSlug ? `article-header-${articleSlug}` : undefined;
-const thumbnailUrl = cleanString(article.thumbnail?.url);
-const thumbnailAlt = cleanString(article.thumbnail?.alt);
+const coverImageUrl = cleanString(article.coverImage?.url);
+const coverImageAlt = cleanString(article.coverImage?.alt);
 const authorNames = formatAuthorNames(article);
 
 const publishedAt = publishedAtValue
@@ -28,12 +28,12 @@ const readTime = isRelated ? null : calculateReadTime(article);
 ---
 
 <header class:list={["article-header", isRelated && "article-header--related"]} transition:name={transitionName}>
-  <div class="article-header__media" aria-hidden={thumbnailUrl ? undefined : "true"}>
-    {thumbnailUrl && (
+  <div class="article-header__media" aria-hidden={coverImageUrl ? undefined : "true"}>
+    {coverImageUrl && (
       <img
         class="article-header__image"
-        src={thumbnailUrl}
-        alt={thumbnailAlt}
+        src={coverImageUrl}
+        alt={coverImageAlt}
         loading="lazy"
       />
     )}
@@ -225,6 +225,10 @@ const readTime = isRelated ? null : calculateReadTime(article);
 }
 
 @media (max-width: 900px) {
+
+  .article-header {
+    min-height: 100dvh;
+  }
   .article-header__inner {
     max-width: none;
   }
@@ -234,6 +238,13 @@ const readTime = isRelated ? null : calculateReadTime(article);
   }
   .article-header__author {
     font: 400 clamp(2rem, 3.4vw, 2.5rem) / 1 var(--font-display);
+  }
+  .article-header__meta {
+    flex-direction: column;
+    gap: 0rem;
+  }
+   .article-header__meta span:nth-child(2) {
+    display: none;
   }
 
 }

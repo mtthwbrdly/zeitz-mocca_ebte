@@ -178,6 +178,27 @@ const authors = getArticleAuthors(article);
         const startsClosedOnMobile = window.matchMedia(
           "(max-width: 900px)",
         ).matches;
+        const mobileSidebarQuery = window.matchMedia("(max-width: 900px)");
+
+        const syncSidebarScrollLock = () => {
+          const shouldLock =
+            mobileSidebarQuery.matches &&
+            animatedPanels.some((panel) => panel.open);
+
+          document.body.classList.toggle(
+            "article-sidebar-panel-is-open",
+            shouldLock,
+          );
+
+          if (shouldLock) {
+            window.lenis?.stop?.();
+            return;
+          }
+
+          if (!document.body.classList.contains("site-menu-is-open")) {
+            window.lenis?.start?.();
+          }
+        };
 
         if (
           startsClosedOnMobile &&
@@ -185,6 +206,7 @@ const authors = getArticleAuthors(article);
         ) {
           informationPanel.open = false;
         }
+        syncSidebarScrollLock();
 
         const setPdfStatus = (title, body, dismissible = false) => {
           if (
@@ -356,15 +378,28 @@ const authors = getArticleAuthors(article);
             });
 
             if (!panel.open) {
+              document.body.classList.toggle(
+                "article-sidebar-panel-is-open",
+                mobileSidebarQuery.matches,
+              );
+              if (mobileSidebarQuery.matches) {
+                window.lenis?.stop?.();
+              }
               await animatePanelOpen(panel);
             }
+            syncSidebarScrollLock();
             return;
           }
 
           if (panel.open) {
             await animatePanelClose(panel);
           }
+          syncSidebarScrollLock();
         };
+
+        mobileSidebarQuery.addEventListener("change", syncSidebarScrollLock, {
+          signal: articleMetaSignal,
+        });
 
         if (shareButton instanceof HTMLButtonElement) {
           shareButton.addEventListener(
@@ -904,10 +939,32 @@ const authors = getArticleAuthors(article);
   }
 
   @media (max-width: 900px) {
+    :global(body.article-sidebar-panel-is-open) {
+      overflow: hidden;
+    }
+
+    .article-meta,
+    .citations-panel {
+      position: static;
+      overflow: visible;
+    }
+
+    .citations-panel[open] {
+      padding-bottom: 0.5rem;
+    }
+
     .meta-stack,
     .citations-panel ol {
-      padding-right: 0;
-      padding-bottom: 0;
+      position: absolute;
+      top: calc(100%);
+      left: 0;
+      z-index: 3;
+      box-sizing: border-box;
+      width: min(80vw, 22rem);
+      max-height: calc(100dvh - 8rem);
+      background: var(--article-category-bg);
+      padding: 0.75rem 1rem 0.75rem 0.75rem;
+      max-width: 100%;
     }
 
     .pdf-status {
@@ -915,7 +972,7 @@ const authors = getArticleAuthors(article);
       bottom: 0.75rem;
       width: calc(100vw - 1.5rem);
     }
-        .article-meta {
+    .article-meta {
       padding: 0.5rem 0.75rem;
     }
   }

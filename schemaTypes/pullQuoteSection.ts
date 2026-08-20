@@ -1,8 +1,9 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import {
   CitationAnnotation,
-  CitationIcon
+  CitationToolbarLabel
 } from "./components/CitationAnnotation";
+import { CompactPortableTextInput } from "./components/CompactPortableTextInput";
 
 export const pullQuoteSection = defineType({
   name: "pullQuoteSection",
@@ -26,9 +27,9 @@ export const pullQuoteSection = defineType({
             annotations: [
               {
                 name: "citation",
-                title: "Citation",
+                title: "Cite",
                 type: "object",
-                icon: CitationIcon,
+                icon: CitationToolbarLabel,
                 components: {
                   annotation: CitationAnnotation
                 },
@@ -42,6 +43,9 @@ export const pullQuoteSection = defineType({
                     name: "formattedSource",
                     title: "Citation",
                     type: "array",
+                    components: {
+                      input: CompactPortableTextInput
+                    },
                     of: [
                       defineArrayMember({
                         type: "block",

@@ -1,25 +1,20 @@
 import type { BlockAnnotationProps } from "sanity";
 
-export function CitationIcon() {
+export function CitationToolbarLabel() {
   return (
-    <svg
+    <span
       aria-hidden="true"
-      viewBox="0 0 24 24"
-      width="1em"
-      height="1em"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      style={{
+        display: "inline-block",
+        minWidth: "2.25rem",
+        fontSize: "0.72rem",
+        fontWeight: 700,
+        lineHeight: 1,
+        textAlign: "center"
+      }}
     >
-      <path d="M7 5h10" />
-      <path d="M7 12h10" />
-      <path d="M7 19h6" />
-      <path d="M4 5h.01" />
-      <path d="M4 12h.01" />
-      <path d="M4 19h.01" />
-    </svg>
+      Cite
+    </span>
   );
 }
 

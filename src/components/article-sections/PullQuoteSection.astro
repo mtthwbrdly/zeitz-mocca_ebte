@@ -182,7 +182,11 @@ const quoteHtml = renderPullQuote(section.quote, citationMap);
 
 @media (max-width: 900px) {
   .pull-quote {
-   padding: 3rem 2rem;
+   padding: 4rem 2rem;
+  }
+
+  .pull-quote--normal blockquote {
+        font-size: clamp(2rem, 3vw, 3rem);
   }
 }
 

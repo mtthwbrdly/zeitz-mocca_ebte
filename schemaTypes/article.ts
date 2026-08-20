@@ -24,17 +24,11 @@ export const article = defineType({
       validation: (rule) => rule.required()
     }),
     defineField({
-      name: "subtitle",
-      title: "Subtitle / Deck",
-      type: "text",
-      group: "meta",
-      rows: 3
-    }),
-    defineField({
       name: "slug",
       title: "Slug",
       type: "slug",
       group: "meta",
+      description: "Please click generate to generate a slug for the article.",
       options: {
         source: "title",
         maxLength: 96
@@ -55,6 +49,7 @@ export const article = defineType({
       title: "Authors",
       type: "array",
       group: "meta",
+      description: "Select one or more Authors, or create a new one",
       of: [defineArrayMember({ type: "reference", to: [{ type: "author" }] })],
       validation: (rule) =>
         rule
@@ -71,7 +66,9 @@ export const article = defineType({
       name: "publishedAt",
       title: "Published at",
       type: "datetime",
-      group: "meta"
+      group: "meta",
+      description: "Enter the date of article publication (this will affect sorting).",
+      validation: (rule) => rule.required()
     }),
     defineField({
       name: "tags",
@@ -85,27 +82,30 @@ export const article = defineType({
       title: "Format / Category",
       type: "string",
       group: "meta",
+      description: "Select a Category.",
       options: {
         list: [
           { title: "Footnote", value: "footnote" },
           { title: "Process Note", value: "process-note" },
           { title: "Voice Note", value: "voice-note" }
         ]
-      }
+      },
+      validation: (rule) => rule.required()
     }),
     defineField({
       name: "excerpt",
       title: "Excerpt",
       type: "text",
       group: "meta",
+      description: "Please enter a short description or summary of the article.",
       rows: 4
     }),
     defineField({
       name: "thumbnail",
-      title: "Thumbnail",
+      title: "Cover image",
       type: "image",
       group: "meta",
-      description: "Used for Further Reading cards and article previews.",
+      description: "Used as the article cover image across the site.",
       fields: [
         defineField({
           name: "alt",
@@ -115,24 +115,15 @@ export const article = defineType({
       ]
     }),
     defineField({
-      name: "downloadablePdf",
-      title: "Downloadable PDF",
-      type: "file",
-      group: "meta",
-      options: {
-        accept: ".pdf"
-      }
-    }),
-    defineField({
       name: "contentSections",
       title: "Content sections",
       type: "array",
       group: "content",
+      description:
+        "Build the article from top to bottom. Use Rich Text for body copy, Pull Quote for highlighted excerpts, Image for visuals and captions, Audio Player for MP3s, Video for uploads or YouTube embeds, Comments to add a discussion area, and Divider / Spacer to create a visual break.",
       of: [
         defineArrayMember({ type: "richTextSection" }),
         defineArrayMember({ type: "pullQuoteSection" }),
-        defineArrayMember({ type: "shareClippingSection" }),
-        defineArrayMember({ type: "featureCardSection" }),
         defineArrayMember({ type: "imageSection" }),
         defineArrayMember({ type: "audioPlayerSection" }),
         defineArrayMember({ type: "videoSection" }),
@@ -147,7 +138,7 @@ export const article = defineType({
       type: "relatedReadingSection",
       group: "content",
       description:
-        "Select one related article."
+        "(Optional) Select an article to feature at the bottom of this page. If left blank, the next most recent article will be featured automatically."
     })
   ],
 preview: {

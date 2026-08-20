@@ -53,9 +53,6 @@ export const homePage = defineType({
       group: "content",
       of: [
         defineArrayMember({
-          type: "categoryCardsSection"
-        }),
-        defineArrayMember({
           type: "homeQuoteSection"
         }),
         defineArrayMember({
@@ -75,10 +72,6 @@ export const homePage = defineType({
     title: "Home Page",
     headerTitle: "Everything but the Exhibition",
     sections: [
-      {
-        _type: "categoryCardsSection",
-        title: "Categories"
-      },
       {
         _type: "articleIndexSection",
         title: "Latest",

@@ -31,7 +31,7 @@ export const richTextSection = defineType({
       type: "string",
       initialValue: "top",
       description:
-        "Choose whether pull quotes derived from highlighted text appear above or below this rich text section.",
+        "Choose whether pull quotes derived from quoted text appear above or below this rich text section.",
       options: {
         list: [
           { title: "Top", value: "top" },

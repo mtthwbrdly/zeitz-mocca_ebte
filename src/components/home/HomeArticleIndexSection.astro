@@ -167,10 +167,10 @@ const fillerRows = Array.from({
           role="listitem"
           aria-hidden="true"
         >
-          <span class="article-index__title">Coming Soon</span>
-          <span class="article-index__author">Coming Soon</span>
-          <span class="article-index__date">Coming Soon</span>
-          <span class="article-index__category">Coming Soon</span>
+          <span class="article-index__title">Coming Soon...</span>
+          <span class="article-index__author">—</span>
+          <span class="article-index__date">—</span>
+          <span class="article-index__category">—</span>
         </div>
       ))
     }
@@ -181,7 +181,6 @@ const fillerRows = Array.from({
   .article-index {
     width: 100%;
     margin: 0 auto;
-
     padding: 1.5rem 1.5rem 1.5rem;
   }
 
@@ -380,9 +379,19 @@ const fillerRows = Array.from({
     .article-index__header {
       padding-right: 0;
     }
+
+    .article-index__header:has(.article-index__filter) {
+      flex-direction: column;
+    }
+
+    .article-index__header:has(.article-index__filter) h2 {
+      border-right: 0;
+    }
+
     .article-index__filter {
       flex-wrap: wrap;
       border-left: 0;
+      border-top: 1px solid var(--ink);
     }
 
     .article-index__filter-link {
@@ -444,9 +453,10 @@ const fillerRows = Array.from({
     }
 
     .article-index__row--filler .article-index__title {
-      font-size: clamp(1rem, 2vw, 2rem);
+      font-size: clamp(0.65rem, 2vw, 2rem);
       text-align: left;
       margin-bottom: 0;
+      color: black;
     }
   }
 </style>

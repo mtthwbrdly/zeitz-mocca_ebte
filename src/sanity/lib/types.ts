@@ -27,7 +27,7 @@ export interface LinkedArticleSummary {
   author?: Author;
   authors?: Author[];
   tags?: Tag[];
-  thumbnail?: MediaAsset;
+  coverImage?: MediaAsset;
 }
 
 export interface Author {
@@ -90,26 +90,6 @@ export interface PullQuoteSection {
   size?: "normal" | "large";
 }
 
-export interface ShareClippingSection {
-  _key?: string;
-  _type: "shareClippingSection";
-  quote: string;
-  label?: string;
-}
-
-export interface FeatureCardSection {
-  _key?: string;
-  _type: "featureCardSection";
-  eyebrow: string;
-  title: string;
-  description: string;
-  linkText?: string;
-  linkedArticle?: {
-    title?: string;
-    slug?: string;
-  };
-}
-
 export interface RelatedReadingSection {
   _key?: string;
   _type: "relatedReadingSection";
@@ -165,8 +145,6 @@ export interface CommentsSection {
 export type ArticleSection =
   | RichTextSection
   | PullQuoteSection
-  | ShareClippingSection
-  | FeatureCardSection
   | ImageSection
   | AudioPlayerSection
   | VideoSection
@@ -176,7 +154,6 @@ export type ArticleSection =
 export interface Article {
   _id?: string;
   title: string;
-  subtitle?: string;
   slug: SlugValue;
   excerpt?: string;
   format?: string;
@@ -185,8 +162,7 @@ export interface Article {
   author?: Author;
   authors?: Author[];
   tags: Tag[];
-  thumbnail?: MediaAsset;
-  downloadablePdf?: AssetFile;
+  coverImage?: MediaAsset;
   contentSections: ArticleSection[];
   furtherReading?: RelatedReadingSection;
 }
@@ -199,9 +175,6 @@ export interface ArticleIndexItem {
   publishedAt?: string;
   author?: Author;
   authors?: Author[];
-  downloadablePdf?: {
-    size?: number;
-  };
   tags?: Tag[];
 }
 
@@ -218,7 +191,6 @@ export interface ArticleIndexHomeSection {
 export type HomeFeaturedArticle = Omit<LinkedArticleSummary, "slug"> & {
   slug?: string;
   excerpt?: string;
-  subtitle?: string;
   contentSections?: ArticleSection[];
 };
 

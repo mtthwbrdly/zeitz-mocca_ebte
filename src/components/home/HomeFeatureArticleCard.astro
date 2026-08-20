@@ -14,8 +14,8 @@ const title = cleanString(article?.title);
 const slug = cleanString(article?.slug);
 const href = slug ? `/articles/${slug}` : "";
 const authorName = formatAuthorNames(article);
-const thumbnailUrl = cleanString(article?.thumbnail?.url);
-const thumbnailAlt = cleanString(article?.thumbnail?.alt);
+const coverImageUrl = cleanString(article?.coverImage?.url);
+const coverImageAlt = cleanString(article?.coverImage?.alt);
 const categoryClass = getArticleCategoryClass(article);
 const categoryLabel = cleanString(getFormatTitle(article?.format) || article?.tags?.[0]?.title).toUpperCase();
 const readTime = article ? calculateReadTime(article) : "";
@@ -34,12 +34,12 @@ const publishedAt = publishedAtValue
 
 {title && (
   <article class:list={["home-feature-card", categoryClass, compact && "home-feature-card--compact"]}>
-    <div class="home-feature-card__media" aria-hidden={thumbnailUrl ? undefined : "true"}>
-      {thumbnailUrl && (
+    <div class="home-feature-card__media" aria-hidden={coverImageUrl ? undefined : "true"}>
+      {coverImageUrl && (
         <img
           class="home-feature-card__image"
-          src={thumbnailUrl}
-          alt={thumbnailAlt}
+          src={coverImageUrl}
+          alt={coverImageAlt}
           loading="lazy"
         />
       )}
@@ -193,11 +193,9 @@ const publishedAt = publishedAtValue
   @media (max-width: 760px) {
     .home-feature-card,
     .home-feature-card--compact {
-      min-height: 82svh;
+      min-height: 100svh;
       padding: clamp(4rem, 18vw, 6rem) 1.5rem;
     }
-
-
 
     .home-feature-card__title,
     .home-feature-card--compact .home-feature-card__title {

@@ -1,15 +1,12 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import {
   CitationAnnotation,
-  CitationIcon
+  CitationToolbarLabel
 } from "./components/CitationAnnotation";
-import {
-  HighlightDecorator,
-  HighlightIcon
-} from "./components/HighlightDecorator";
+import { CompactPortableTextInput } from "./components/CompactPortableTextInput";
 import {
   PullQuoteDecorator,
-  PullQuoteIcon
+  PullQuoteToolbarLabel
 } from "./components/PullQuoteDecorator";
 
 export const portableText = defineType({
@@ -36,15 +33,9 @@ export const portableText = defineType({
           { title: "Code", value: "code" },
           { title: "Underline", value: "underline" },
           {
-            title: "Highlight",
-            value: "highlight",
-            icon: HighlightIcon,
-            component: HighlightDecorator
-          },
-          {
-            title: "Pull Quote",
+            title: "Quote",
             value: "pullQuote",
-            icon: PullQuoteIcon,
+            icon: PullQuoteToolbarLabel,
             component: PullQuoteDecorator
           }
         ],
@@ -63,9 +54,9 @@ export const portableText = defineType({
           },
           {
             name: "citation",
-            title: "Citation",
+            title: "Cite",
             type: "object",
-            icon: CitationIcon,
+            icon: CitationToolbarLabel,
             components: {
               annotation: CitationAnnotation
             },
@@ -79,6 +70,9 @@ export const portableText = defineType({
                 name: "formattedSource",
                 title: "Citation",
                 type: "array",
+                components: {
+                  input: CompactPortableTextInput
+                },
                 of: [
                   defineArrayMember({
                     type: "block",

@@ -371,21 +371,25 @@ const footerPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
       grid-template-columns: 1fr 1fr;
       grid-template-rows: auto auto 1fr;
       flex: 1;
-      gap: 5rem;
+      gap: 3rem 5rem;
       align-content: start;
-      padding: 6rem 3rem 4rem 3rem;
+      padding: 6rem 2rem 3rem 2rem;
     }
 
     .site-footer__nav-links a {
       font-size: clamp(1.75rem, 10vw, 2.75rem);
     }
 
+    .site-footer__column h2 {
+      font-size: clamp(0.75rem, 2vw, 1.25rem);
+    }
+
     .site-footer__social-links a {
-      font-size: clamp(1rem, 5vw, 1.5rem);
+      font-size: clamp(0.85rem, 4vw, 1.5rem);
     }
 
     .site-footer__column--submissions p {
-      font: 400 clamp(1.5rem, 2vw, 2rem) / 1.05 var(--font-display);
+      font: 400 clamp(1.25rem, 2vw, 2rem) / 1.05 var(--font-display);
     }
 
     .site-footer__column--submissions {

@@ -38,9 +38,6 @@ function wrapMarks(
     if (mark === "underline") {
       return `<span class="u-underline">${output}</span>`;
     }
-    if (mark === "highlight") {
-      return `<span class="u-highlight">${output}</span>`;
-    }
     if (mark === PULL_QUOTE_MARK) {
       return output;
     }
