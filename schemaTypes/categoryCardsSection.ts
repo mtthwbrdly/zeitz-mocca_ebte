@@ -1,35 +1,5 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
-export const defaultCategoryCards = [
-  {
-    _type: "categoryCard",
-    category: "process-notes",
-    label: "Process Note",
-    title: "Process Notes",
-    description:
-      "Research fragments, working documents, and reflections tracing how the publication takes shape.",
-    linkText: "All Process Notes"
-  },
-  {
-    _type: "categoryCard",
-    category: "footnotes",
-    label: "Footnote",
-    title: "Footnotes",
-    description:
-      "Behind-the-scenes conversations and interviews exploring the ideas, research, and making of the Publishing Atelier. A space where curators, fellows, and collaborators share the thinking behind the work.",
-    linkText: "All Footnotes"
-  },
-  {
-    _type: "categoryCard",
-    category: "voice-notes",
-    label: "Voice Note",
-    title: "Voice Notes",
-    description:
-      "Audio-led notes, recordings, and spoken reflections from the people thinking around the exhibition.",
-    linkText: "All Voice Notes"
-  }
-];
-
 export const categoryCardsSection = defineType({
   name: "categoryCardsSection",
   title: "Category Cards Section",
@@ -39,7 +9,6 @@ export const categoryCardsSection = defineType({
       name: "title",
       title: "Title",
       type: "string",
-      initialValue: "Categories",
       validation: (rule) => rule.required()
     }),
     defineField({
@@ -110,7 +79,6 @@ export const categoryCardsSection = defineType({
           }
         })
       ],
-      initialValue: defaultCategoryCards,
       validation: (rule) => rule.required().min(1).max(3)
     })
   ],

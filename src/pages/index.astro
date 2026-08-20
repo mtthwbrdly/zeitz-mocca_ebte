@@ -2,6 +2,7 @@
 import HomeArticleIndexSection from "../components/home/HomeArticleIndexSection.astro";
 import HomeCategoryCardsSection from "../components/home/HomeCategoryCardsSection.astro";
 import HomeFeaturedArticleSection from "../components/home/HomeFeaturedArticleSection.astro";
+import HomeHeaderSection from "../components/home/HomeHeaderSection.astro";
 import HomeQuoteSection from "../components/home/HomeQuoteSection.astro";
 import HomeSplitFeatureSection from "../components/home/HomeSplitFeatureSection.astro";
 import DisableDraftMode from "../components/DisableDraftMode";
@@ -26,16 +27,18 @@ const pageTitle =
 const pageDescription =
   cleanString(homePage.seoDescription) ||
   "Recent articles from Everything but the Exhibition.";
-const headerText = cleanString(homePage.headerText);
-const fallbackHeaderText =
-  "Everything but the Exhibition is an online publication exploring the curatorial beyond the exhibition itself. Everything, here, means both 'preceding and surrounding' and 'aftermath,' refusing the fiction that the exhibition is the ultimate act and instead, turns to the research, the arguments, the false starts, the logistics, the public conversations, and all the other labour that is edited and happening elsewhere.";
-const introText = headerText || fallbackHeaderText;
 const responsiveHeroPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
   ? heroPaperSvg.replace(
       /preserveAspectRatio="[^"]*"/,
       'preserveAspectRatio="none"',
     )
   : heroPaperSvg.replace("<svg", '<svg preserveAspectRatio="none"');
+const hasCategoryCardsSection = homePage.sections.some(
+  (section) => section._type === "categoryCardsSection",
+);
+const hasHeaderSection = homePage.sections.some(
+  (section) => section._type === "homeHeaderSection",
+);
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
@@ -63,45 +66,19 @@ const responsiveHeroPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
       </div>
     </header>
 
-    <div class="home-hero__intro" aria-hidden="true">
-      <span
-        class="pull-quote__marker pull-quote__marker--top-left"
-        aria-hidden="true"></span>
-      <span
-        class="pull-quote__marker pull-quote__marker--top-right"
-        aria-hidden="true"></span>
-      <span
-        class="pull-quote__marker pull-quote__marker--bottom-left"
-        aria-hidden="true"></span>
-      <span
-        class="pull-quote__marker pull-quote__marker--bottom-right"
-        aria-hidden="true"></span>
-      <p class="home-hero__intro-text">
-        {
-          headerText ? (
-            introText
-          ) : (
-            <>
-              <em>Everything but the Exhibition</em>
-              {
-                " is an online publication exploring the curatorial beyond the exhibition itself. "
-              }
-              <em>Everything</em>
-              {
-                ", here, means both 'preceding and surrounding' and 'aftermath,' refusing the fiction that the exhibition is the ultimate act and instead, turns to the research, the arguments, the false starts, the logistics, the public conversations, and all the other labour that is edited and happening elsewhere."
-              }
-            </>
-          )
-        }
-      </p>
-    </div>
-
-    <HomeCategoryCardsSection />
+    {!hasHeaderSection && <HomeHeaderSection />}
+    {!hasCategoryCardsSection && <HomeCategoryCardsSection />}
 
     <div class="home-page__sections">
       {
         homePage.sections.map((section) => (
           <>
+            {section._type === "homeHeaderSection" && (
+              <HomeHeaderSection section={section} />
+            )}
+            {section._type === "categoryCardsSection" && (
+              <HomeCategoryCardsSection section={section} />
+            )}
             {section._type === "articleIndexSection" && (
               <HomeArticleIndexSection section={section} articles={articles} />
             )}
@@ -212,8 +189,7 @@ const responsiveHeroPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
     opacity: var(--home-hero-paper-opacity);
   }
 
-  .home-hero__title,
-  .home-hero__intro {
+  .home-hero__title {
     margin: 0;
   }
 
@@ -287,35 +263,6 @@ const responsiveHeroPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
     transition: var(--transition-text-shadow);
   }
 
-  .home-hero__intro {
-    min-height: 75svh;
-    padding: 1.5rem;
-    background: var(--ink);
-    color: var(--surface);
-    z-index: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-  }
-
-  .home-hero__intro:hover .pull-quote__marker {
-    --marker-offset: 7rem;
-  }
-
-  .home-hero__intro-text {
-    font: 400 clamp(1.5rem, 2.5vw, 3rem) / 1 var(--font-display);
-    letter-spacing: 0;
-    max-width: clamp(20rem, 75vw, 65rem);
-    text-align: center;
-  }
-
-  .home-hero__intro em {
-    font-style: italic;
-    text-shadow: var(--text-shadow-hover-large-white);
-  }
-
   .home-page__sections {
     display: grid;
     min-height: 100svh;
@@ -347,78 +294,6 @@ const responsiveHeroPaperSvg = heroPaperSvg.includes("preserveAspectRatio=")
     .home-hero__underlay {
       margin-top: calc(-1 * var(--home-hero-paper-height));
     }
-  }
-
-  .pull-quote__marker {
-    --marker-size: 1rem;
-    --marker-offset: 5rem;
-    position: absolute;
-    width: var(--marker-size);
-    height: var(--marker-size);
-    pointer-events: none;
-    transition:
-      top 1s ease,
-      right 1s ease,
-      bottom 1s ease,
-      left 1s ease;
-  }
-
-  .pull-quote__marker::before,
-  .pull-quote__marker::after {
-    content: "";
-    position: absolute;
-    background: var(--surface);
-  }
-
-  .pull-quote__marker::before {
-    width: 100%;
-    height: 1px;
-    top: 0;
-    left: 0;
-  }
-
-  .pull-quote__marker::after {
-    width: 1px;
-    height: 100%;
-    top: 0;
-    left: 0;
-  }
-
-  .pull-quote__marker--top-left {
-    top: var(--marker-offset);
-    left: var(--marker-offset);
-    transform: rotate(180deg);
-  }
-
-  .pull-quote__marker--top-right {
-    top: var(--marker-offset);
-    right: var(--marker-offset);
-    transform: rotate(-90deg);
-  }
-
-  .pull-quote__marker--bottom-left {
-    bottom: var(--marker-offset);
-    left: var(--marker-offset);
-    transform: rotate(90deg);
-  }
-
-  .pull-quote__marker--bottom-right {
-    right: var(--marker-offset);
-    bottom: var(--marker-offset);
-  }
-
-  @media (max-width: 900px) {
-    .pull-quote__marker {
-      --marker-offset: 2rem;
-    }
-
-    .home-hero__intro:hover .pull-quote__marker {
-      --marker-offset: 3rem;
-    }
-
-     .home-hero__intro {
-    min-height: 100svh;
-
   }
 
 </style>

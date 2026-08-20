@@ -224,6 +224,12 @@ export interface CategoryCardsHomeSection {
   cards?: HomeCategoryCard[];
 }
 
+export interface HomeHeaderSection {
+  _key?: string;
+  _type: "homeHeaderSection";
+  text?: PortableTextBlock[];
+}
+
 export interface HomeQuoteSection {
   _key?: string;
   _type: "homeQuoteSection";
@@ -241,6 +247,7 @@ export interface HomeQuoteSection {
 
 export type HomePageSection =
   | ArticleIndexHomeSection
+  | HomeHeaderSection
   | CategoryCardsHomeSection
   | HomeQuoteSection
   | HomeFeaturedArticleSection
@@ -251,6 +258,5 @@ export interface HomePage {
   title?: string;
   seoDescription?: string;
   headerTitle?: string;
-  headerText?: string;
   sections: HomePageSection[];
 }

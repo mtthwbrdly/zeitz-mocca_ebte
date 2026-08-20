@@ -7,6 +7,7 @@ import { commentsSection } from "./commentsSection.ts";
 import { dividerSection } from "./dividerSection.ts";
 import { imageSection } from "./imageSection.ts";
 import { homeFeaturedArticleSection } from "./homeFeaturedArticleSection.ts";
+import { homeHeaderSection } from "./homeHeaderSection.ts";
 import { homePage } from "./homePage.ts";
 import { homeQuoteSection } from "./homeQuoteSection.ts";
 import { homeSplitFeatureSection } from "./homeSplitFeatureSection.ts";
@@ -22,6 +23,7 @@ export const schemaTypes = [
   article,
   articleIndexSection,
   categoryCardsSection,
+  homeHeaderSection,
   homeFeaturedArticleSection,
   homeSplitFeatureSection,
   homeQuoteSection,

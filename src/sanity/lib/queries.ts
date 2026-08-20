@@ -67,7 +67,6 @@ export const homePageQuery = groq`
     title,
     seoDescription,
     headerTitle,
-    headerText,
     sections[]{
       _key,
       _type,

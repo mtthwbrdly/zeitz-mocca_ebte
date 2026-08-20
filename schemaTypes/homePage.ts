@@ -7,7 +7,7 @@ export const homePage = defineType({
   groups: [
     {
       name: "header",
-      title: "Header",
+      title: "Meta",
       default: true
     },
     {
@@ -40,18 +40,17 @@ export const homePage = defineType({
       validation: (rule) => rule.required()
     }),
     defineField({
-      name: "headerText",
-      title: "Header text",
-      type: "text",
-      group: "header",
-      rows: 3
-    }),
-    defineField({
       name: "sections",
       title: "Sections",
       type: "array",
       group: "content",
       of: [
+        defineArrayMember({
+          type: "homeHeaderSection"
+        }),
+        defineArrayMember({
+          type: "categoryCardsSection"
+        }),
         defineArrayMember({
           type: "homeQuoteSection"
         }),
@@ -73,6 +72,11 @@ export const homePage = defineType({
     headerTitle: "Everything but the Exhibition",
     sections: [
       {
+        _key: "header-text",
+        _type: "homeHeaderSection"
+      },
+      {
+        _key: "latest-articles",
         _type: "articleIndexSection",
         title: "Latest",
         categoryFilter: "all"

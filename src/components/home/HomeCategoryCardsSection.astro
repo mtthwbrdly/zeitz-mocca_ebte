@@ -1,112 +1,88 @@
 ---
 import { getCategoryIconSvg } from "../../lib/categoryIcons";
 import { cleanString } from "../../sanity/lib/clean";
-import type { HomeCategoryCard } from "../../sanity/lib/types";
+import type { CategoryCardsHomeSection } from "../../sanity/lib/types";
 
-const defaultIntro =
-  "The publication unfolds through three recurring editorial formats—Process Notes, Foot Notes and Voice Notes—each offering a distinct way of engaging with curatorial practice. Together, they bring interviews, essays, reflections and experimental writing into conversation, foregrounding the research, exchanges and lived experiences that shape exhibitions beyond their final public form.";
+interface Props {
+  section?: CategoryCardsHomeSection;
+}
 
-const defaultCards: HomeCategoryCard[] = [
-  {
-    category: "process-notes",
-    label: "Process Note",
-    title: "Process Notes",
-    description:
-      "Process Notes are dialogical texts. These are interviews and conversations that speak to the processes and exchanges that happen behind the scenes, noting the research and curatorial thinking that underpins creative work. While themes differ, the focus is on the anecdotal and conversational ways in which information is shared.",
-    linkText: "Read Process Notes",
-  },
-  {
-    category: "footnotes",
-    label: "Footnote",
-    title: "Footnotes",
-    description:
-      "Taking a cue from their title, Foot Notes focus on the peripheral work that is often merely cited and not fully explored. This form of writing seeks to expand the footnotes of a particular exhibition or project into a longer form of text dedicated to a specific research thread.",
-    linkText: "Read Footnotes",
-  },
-  {
-    category: "voice-notes",
-    label: "Voice Note",
-    title: "Voice Notes",
-    description:
-      "Voice Notes are short-form, subjective and reflective pieces of writing accompanied by visual or sonic material. These notes centre individual perspectives and the subjective voice, ranging from reflections and reviews to writing in more experimental terms.",
-    linkText: "Read Voice Notes",
-  },
-];
+const { section } = Astro.props;
 
-const title = "Categories";
-const intro = defaultIntro;
-const cards = defaultCards;
+const title = cleanString(section?.title) || "Categories";
+const intro = cleanString(section?.intro);
+const cards = section?.cards || [];
 
-const categoryLabel = (category: HomeCategoryCard["category"]) => {
+const categoryLabel = (category: NonNullable<(typeof cards)[number]["category"]>) => {
   if (category === "footnotes") return "footnotes";
   if (category === "voice-notes") return "voice notes";
   return "process notes";
 };
 
-const categoryHref = (category: HomeCategoryCard["category"]) =>
+const categoryHref = (category: (typeof cards)[number]["category"]) =>
   `/articles?category=${cleanString(category) || "process-notes"}`;
 ---
 
-<section class="home-categories" aria-labelledby="home-categories-title">
-  <header class="home-categories__header">
-    <h2
-      class="section-title-row home-categories__title-row"
-      id="home-categories-title"
-    >
-      <span>{title}</span>
-    </h2>
-  </header>
-  {
-    intro && (
-      <div class="home-categories__intro">
-        <p>{intro}</p>
-      </div>
-    )
-  }
+{
+  cards.length > 0 && (
+    <section class="home-categories" aria-labelledby="home-categories-title">
+      <header class="home-categories__header">
+        <h2
+          class="section-title-row home-categories__title-row"
+          id="home-categories-title"
+        >
+          <span>{title}</span>
+        </h2>
+      </header>
+      {intro && (
+        <div class="home-categories__intro">
+          <p>{intro}</p>
+        </div>
+      )}
 
-  <div class="home-categories__cards" role="list">
-    {
-      cards.map((card) => {
-        const category = card.category || "process-notes";
-        const cardTitle = cleanString(card.title) || categoryLabel(category);
-        const label = cleanString(card.label) || categoryLabel(category);
-        // allow HTML (e.g. <em>) in descriptions — render via set:html below
-        const description = card.description;
-        const linkText =
-          cleanString(card.linkText) || `All ${categoryLabel(category)}`;
-        const iconSvg = getCategoryIconSvg(category);
+      <div class="home-categories__cards" role="list">
+        {cards.map((card) => {
+          const category = card.category || "process-notes";
+          const cardTitle = cleanString(card.title) || categoryLabel(category);
+          const label = cleanString(card.label) || categoryLabel(category);
+          // allow HTML (e.g. <em>) in descriptions — render via set:html below
+          const description = card.description;
+          const linkText =
+            cleanString(card.linkText) || `All ${categoryLabel(category)}`;
+          const iconSvg = getCategoryIconSvg(category);
 
-        return (
-          <article
-            class={`home-category-card article-category-${category}`}
-            role="listitem"
-          >
-            <h3 class="home-category-card__title">
-              <span>{cardTitle}</span>
-            </h3>
-            <div class="home-category-card__content">
-              <p class="home-category-card__label">{label}</p>
-              {description && (
-                <p
-                  class="home-category-card__description"
-                  set:html={description}
+          return (
+            <article
+              class={`home-category-card article-category-${category}`}
+              role="listitem"
+            >
+              <h3 class="home-category-card__title">
+                <span>{cardTitle}</span>
+              </h3>
+              <div class="home-category-card__content">
+                <p class="home-category-card__label">{label}</p>
+                {description && (
+                  <p
+                    class="home-category-card__description"
+                    set:html={description}
+                  />
+                )}
+                <a class="home-category-card__link" href={categoryHref(category)}>
+                  {linkText}
+                </a>
+                <span
+                  class="home-category-card__icon"
+                  aria-hidden="true"
+                  set:html={iconSvg}
                 />
-              )}
-              <a class="home-category-card__link" href={categoryHref(category)}>
-                {linkText}
-              </a>
-              <span
-                class="home-category-card__icon"
-                aria-hidden="true"
-                set:html={iconSvg}
-              />
-            </div>
-          </article>
-        );
-      })
-    }
-  </div>
-</section>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  )
+}
 
 <style>
   .home-categories {

@@ -11,6 +11,10 @@ const fallbackHomePage: HomePage = {
   headerTitle: "Everything but the Exhibition",
   sections: [
     {
+      _key: "header-text",
+      _type: "homeHeaderSection"
+    },
+    {
       _key: "latest-articles",
       _type: "articleIndexSection",
       title: "Latest",

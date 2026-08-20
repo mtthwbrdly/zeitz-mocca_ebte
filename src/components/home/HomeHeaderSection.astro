@@ -1,0 +1,145 @@
+---
+import { renderInlinePortableText } from "../../sanity/lib/renderInlinePortableText";
+import { defaultHomeHeaderText } from "../../sanity/lib/homeHeaderText";
+import type { HomeHeaderSection } from "../../sanity/lib/types";
+
+interface Props {
+  section?: HomeHeaderSection;
+}
+
+const { section } = Astro.props;
+const text = section?.text?.length ? section.text : defaultHomeHeaderText;
+const html = renderInlinePortableText(text);
+---
+
+{
+  html && (
+    <div class="home-hero__intro" aria-hidden="true">
+      <span
+        class="pull-quote__marker pull-quote__marker--top-left"
+        aria-hidden="true"
+      />
+      <span
+        class="pull-quote__marker pull-quote__marker--top-right"
+        aria-hidden="true"
+      />
+      <span
+        class="pull-quote__marker pull-quote__marker--bottom-left"
+        aria-hidden="true"
+      />
+      <span
+        class="pull-quote__marker pull-quote__marker--bottom-right"
+        aria-hidden="true"
+      />
+      <p class="home-hero__intro-text" set:html={html} />
+    </div>
+  )
+}
+
+<style>
+  .home-hero__intro {
+    min-height: 75svh;
+    padding: 1.5rem;
+    background: var(--ink);
+    color: var(--surface);
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin: 0;
+  }
+
+  .home-hero__intro:hover .pull-quote__marker {
+    --marker-offset: 7rem;
+  }
+
+  .home-hero__intro-text {
+    font: 400 clamp(1.5rem, 2.5vw, 3rem) / 1 var(--font-display);
+    letter-spacing: 0;
+    max-width: clamp(20rem, 75vw, 65rem);
+    text-align: center;
+  }
+
+  .home-hero__intro :global(em) {
+    font-style: italic;
+    text-shadow: var(--text-shadow-hover-large-white);
+  }
+
+  .home-hero__intro :global(strong) {
+    font-weight: 700;
+  }
+
+  .pull-quote__marker {
+    --marker-size: 1rem;
+    --marker-offset: 5rem;
+    position: absolute;
+    width: var(--marker-size);
+    height: var(--marker-size);
+    pointer-events: none;
+    transition:
+      top 1s ease,
+      right 1s ease,
+      bottom 1s ease,
+      left 1s ease;
+  }
+
+  .pull-quote__marker::before,
+  .pull-quote__marker::after {
+    content: "";
+    position: absolute;
+    background: var(--surface);
+  }
+
+  .pull-quote__marker::before {
+    width: 100%;
+    height: 1px;
+    top: 0;
+    left: 0;
+  }
+
+  .pull-quote__marker::after {
+    width: 1px;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  .pull-quote__marker--top-left {
+    top: var(--marker-offset);
+    left: var(--marker-offset);
+    transform: rotate(180deg);
+  }
+
+  .pull-quote__marker--top-right {
+    top: var(--marker-offset);
+    right: var(--marker-offset);
+    transform: rotate(-90deg);
+  }
+
+  .pull-quote__marker--bottom-left {
+    bottom: var(--marker-offset);
+    left: var(--marker-offset);
+    transform: rotate(90deg);
+  }
+
+  .pull-quote__marker--bottom-right {
+    right: var(--marker-offset);
+    bottom: var(--marker-offset);
+  }
+
+  @media (max-width: 900px) {
+    .pull-quote__marker {
+      --marker-offset: 2rem;
+    }
+
+    .home-hero__intro:hover .pull-quote__marker {
+      --marker-offset: 3rem;
+    }
+
+    .home-hero__intro {
+      min-height: 100svh;
+    }
+  }
+</style>
