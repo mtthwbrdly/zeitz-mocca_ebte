@@ -230,6 +230,14 @@ const authors = getArticleAuthors(article);
           }
         };
 
+        const setPdfGeneratingCursor = (isGenerating) => {
+          document.documentElement.classList.toggle(
+            "is-pdf-generating",
+            isGenerating,
+          );
+          downloadButton?.setAttribute("aria-busy", String(isGenerating));
+        };
+
         const animatePanelOpen = async (panel) => {
           const content = getPanelContent(panel);
 
@@ -446,6 +454,7 @@ const authors = getArticleAuthors(article);
               const originalLabel = downloadButton.textContent;
               downloadButton.disabled = true;
               downloadButton.textContent = "(↓) Preparing PDF...";
+              setPdfGeneratingCursor(true);
               setPdfStatus(
                 "Generating PDF...",
                 "This can take a few seconds for long articles with images.",
@@ -491,6 +500,7 @@ const authors = getArticleAuthors(article);
                   true,
                 );
               } finally {
+                setPdfGeneratingCursor(false);
                 downloadButton.disabled = false;
                 downloadButton.textContent = originalLabel;
               }
@@ -498,6 +508,12 @@ const authors = getArticleAuthors(article);
             { signal: articleMetaSignal },
           );
         }
+
+        document.addEventListener(
+          "astro:before-swap",
+          () => setPdfGeneratingCursor(false),
+          { signal: articleMetaSignal },
+        );
 
         statusCloseButton?.addEventListener("click", hidePdfStatus, {
           signal: articleMetaSignal,
@@ -544,6 +560,15 @@ const authors = getArticleAuthors(article);
             const containingDetails = target.closest("details");
             if (containingDetails instanceof HTMLDetailsElement) {
               await setPanelOpen(containingDetails, true);
+            }
+
+            if (
+              mobileSidebarQuery.matches &&
+              citationsPanel instanceof HTMLDetailsElement &&
+              citationsPanel.open &&
+              citationsPanel.contains(link)
+            ) {
+              await setPanelOpen(citationsPanel, false);
             }
 
             window.requestAnimationFrame(() => {
@@ -960,11 +985,12 @@ const authors = getArticleAuthors(article);
       left: 0;
       z-index: 3;
       box-sizing: border-box;
-      width: min(80vw, 22rem);
-      max-height: calc(100dvh - 8rem);
+      width: max(80vw);
+      max-height: calc(100dvh - 6rem);
       background: var(--article-category-bg);
-      padding: 0.75rem 1rem 0.75rem 0.75rem;
+      padding: 1rem 1rem 1rem 1rem;
       max-width: 100%;
+      margin-top: 0.25rem;
     }
 
     .pdf-status {

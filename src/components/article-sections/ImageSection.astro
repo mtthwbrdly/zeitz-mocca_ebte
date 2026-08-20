@@ -81,10 +81,18 @@ const captionHtml = renderInlinePortableText(section.image?.formattedCaption);
     text-align: center;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 900px) {
     .image-section--caption-left {
-      grid-template-columns: 1fr;
+     
+      display: flex;
+        flex-direction: column;
     }
+  .image-section figcaption {
+    padding: 2rem 2rem 2rem 2rem;
+    font: 600 0.75rem / 1.4 var(--font-meta);
+  }
+  .image-section--caption-left img {
+    aspect-ratio: 0;
   }
 
   /*

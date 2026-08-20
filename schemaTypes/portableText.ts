@@ -5,6 +5,10 @@ import {
 } from "./components/CitationAnnotation";
 import { CompactPortableTextInput } from "./components/CompactPortableTextInput";
 import {
+  InterviewDecorator,
+  InterviewToolbarLabel
+} from "./components/InterviewDecorator";
+import {
   PullQuoteDecorator,
   PullQuoteToolbarLabel
 } from "./components/PullQuoteDecorator";
@@ -37,6 +41,12 @@ export const portableText = defineType({
             value: "pullQuote",
             icon: PullQuoteToolbarLabel,
             component: PullQuoteDecorator
+          },
+          {
+            title: "Interview",
+            value: "interview",
+            icon: InterviewToolbarLabel,
+            component: InterviewDecorator
           }
         ],
         annotations: [

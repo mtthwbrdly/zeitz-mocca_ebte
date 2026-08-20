@@ -81,9 +81,9 @@ const categoryClass = getArticleCategoryClass(section.linkedArticle);
 
   .home-quote__quote p {
     margin: 0;
-    font: 400 clamp(3rem, 4.5vw, 8rem) / 0.9 var(--font-display);
-    letter-spacing: 0;
-    /* text-wrap: balance; */
+    font: 400 clamp(2rem, 4vw, 8rem) / 0.9 var(--font-display);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 
 
@@ -120,9 +120,12 @@ const categoryClass = getArticleCategoryClass(section.linkedArticle);
     outline: 0;
   }
 
-  @media (max-width: 700px) {
+  @media (max-width: 900px) {
     .home-quote__figure {
       padding-block: clamp(2rem, 16vw, 4rem);
+    }
+    .home-quote__quote p {
+      font-size: clamp(2.25rem, 5vw, 5rem);
     }
   }
 </style>

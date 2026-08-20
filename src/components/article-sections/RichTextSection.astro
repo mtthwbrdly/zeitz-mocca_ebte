@@ -261,6 +261,16 @@ const width = cleanString(section.width) || "standard";
     text-underline-offset: 0.16em;
   }
 
+  .prose :global(.u-interview) {
+    float: inline-start;
+    margin-top:0.25rem;
+    margin-bottom: 1rem;
+    margin-right: 2rem;
+    background: var(--article-category-bg);
+    padding: 0rem 0.5rem;
+    font: 400 90% / 1.6 var(--font-display);
+  }
+
   .prose :global(code) {
     padding: 0.15rem 0.3rem;
     background: rgba(23, 23, 23, 0.06);
@@ -291,8 +301,7 @@ const width = cleanString(section.width) || "standard";
     }
 
     .rich-text__panel {
-      padding-right: 0;
-   
+      padding-right: 0.5rem;
       border-inline-start: 0;
     }
 

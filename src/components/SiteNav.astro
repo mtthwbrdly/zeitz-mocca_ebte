@@ -280,9 +280,19 @@ const links: NavLink[] = [
       display: none;
     }
 
+    .site-menu-overlay__brand {
+      display: none;
+    }
+
     .site-nav__menu-button {
       right: 1rem;
     }
+
+      .site-menu-overlay__close {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+      }
 
     .site-menu-overlay__panel {
       padding: 1rem;
@@ -294,12 +304,15 @@ const links: NavLink[] = [
     }
 
     .site-menu-overlay__links a {
-      font-size: clamp(2.9rem, 18vw, 5.7rem);
+      font-size: clamp(2.9rem, 25vw, 8rem);
     }
 
     .site-menu-overlay__logo {
-      width: clamp(3rem, 8vw, 8rem);
+      width: clamp(4rem, 8vw, 8rem);
       height: auto;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
     }
   }
 </style>

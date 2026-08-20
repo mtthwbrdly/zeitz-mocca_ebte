@@ -26,5 +26,31 @@ const {
     <ScrollProgress />
     <SiteNav />
     <slot />
+    <script is:inline>
+      if (!window.__siteTransitionCursorBound) {
+        window.__siteTransitionCursorBound = true;
+
+        let transitionCursorTimeout;
+        const root = document.documentElement;
+
+        const showTransitionCursor = () => {
+          window.clearTimeout(transitionCursorTimeout);
+          root.classList.add("is-site-transitioning");
+        };
+
+        const hideTransitionCursor = () => {
+          window.clearTimeout(transitionCursorTimeout);
+          transitionCursorTimeout = window.setTimeout(() => {
+            root.classList.remove("is-site-transitioning");
+          }, 360);
+        };
+
+        document.addEventListener(
+          "astro:before-preparation",
+          showTransitionCursor,
+        );
+        document.addEventListener("astro:page-load", hideTransitionCursor);
+      }
+    </script>
   </body>
 </html>

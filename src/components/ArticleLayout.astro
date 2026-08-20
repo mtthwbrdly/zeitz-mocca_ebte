@@ -157,7 +157,7 @@ const articleCategoryClass = getArticleCategoryClass(article);
     .article-sidebar {
       top: 0.5rem;
       z-index: 50;
-      max-width: 80%;
+      width: 50%;
       max-height: none;
       overflow: visible;
       grid-template-rows: none;
@@ -166,6 +166,13 @@ const articleCategoryClass = getArticleCategoryClass(article);
     .article-sidebar:has(.article-meta[open]),
     .article-sidebar:has(.citations-panel[open]) {
       grid-template-rows: none;
+    }
+
+  }
+
+    @media (max-width: 500px) {
+    .article-sidebar {
+      width: 80%;
     }
 
   }

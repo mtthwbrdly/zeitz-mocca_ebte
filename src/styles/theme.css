@@ -191,6 +191,14 @@ body {
   font-family: var(--font-body);
   position: relative;
 }
+
+html.is-site-transitioning,
+html.is-site-transitioning *,
+html.is-pdf-generating,
+html.is-pdf-generating * {
+  cursor: wait !important;
+}
+
   /* TEMP — Noise overlay for the site shell
   body::before {
     content: '';
@@ -232,6 +240,7 @@ img {
     animation-duration: 320ms;
     animation-timing-function: ease;
     mix-blend-mode: normal;
+    cursor: wait;
   }
 
   ::view-transition-group(site-nav) {
