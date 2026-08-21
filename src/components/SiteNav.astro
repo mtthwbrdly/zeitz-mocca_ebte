@@ -80,10 +80,9 @@ const isCloseNavPage = closeNavPaths.has(Astro.url.pathname.replace(/\/$/, ""));
         <div class="site-menu-overlay__logo">
           <a
             class="site-menu-overlay__logo-link"
-            href="https://zeitzmocaa.museum/"
-            aria-label="ZEITZ MOCAA"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/"
+            aria-label="Everything but the Exhibition"
+            data-menu-link
           >
             <img
               class="site-menu-overlay__logo"
@@ -162,10 +161,10 @@ const isCloseNavPage = closeNavPaths.has(Astro.url.pathname.replace(/\/$/, ""));
     overflow: hidden;
     pointer-events: none;
     opacity: 0;
-    background: rgba(255, 255, 255, 0.894) ;
+    background: rgba(255, 255, 255, 1) ;
     color: var(--ink);
     transition: opacity 240ms ease;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(0px);
   }
 
   .site-menu-overlay.is-open {
