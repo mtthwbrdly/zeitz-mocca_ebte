@@ -1,16 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import zeitzLogoUrl from "../assets/footer-logo.svg?url";
 import dotLogoUrl from "../assets/zeitz-logo-icon_dark.svg?url";
-
-const socialLinks = [
-  { href: "https://www.instagram.com/zeitzmocaa/", label: "Instagram" },
-  {
-    href: "https://www.youtube.com/channel/UCDJltdsHMhBhgl_y6MMEcyQ",
-    label: "Youtube",
-  },
-  { href: "https://twitter.com/ZeitzMOCAA", label: "Twitter" },
-];
 ---
 
 <BaseLayout
@@ -19,268 +9,139 @@ const socialLinks = [
 >
   <main class="contact-page">
     <section class="contact-page__content" aria-labelledby="contact-title">
-      <div class="contact-page__identity">
-        <a
-          class="contact-page__logo-link"
-          href="https://zeitzmocaa.museum/"
-          aria-label="ZEITZ MOCAA"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            class="contact-page__logo"
-            src={zeitzLogoUrl}
-            alt="ZEITZ MOCAA"
-            width="169"
-            height="40"
-          />
-        </a>
-        <a
-          class="contact-page__address"
-          href="https://maps.app.goo.gl/i56DDDsjS6Q764LcA"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          S Arm Rd Victoria &amp; Alfred Waterfront<br />
-          CapeTown, 8002, South Africa
-        </a>
-      </div>
-
-      <div class="contact-page__column">
-        <h2>Navigation</h2>
-        <nav class="contact-page__links" aria-label="Contact page navigation">
-          <a href="/">Home</a>
-          <a href="/articles">Index</a>
-          <a href="/submissions">Submit</a>
-        </nav>
-      </div>
-
-      <div class="contact-page__column">
-        <h2>Social</h2>
-        <nav class="contact-page__social" aria-label="Social media">
-          {
-            socialLinks.map((link) => (
-              <a href={link.href} target="_blank" rel="noopener noreferrer">
-                {link.label}
-              </a>
-            ))
-          }
-        </nav>
-      </div>
-
-      <div class="contact-page__column contact-page__column--submissions">
-        <h2>Submissions</h2>
-        <p>
-          We welcome submissions that explore publishing and paracuratorial
-          practices within Foot Notes or Voice Notes formats for <em>Everything but the Exhibition.</em>
+      <div class="contact-page__body">
+        <p class="contact-page__intro">
+          Please reach out to the team with any questions, proposals, or points
+          of connection related to <em>Everything but the Exhibition.</em>
         </p>
-        <a class="contact-page__submit" href="/submissions">Submit</a>
+        <p class="contact-page__intro">
+          For editorial enquiries, collaborations, submissions, or general
+          correspondence, we welcome thoughtful notes at <a
+            href="mailto:info.everything@zeitzmocca.meusem"
+            >info.everything<wbr>@zeitzmocca.meusem</a
+          > and will respond as soon as possible.
+        </p>
+      </div>
+
+      <div class="contact-page__footer">
+        <h1 class="contact-page__title" id="contact-title">Contact</h1>
+        <img
+          class="contact-page__mark"
+          src={dotLogoUrl}
+          alt=""
+          aria-hidden="true"
+        />
       </div>
     </section>
-
-    <h1 class="contact-page__title" id="contact-title">Contact</h1>
-    <img class="contact-page__mark" src={dotLogoUrl} alt="" aria-hidden="true" />
   </main>
 </BaseLayout>
 
 <style>
-
-  .contact-page__column--submissions em{
-    text-shadow: var(--text-shadow-hover-small-black);
+  .contact-page__footer {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
   }
+
   .contact-page {
     position: relative;
     isolation: isolate;
     min-height: 100svh;
     overflow: clip;
     padding: 1.5rem;
-    background: var(--page-bg);
+    background: var(--surface);
     color: var(--ink);
+    display: flex;
+    align-items: flex-end;
   }
 
   .contact-page__content {
-    position: absolute;
-    left: clamp(1.5rem, 2.9vw, 3.75rem);
-    right: clamp(1.5rem, 3vw, 4rem);
-    bottom: clamp(16.25rem, 23vw, 23rem);
-    display: grid;
-    grid-template-columns:
-      minmax(16rem, 1.35fr)
-      minmax(8rem, 0.7fr)
-      minmax(8rem, 0.7fr)
-      minmax(21rem, 1.45fr);
-    gap: clamp(2rem, 4vw, 6rem);
-    align-items: start;
-  }
-
-  .contact-page__identity {
-    display: grid;
-    gap: clamp(3rem, 6vw, 5rem);
-  }
-
-  .contact-page__logo-link {
-    width: clamp(12rem, 13vw, 15rem);
-  }
-
-  .contact-page__logo {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    height: min(75svh, calc(100svh - 3rem));
+    max-height: 75svh;
+    justify-content: space-between;
+    gap: 2rem;
     width: 100%;
-    height: auto;
-    filter: invert(1);
   }
 
-  .contact-page__address,
-  .contact-page__column p,
-  .contact-page__social a {
-    color: rgb(23 23 23 / 76%);
-    font: 400 clamp(1rem, 1.15vw, 1.3rem) / 1.15 var(--font-display);
-    letter-spacing: 0;
-    text-decoration: none;
-  }
-
-  .contact-page__column {
+  .contact-page__body {
     display: grid;
-    gap: 1.5rem;
-    align-content: start;
+    gap: 2rem;
+    min-height: 0;
   }
 
-  .contact-page__column h2 {
+  .contact-page__intro {
+    max-width: 56rem;
     margin: 0;
-    color: rgb(23 23 23 / 48%);
-    font: 700 clamp(0.75rem, 0.8vw, 0.95rem) / 1 var(--font-meta);
-    letter-spacing: var(--meta-letter-spacing);
-    text-transform: uppercase;
+    font: 400 clamp(1.5rem, 2.5vw, 2.25rem) / 1 var(--font-display);
+    letter-spacing: 0;
   }
 
-  .contact-page__links,
-  .contact-page__social {
-    display: grid;
-    justify-items: start;
+  .contact-page__intro em {
+    text-shadow: var(--text-shadow-hover-large-black);
   }
 
-  .contact-page__links a,
-  .contact-page__social a {
+  .contact-page__intro a {
     color: inherit;
-    text-decoration: none;
+    text-decoration-thickness: 0.05em;
+    text-underline-offset: 0.12em;
     transition: var(--transition-text-shadow);
   }
 
-  .contact-page__links a {
-    font: 400 clamp(2.2rem, 3.1vw, 3.75rem) / 0.95 var(--font-display);
-    letter-spacing: 0;
+  .contact-page__intro a:hover,
+  .contact-page__intro a:focus-visible {
+    text-shadow: var(--text-shadow-hover-large-black);
   }
 
-  .contact-page__social {
-    gap: 0.7rem;
-  }
-
-  .contact-page__column p {
-    max-width: 43rem;
-    margin: 0;
-    color: var(--ink);
-  }
-
-  .contact-page__column em {
-    font-style: italic;
-  }
-
-  .contact-page__submit {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    justify-self: start;
-    padding: 0.5rem 2.35rem 0.65rem;
-    background: var(--ink);
-    color: var(--surface);
-    font: 700 0.9rem / 1 var(--font-meta);
-    letter-spacing: var(--meta-letter-spacing);
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: var(--transition-text-shadow);
-  }
-
-  .contact-page a:hover,
-  .contact-page a:focus-visible {
-    text-shadow: var(--text-shadow-hover-small-black);
-  }
-
-  .contact-page a:focus-visible {
+  .contact-page__intro a:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 0.25rem;
   }
 
   .contact-page__title {
-    position: absolute;
-    left: clamp(1.5rem, 2vw, 2.5rem);
-    bottom: clamp(0.5rem, 1.3vw, 1.5rem);
     margin: 0;
-    max-width: calc(100% - 12rem);
+    max-width: calc(100% - 10rem);
     font: 400 clamp(3.25rem, 12vw, 17rem) / 0.8 var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.05em;
+    padding: 0.25rem;
   }
 
   .contact-page__mark {
-    position: absolute;
-    right: clamp(1.5rem, 2vw, 2.5rem);
-    bottom: clamp(2rem, 2.5vw, 3rem);
-    width: clamp(4.25rem, 5.2vw, 6.5rem);
+    width: clamp(2rem, 6vw, 6rem);
     height: auto;
   }
 
-  @media (max-width: 1100px) {
+  @media (max-width: 900px) {
     .contact-page {
-      min-height: 100svh;
-      padding-top: 6rem;
-      overflow: visible;
-    }
-
-    .contact-page__content {
-      position: relative;
-      left: auto;
-      right: auto;
-      bottom: auto;
-      grid-template-columns: 1fr 1fr;
-      padding-bottom: clamp(9rem, 28vw, 16rem);
-    }
-
-    .contact-page__identity,
-    .contact-page__column--submissions {
-      grid-column: 1 / -1;
-    }
-  }
-
-  @media (max-width: 700px) {
-    .contact-page {
-      padding: 5.5rem 1rem 1rem;
-    }
-
-    .contact-page__content {
-      grid-template-columns: 1fr;
-      gap: 2.5rem;
-      padding-bottom: 9rem;
-    }
-
-    .contact-page__identity {
-      gap: 2.5rem;
-    }
-
-    .contact-page__links a {
-      font-size: clamp(2.35rem, 16vw, 4rem);
-    }
-
-    .contact-page__submit {
-      width: 100%;
+      padding: 8rem 1rem 1rem;
+      align-items: space-between;
     }
 
     .contact-page__title {
-      max-width: calc(100% - 5.5rem);
-      font-size: clamp(5rem, 26vw, 8rem);
+      font: 400 clamp(3.25rem, 20vw, 17rem) / 0.8 var(--font-display);
+      padding: 0;
+    }
+
+    .contact-page__intro{
+    font: 400 clamp(1.25rem, 2.5vw, 2.25rem) / 1.2 var(--font-display);
+    }
+
+    .contact-page__content {
+      height: min(75svh, calc(100svh - 6.5rem));
     }
 
     .contact-page__mark {
-      width: 4rem;
-      bottom: 1.35rem;
-      right: 1rem;
+      width: clamp(3rem, 8vw, 8rem);
+      height: auto;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+    }
+
+    .contact-page__intro {
+      max-width: 90%;
     }
   }
 </style>
