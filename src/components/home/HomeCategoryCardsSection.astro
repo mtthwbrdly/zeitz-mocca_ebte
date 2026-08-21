@@ -137,13 +137,12 @@ const categoryHref = (category: (typeof cards)[number]["category"]) =>
     --category-card-bg: var(--article-category-bg);
     position: relative;
     display: grid;
-    min-height: clamp(24rem, 35vw, 32rem);
+    min-height: clamp(20rem, 40vw, 40rem);
     overflow: hidden;
     border: 1px solid var(--ink);
     background: var(--surface);
     color: var(--ink);
     isolation: isolate;
-    aspect-ratio: 4/5;
   }
 
   .home-category-card__title {
@@ -224,7 +223,7 @@ const categoryHref = (category: (typeof cards)[number]["category"]) =>
   .home-category-card__description {
     position: relative;
     z-index: 1;
-    font: 400 clamp(0.85rem, 1.75vw, 2rem) / 1.15 var(--font-display);
+    font: 400 clamp(0.85rem, 1.65vw, 2rem) / 1.15 var(--font-display);
     letter-spacing: -0.01em;
     margin: 0;
   }
@@ -240,7 +239,7 @@ const categoryHref = (category: (typeof cards)[number]["category"]) =>
     align-self: flex-start;
     padding: 0.35rem 0.55rem 0.35rem;
     color: var(--ink);
-    font: 700 1rem / 1 var(--font-display);
+    font: 700 clamp(0.5rem, 1vw, 1rem) / 1 var(--font-display);
     text-decoration: none;
     text-transform: uppercase;
     transition: var(--transition-text-shadow);
